@@ -3,6 +3,7 @@
 ## Quick Start
 
 ```console
+$ ln -s .env.example .env
 $ docker compose up
 ```
 
