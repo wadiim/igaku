@@ -5,7 +5,7 @@ import (
 )
 
 type Organization struct {
-	ID	uuid.UUID	`gorm:type:uuid;default:uuid_generate_v4()"`
+	ID	uuid.UUID	`gorm:"type:uuid;primary_key;" json:"id"`
 	Name	string		`json:"name"`
 	Address	string		`json:"address"`
 }
