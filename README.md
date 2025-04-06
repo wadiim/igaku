@@ -10,3 +10,10 @@ $ docker compose up
 ```console
 $ curl http://localhost:8080/hello
 ```
+
+## Testing
+
+```console
+$ cd api
+$ go test -tags=integration ./test/ -v
+```
