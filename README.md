@@ -15,5 +15,6 @@ $ curl http://localhost:8080/hello
 
 ```console
 $ cd api
+$ go test ./test/
 $ go test -tags=integration ./test/ -v
 ```
