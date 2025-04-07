@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"github.com/gin-gonic/gin"
+
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"igaku/dto"
 )
 
 type HelloController struct {}
@@ -12,10 +14,15 @@ func NewHelloController() *HelloController {
 	return &HelloController{}
 }
 
+// @Summary	Show a hello message
+// @Description	Returns a static hello world message as a JSON object.
+// @Tags	Hello
+// @Produce	json
+// @Success	200 {object} dto.HelloOutput
+// @Router	/hello [get]
 func (ctrl *HelloController) SayHello(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Hello world!",
-	})
+	response := dto.HelloOutput{Message: "Hello world!"}
+	c.JSON(http.StatusOK, response)
 }
 
 func (ctrl *HelloController) RegisterHelloRoutes(router *gin.Engine) {

@@ -5,6 +5,9 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	docs "igaku/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"errors"
 	"fmt"
@@ -17,6 +20,10 @@ import (
 	"igaku/repositories"
 	"igaku/services"
 )
+
+// @title		Igaku API
+// @version		0.0.1
+// @host		localhost:8080
 
 func main() {
 	dsn := fmt.Sprintf(
@@ -55,6 +62,7 @@ func main() {
 	}
 
 	router := gin.Default()
+	docs.SwaggerInfo.BasePath = "/"
 
 	helloController := controllers.NewHelloController()
 	helloController.RegisterHelloRoutes(router)
@@ -64,6 +72,7 @@ func main() {
 	orgController := controllers.NewOrganizationController(orgService)
 	orgController.RegisterRoutes(router)
 
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run()
 }
 

@@ -1,0 +1,76 @@
+definitions:
+  dto.ErrorResponse:
+    properties:
+      error:
+        example: Specific error message
+        type: string
+    type: object
+  dto.HelloOutput:
+    properties:
+      message:
+        example: Hello world!
+        type: string
+    type: object
+  models.Organization:
+    properties:
+      address:
+        example: 295 Varnum Ave
+        type: string
+      id:
+        example: 86e6a1f3-d7aa-4e74-a20a-ea78bc13340b
+        type: string
+      name:
+        example: The Lowell General Hospital
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: Igaku API
+  version: 0.0.1
+paths:
+  /hello:
+    get:
+      description: Returns a static hello world message as a JSON object.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.HelloOutput'
+      summary: Show a hello message
+      tags:
+      - Hello
+  /organizations/{id}:
+    get:
+      description: Retrieves details for a specific organization using its UUID.
+      parameters:
+      - description: Organization ID (UUIDv4 format)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved organization
+          schema:
+            $ref: '#/definitions/models.Organization'
+        "400":
+          description: Bad Request - Invalid UUID format
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found - Organization not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to retrieve organization
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get organization by ID
+      tags:
+      - Organizations
+swagger: "2.0"

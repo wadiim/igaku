@@ -9,6 +9,7 @@ import (
 	"errors"
 
 	"igaku/services"
+	"igaku/dto"
 )
 
 type OrganizationController struct {
@@ -19,12 +20,23 @@ func NewOrganizationController(service services.OrganizationService) *Organizati
 	return &OrganizationController{service: service}
 }
 
+// GetByID retrieves a specific organization by its UUID.
+// @Summary	Get organization by ID
+// @Description	Retrieves details for a specific organization using its UUID.
+// @Tags	Organizations
+// @Produce	json
+// @Param	id path string true "Organization ID (UUIDv4 format)"
+// @Success	200 {object} models.Organization "Successfully retrieved organization"
+// @Failure	400 {object} dto.ErrorResponse "Bad Request - Invalid UUID format"
+// @Failure	404 {object} dto.ErrorResponse "Not Found - Organization not found"
+// @Failure	500 {object} dto.ErrorResponse "Internal Server Error - Failed to retrieve organization"
+// @Router	/organizations/{id} [get]
 func (ctrl *OrganizationController) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid UUID format",
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Message: "Invalid UUID format",
 		})
 		return
 	}
@@ -32,12 +44,12 @@ func (ctrl *OrganizationController) GetByID(c *gin.Context) {
 	org, err := ctrl.service.GetOrganizationByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{
-				"error": "Organization not found",
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Message: "Organization not found",
 			})
 		} else {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "Failed to retrieve organization",
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Message: "Failed to retrieve organization",
 			})
 		}
 		return
