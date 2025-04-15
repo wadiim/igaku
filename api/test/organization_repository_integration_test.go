@@ -6,77 +6,21 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 
 	"context"
 	"errors"
-	"os"
-	"path/filepath"
 	"testing"
-	"time"
 
 	"igaku/repositories"
-	"igaku/models"
+	testUtils "igaku/test/utils"
 )
-
-func setupTestDatabase(ctx context.Context, t *testing.T) (db *gorm.DB, cleanup func()) {
-	t.Helper()
-
-	// Configure the PostgreSQL container.
-	pgContainer, err := tcpostgres.RunContainer(
-		ctx,
-		testcontainers.WithImage("postgres:latest"),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
-				WithStartupTimeout(10*time.Second),
-		),
-	)
-	require.NoError(t, err, "Failed to start PostgreSQL container")
-
-	cleanup = func() {
-		if err := pgContainer.Terminate(ctx); err != nil {
-			t.Errorf("Failed to terminate PostgreSQL container: %v", err)
-		}
-	}
-
-	// Get the connection string.
-	dsn, err := pgContainer.ConnectionString(ctx, "sslmode=disable")
-	require.NoError(t, err, "Failed to get container connection string")
-
-	// Connect GORM to the test database.
-	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
-	require.NoError(t, err, "Failed to connect to test database with GORM")
-
-	// Migrate the database schema.
-	err = gormDB.AutoMigrate(&models.Organization{})
-	require.NoError(t, err, "Failed to migrate the database schema")
-
-	// Read and execute the initialization script.
-	initScriptDir, err := filepath.Abs("../resources")
-	require.NoError(t, err, "Failed to get absolute path for resources/")
-	initScriptPath := filepath.Join(initScriptDir, "init_test.sql")
-	sqlBytes, err := os.ReadFile(initScriptPath)
-	require.NoError(t, err, "Failed to read db init script: %s", initScriptPath)
-	sqlScript := string(sqlBytes)
-	tx := gormDB.Exec(sqlScript)
-	require.NoError(t, tx.Error, "Failed to execute init script")
-
-	return gormDB, cleanup
-}
 
 func TestGormOrganizationRepository(t *testing.T) {
 	t.Run("FindByID_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := setupTestDatabase(ctx, t)
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
 		defer cleanup()
 
 		repo := repositories.NewGormOrganizationRepository(db)
@@ -106,7 +50,7 @@ func TestGormOrganizationRepository(t *testing.T) {
 	t.Run("FindByID_NotFound", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := setupTestDatabase(ctx, t)
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
 		defer cleanup()
 
 		repo := repositories.NewGormOrganizationRepository(db)
