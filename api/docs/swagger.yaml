@@ -11,6 +11,18 @@ definitions:
         example: Hello world!
         type: string
     type: object
+  dto.LoginCredentials:
+    properties:
+      password:
+        example: P@ssw0rd!
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - password
+    - username
+    type: object
   models.Organization:
     properties:
       address:
@@ -42,6 +54,43 @@ paths:
       summary: Show a hello message
       tags:
       - Hello
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user via username and password. Returns a JWT token
+        as plain text on success.
+      parameters:
+      - description: User login credentials (username and password)
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginCredentials'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully authenticated, returns JWT token
+          schema:
+            type: string
+        "400":
+          description: Bad Request - Invalid request payload (e.g., missing fields,
+            wrong format)
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Not Found - Invalid username or password
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to process login (e.g., database
+            error)
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Login into the system
+      tags:
+      - Authentication
   /organizations/{id}:
     get:
       description: Retrieves details for a specific organization using its UUID.

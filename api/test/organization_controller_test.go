@@ -35,7 +35,7 @@ func (m *MockOrganizationRepository) FindByID(id uuid.UUID) (*models.Organizatio
 	return r0, r1
 }
 
-func setupRouter(mockRepo *MockOrganizationRepository) *gin.Engine {
+func setupOrgRouter(mockRepo *MockOrganizationRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	orgService := services.NewOrganizationService(mockRepo)
@@ -48,7 +48,7 @@ func setupRouter(mockRepo *MockOrganizationRepository) *gin.Engine {
 
 func TestOrganizationController_GetByID_Success(t *testing.T) {
 	mockRepo := new(MockOrganizationRepository)
-	router := setupRouter(mockRepo)
+	router := setupOrgRouter(mockRepo)
 
 	testOrgID := uuid.New()
 	expectedOrg := &models.Organization{
@@ -85,7 +85,7 @@ func TestOrganizationController_GetByID_Success(t *testing.T) {
 
 func TestOrganizationController_GetByID_NotFound(t *testing.T) {
 	mockRepo := new(MockOrganizationRepository)
-	router := setupRouter(mockRepo)
+	router := setupOrgRouter(mockRepo)
 
 	testOrgID := uuid.New()
 
@@ -115,7 +115,7 @@ func TestOrganizationController_GetByID_NotFound(t *testing.T) {
 
 func TestOrganizationController_GetByID_InvalidUUID(t *testing.T) {
 	mockRepo := new(MockOrganizationRepository)
-	router := setupRouter(mockRepo)
+	router := setupOrgRouter(mockRepo)
 
 	invalidUUID := "not-a-UUID"
 

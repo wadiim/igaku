@@ -19,6 +19,7 @@ import (
 	"igaku/repositories"
 	"igaku/services"
 	"igaku/utils"
+	"igaku/models"
 )
 
 // @title		Igaku API
@@ -68,6 +69,11 @@ func main() {
 	orgService := services.NewOrganizationService(orgRepo)
 	orgController := controllers.NewOrganizationController(orgService)
 	orgController.RegisterRoutes(router)
+
+	userRepo := repositories.NewGormUserRepository(db)
+	authService := services.NewAuthService(userRepo)
+	authController := controllers.NewAuthController(authService)
+	authController.RegisterRoutes(router)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run()
