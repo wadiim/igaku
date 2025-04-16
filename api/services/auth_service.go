@@ -32,7 +32,7 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 	usr, err := s.repo.FindByUsername(creds.Username)
 
 	if err != nil {
-		return "", err
+		return "", &errors.InvalidUsernameOrPasswordError{}
 	}
 
 	err = bcrypt.CompareHashAndPassword(

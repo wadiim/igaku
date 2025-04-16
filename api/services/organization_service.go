@@ -2,9 +2,6 @@ package services
 
 import (
 	"github.com/google/uuid"
-	"gorm.io/gorm"
-
-	"errors"
 
 	"igaku/models"
 	"igaku/repositories"
@@ -26,10 +23,6 @@ func (s *organizationService) GetOrganizationByID(id uuid.UUID) (*models.Organiz
 	org, err := s.repo.FindByID(id)
 
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// TODO: Wrap into custom error.
-			return nil, err
-		}
 		return nil, err
 	}
 

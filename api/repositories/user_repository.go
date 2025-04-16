@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"igaku/errors"
 	"igaku/models"
 )
 
@@ -24,7 +25,7 @@ func (r *gormUserRepository) FindByID(id uuid.UUID) (*models.User, error) {
 	var usr models.User
 	err := r.db.First(&usr, id).Error
 	if err != nil {
-		return nil, err
+		return nil, &errors.UserNotFoundError{}
 	}
 	return &usr, nil
 }
@@ -33,7 +34,7 @@ func (r *gormUserRepository) FindByUsername(username string) (*models.User, erro
 	var usr models.User
 	err := r.db.Where("username = ?", username).First(&usr).Error
 	if err != nil {
-		return nil, err
+		return nil, &errors.UserNotFoundError{}
 	}
 	return &usr, nil
 }

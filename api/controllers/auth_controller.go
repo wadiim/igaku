@@ -2,13 +2,12 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 
 	"errors"
 	"net/http"
 
 	"igaku/dtos"
-	igaku_errors "igaku/errors"
+	igakuErrors "igaku/errors"
 	"igaku/services"
 )
 
@@ -43,7 +42,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 
 	token, err := ctrl.service.Login(creds)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, &igaku_errors.InvalidUsernameOrPasswordError{}) {
+		if errors.Is(err, &igakuErrors.InvalidUsernameOrPasswordError{}) {
 			c.JSON(http.StatusUnauthorized, dtos.ErrorResponse{
 				Message: "Invalid login or password",
 			})

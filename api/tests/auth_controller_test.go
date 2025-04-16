@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 
 	"bytes"
 	"encoding/json"
@@ -17,6 +16,7 @@ import (
 	"testing"
 
 	"igaku/controllers"
+	"igaku/errors"
 	"igaku/models"
 	"igaku/services"
 	"igaku/utils"
@@ -96,7 +96,7 @@ func TestAuthController_Login_InvalidUsername(t *testing.T) {
 
 	invalidUsername := "invalidUsername"
 	mockRepo.On("FindByUsername", invalidUsername).
-		Return(nil, gorm.ErrRecordNotFound).Once()
+		Return(nil, &errors.UserNotFoundError{}).Once()
 
 	body := []byte(fmt.Sprintf(
 		`{"username":"%s", "password":"P@ssw0rd!"}`,

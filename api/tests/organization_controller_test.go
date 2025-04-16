@@ -5,7 +5,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"gorm.io/gorm"
 
 	"encoding/json"
 	"fmt"
@@ -14,6 +13,7 @@ import (
 	"testing"
 
 	"igaku/controllers"
+	"igaku/errors"
 	"igaku/models"
 	"igaku/services"
 )
@@ -89,7 +89,8 @@ func TestOrganizationController_GetByID_NotFound(t *testing.T) {
 
 	testOrgID := uuid.New()
 
-	mockRepo.On("FindByID", testOrgID).Return(nil, gorm.ErrRecordNotFound).Once()
+	mockRepo.On("FindByID", testOrgID).
+		Return(nil, &errors.OrganizationNotFoundError{}).Once()
 
 	req, err := http.NewRequest(
 		http.MethodGet,

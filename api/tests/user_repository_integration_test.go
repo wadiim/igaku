@@ -6,12 +6,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"gorm.io/gorm"
 
 	"context"
 	"errors"
 	"testing"
 
+	igakuErrors "igaku/errors"
 	"igaku/models"
 	"igaku/repositories"
 	testUtils "igaku/tests/utils"
@@ -71,8 +71,8 @@ func TestGormUserRepository(t *testing.T) {
 			"Expected an error when finding non-existent user",
 		)
 		assert.True(
-			t, errors.Is(err, gorm.ErrRecordNotFound),
-			"Expected gorm.ErrRecordNotFound",
+			t, errors.Is(err, &igakuErrors.UserNotFoundError{}),
+			"Expected UserNotFoundError",
 		)
 		assert.Nil(
 			t, usr,
@@ -135,8 +135,8 @@ func TestGormUserRepository(t *testing.T) {
 			"Expected an error when finding non-existent user",
 		)
 		assert.True(
-			t, errors.Is(err, gorm.ErrRecordNotFound),
-			"Expected gorm.ErrRecordNotFound",
+			t, errors.Is(err, &igakuErrors.UserNotFoundError{}),
+			"Expected UserNotFoundError",
 		)
 		assert.Nil(
 			t, usr,

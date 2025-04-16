@@ -3,11 +3,11 @@ package controllers
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 
 	"net/http"
 	"errors"
 
+	igakuErrors "igaku/errors"
 	"igaku/services"
 	"igaku/dtos"
 )
@@ -43,7 +43,7 @@ func (ctrl *OrganizationController) GetByID(c *gin.Context) {
 
 	org, err := ctrl.service.GetOrganizationByID(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, &igakuErrors.OrganizationNotFoundError{}) {
 			c.JSON(http.StatusNotFound, dtos.ErrorResponse{
 				Message: "Organization not found",
 			})

@@ -4,6 +4,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"igaku/errors"
 	"igaku/models"
 )
 
@@ -23,7 +24,7 @@ func (r *gormOrganizationRepository) FindByID(id uuid.UUID) (*models.Organizatio
 	var org models.Organization
 	err := r.db.First(&org, id).Error
 	if err != nil {
-		return nil, err
+		return nil, &errors.OrganizationNotFoundError{}
 	}
 	return &org, nil
 }
