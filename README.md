@@ -13,6 +13,6 @@ Visit <http://localhost:8080/swagger/index.html>
 
 ```console
 $ cd api
-$ go test ./test/
-$ go test -tags=integration ./test/ -v
+$ go test ./tests/
+$ go test -tags=integration ./tests/ -v
 ```

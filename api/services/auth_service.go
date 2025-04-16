@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"igaku/dto"
+	"igaku/dtos"
 	"igaku/errors"
 	"igaku/repositories"
 	"igaku/utils"
@@ -17,7 +17,7 @@ var jwtSecretKey = []byte(os.Getenv("SECRET_KEY"))
 const tokenDuration = time.Hour * 1 // TODO: Store in `.env`
 
 type AuthService interface {
-	Login(creds dto.LoginCredentials) (string, error)
+	Login(creds dtos.LoginCredentials) (string, error)
 }
 
 type authService struct {
@@ -28,7 +28,7 @@ func NewAuthService(repo repositories.UserRepository) AuthService {
 	return &authService{repo: repo}
 }
 
-func (s *authService) Login(creds dto.LoginCredentials) (string, error) {
+func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 	usr, err := s.repo.FindByUsername(creds.Username)
 
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 
 	"net/http"
 
-	"igaku/dto"
+	"igaku/dtos"
 )
 
 type HelloController struct {}
@@ -18,10 +18,10 @@ func NewHelloController() *HelloController {
 // @Description	Returns a static hello world message as a JSON object.
 // @Tags	Hello
 // @Produce	json
-// @Success	200 {object} dto.HelloOutput
+// @Success	200 {object} dtos.HelloOutput
 // @Router	/hello [get]
 func (ctrl *HelloController) SayHello(c *gin.Context) {
-	response := dto.HelloOutput{Message: "Hello world!"}
+	response := dtos.HelloOutput{Message: "Hello world!"}
 	c.JSON(http.StatusOK, response)
 }
 

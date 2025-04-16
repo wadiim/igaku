@@ -7,7 +7,7 @@ import (
 	"errors"
 	"net/http"
 
-	"igaku/dto"
+	"igaku/dtos"
 	igaku_errors "igaku/errors"
 	"igaku/services"
 )
@@ -26,16 +26,16 @@ func NewAuthController(service services.AuthService) *AuthController {
 // @Tags	Authentication
 // @Accept	json
 // @Produce	plain
-// @Param	credentials body dto.LoginCredentials true "User login credentials (username and password)"
+// @Param	credentials body dtos.LoginCredentials true "User login credentials (username and password)"
 // @Success	200 {string} string "Successfully authenticated, returns JWT token"
-// @Failure	400 {object} dto.ErrorResponse "Bad Request - Invalid request payload (e.g., missing fields, wrong format)"
-// @Failure	401 {object} dto.ErrorResponse "Not Found - Invalid username or password"
-// @Failure	500 {object} dto.ErrorResponse "Internal Server Error - Failed to process login (e.g., database error)"
+// @Failure	400 {object} dtos.ErrorResponse "Bad Request - Invalid request payload (e.g., missing fields, wrong format)"
+// @Failure	401 {object} dtos.ErrorResponse "Not Found - Invalid username or password"
+// @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to process login (e.g., database error)"
 // @Router	/login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {
-	var creds dto.LoginCredentials
+	var creds dtos.LoginCredentials
 	if err := c.ShouldBindJSON(&creds); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+		c.JSON(http.StatusBadRequest, dtos.ErrorResponse{
 			Message: "Invalid request payload",
 		})
 		return
@@ -44,11 +44,11 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 	token, err := ctrl.service.Login(creds)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, &igaku_errors.InvalidUsernameOrPasswordError{}) {
-			c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			c.JSON(http.StatusUnauthorized, dtos.ErrorResponse{
 				Message: "Invalid login or password",
 			})
 		} else {
-			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{
 				Message: "Failed to retrieve user",
 			})
 		}

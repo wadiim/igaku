@@ -1,6 +1,6 @@
 //go:build integration
 
-package test
+package tests
 
 import (
 	"github.com/google/uuid"
@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"igaku/repositories"
-	testUtils "igaku/test/utils"
+	testUtils "igaku/tests/utils"
 )
 
 func TestGormOrganizationRepository(t *testing.T) {

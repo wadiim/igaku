@@ -1,4 +1,4 @@
-package dto
+package dtos
 
 type LoginCredentials struct {
 	Username string `json:"username" binding:"required" example:"jdoe"`
