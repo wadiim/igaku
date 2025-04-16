@@ -29,7 +29,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.HelloOutput"
+                            "$ref": "#/definitions/dtos.HelloOutput"
                         }
                     }
                 }
@@ -55,7 +55,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.LoginCredentials"
+                            "$ref": "#/definitions/dtos.LoginCredentials"
                         }
                     }
                 ],
@@ -69,19 +69,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request - Invalid request payload (e.g., missing fields, wrong format)",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/dtos.ErrorResponse"
                         }
                     },
                     "401": {
-                        "description": "Not Found - Invalid username or password",
+                        "description": "Unauthorized - Invalid username or password",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/dtos.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error - Failed to process login (e.g., database error)",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/dtos.ErrorResponse"
                         }
                     }
                 }
@@ -116,19 +116,19 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request - Invalid UUID format",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/dtos.ErrorResponse"
                         }
                     },
                     "404": {
                         "description": "Not Found - Organization not found",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/dtos.ErrorResponse"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error - Failed to retrieve organization",
                         "schema": {
-                            "$ref": "#/definitions/dto.ErrorResponse"
+                            "$ref": "#/definitions/dtos.ErrorResponse"
                         }
                     }
                 }
@@ -136,7 +136,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.ErrorResponse": {
+        "dtos.ErrorResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -145,7 +145,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.HelloOutput": {
+        "dtos.HelloOutput": {
             "type": "object",
             "properties": {
                 "message": {
@@ -154,7 +154,7 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.LoginCredentials": {
+        "dtos.LoginCredentials": {
             "type": "object",
             "required": [
                 "password",

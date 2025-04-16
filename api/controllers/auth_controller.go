@@ -28,7 +28,7 @@ func NewAuthController(service services.AuthService) *AuthController {
 // @Param	credentials body dtos.LoginCredentials true "User login credentials (username and password)"
 // @Success	200 {string} string "Successfully authenticated, returns JWT token"
 // @Failure	400 {object} dtos.ErrorResponse "Bad Request - Invalid request payload (e.g., missing fields, wrong format)"
-// @Failure	401 {object} dtos.ErrorResponse "Not Found - Invalid username or password"
+// @Failure	401 {object} dtos.ErrorResponse "Unauthorized - Invalid username or password"
 // @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to process login (e.g., database error)"
 // @Router	/login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {

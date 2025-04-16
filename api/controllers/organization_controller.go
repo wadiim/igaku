@@ -27,7 +27,7 @@ func NewOrganizationController(service services.OrganizationService) *Organizati
 // @Produce	json
 // @Param	id path string true "Organization ID (UUIDv4 format)"
 // @Success	200 {object} models.Organization "Successfully retrieved organization"
-// @Failure	400 {object} dots.ErrorResponse "Bad Request - Invalid UUID format"
+// @Failure	400 {object} dtos.ErrorResponse "Bad Request - Invalid UUID format"
 // @Failure	404 {object} dtos.ErrorResponse "Not Found - Organization not found"
 // @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to retrieve organization"
 // @Router	/organizations/{id} [get]
