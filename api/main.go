@@ -63,7 +63,7 @@ func main() {
 	docs.SwaggerInfo.BasePath = "/"
 
 	helloController := controllers.NewHelloController()
-	helloController.RegisterHelloRoutes(router)
+	helloController.RegisterRoutes(router)
 
 	orgRepo := repositories.NewGormOrganizationRepository(db)
 	orgService := services.NewOrganizationService(orgRepo)

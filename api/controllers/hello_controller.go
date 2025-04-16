@@ -25,7 +25,7 @@ func (ctrl *HelloController) SayHello(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func (ctrl *HelloController) RegisterHelloRoutes(router *gin.Engine) {
+func (ctrl *HelloController) RegisterRoutes(router *gin.Engine) {
 	helloRoutes := router.Group("/hello")
 	{
 		helloRoutes.GET("", ctrl.SayHello)
