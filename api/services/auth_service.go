@@ -1,10 +1,8 @@
 package services
 
 import (
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
-	"os"
 	"time"
 
 	"igaku/dtos"
@@ -13,7 +11,6 @@ import (
 	"igaku/utils"
 )
 
-var jwtSecretKey = []byte(os.Getenv("SECRET_KEY"))
 const tokenDuration = time.Hour * 1 // TODO: Store in `.env`
 
 type AuthService interface {
@@ -44,21 +41,5 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 	}
 
 	expirationTime := time.Now().Add(tokenDuration)
-	claims := &utils.Claims{
-		Role: usr.Role,
-		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:	usr.ID.String(),
-			ExpiresAt:	jwt.NewNumericDate(expirationTime),
-			IssuedAt:	jwt.NewNumericDate(time.Now()),
-			Issuer:		"igaku",
-		},
-	}
-
-	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).
-		SignedString(jwtSecretKey)
-	if err != nil {
-		return "", &errors.TokenGenerationError{}
-	}
-
-	return token, nil
+	return utils.GenerateJWTToken(usr, time.Now(), expirationTime)
 }

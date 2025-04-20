@@ -26,6 +26,10 @@ import (
 // @version		0.0.1
 // @host		localhost:8080
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
 	dsn := fmt.Sprintf(
 		"host=%s "+
@@ -74,6 +78,10 @@ func main() {
 	authService := services.NewAuthService(userRepo)
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)
+
+	accService := services.NewAccountService(userRepo)
+	accController := controllers.NewAccountController(accService)
+	accController.RegisterRoutes(router)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run()

@@ -19,40 +19,11 @@ import (
 	"igaku/errors"
 	"igaku/models"
 	"igaku/services"
+	"igaku/tests/mocks"
 	"igaku/utils"
 )
 
-type MockUserRepository struct {
-	mock.Mock
-}
-
-func (m *MockUserRepository) FindByID(id uuid.UUID) (*models.User, error) {
-	args := m.Called(id)
-
-	var r0 *models.User
-	if args.Get(0) != nil {
-		r0 = args.Get(0).(*models.User)
-	}
-
-	r1 := args.Error(1)
-
-	return r0, r1
-}
-
-func (m *MockUserRepository) FindByUsername(username string) (*models.User, error) {
-	args := m.Called(username)
-
-	var r0 *models.User
-	if args.Get(0) != nil {
-		r0 = args.Get(0).(*models.User)
-	}
-
-	r1 := args.Error(1)
-
-	return r0, r1
-}
-
-func setupAuthRouter(mockRepo *MockUserRepository) *gin.Engine {
+func setupAuthRouter(mockRepo *mocks.UserRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	authService := services.NewAuthService(mockRepo)
@@ -64,7 +35,7 @@ func setupAuthRouter(mockRepo *MockUserRepository) *gin.Engine {
 }
 
 func TestAuthController_Login_NoPasswordField(t *testing.T) {
-	mockRepo := new(MockUserRepository)
+	mockRepo := new(mocks.UserRepository)
 	router := setupAuthRouter(mockRepo)
 
 	body := []byte(`{"username":"jdoe"}`)
@@ -91,7 +62,7 @@ func TestAuthController_Login_NoPasswordField(t *testing.T) {
 }
 
 func TestAuthController_Login_InvalidUsername(t *testing.T) {
-	mockRepo := new(MockUserRepository)
+	mockRepo := new(mocks.UserRepository)
 	router := setupAuthRouter(mockRepo)
 
 	invalidUsername := "invalidUsername"
@@ -123,7 +94,7 @@ func TestAuthController_Login_InvalidUsername(t *testing.T) {
 }
 
 func TestAuthController_Login_InvalidPassword(t *testing.T) {
-	mockRepo := new(MockUserRepository)
+	mockRepo := new(mocks.UserRepository)
 	router := setupAuthRouter(mockRepo)
 
 	testUsername := "jdoe"
@@ -161,7 +132,7 @@ func TestAuthController_Login_InvalidPassword(t *testing.T) {
 func TestAuthController_Login_Success(t *testing.T) {
 	jwtSecretKey := []byte(os.Getenv("SECRET_KEY"))
 
-	mockRepo := new(MockUserRepository)
+	mockRepo := new(mocks.UserRepository)
 	router := setupAuthRouter(mockRepo)
 
 	testID := uuid.New()

@@ -1,4 +1,13 @@
 definitions:
+  dtos.AccountDetails:
+    properties:
+      role:
+        example: patient
+        type: string
+      username:
+        example: jdoe
+        type: string
+    type: object
   dtos.ErrorResponse:
     properties:
       error:
@@ -41,6 +50,34 @@ info:
   title: Igaku API
   version: 0.0.1
 paths:
+  /accounts/self:
+    get:
+      description: Retrieves details (username, role, etc.) for the currently logged-in
+        user based on the provided JWT.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved account details
+          schema:
+            $ref: '#/definitions/dtos.AccountDetails'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found - User associated with token not found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to retrieve account details
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get Own Account Details
+      tags:
+      - Accounts
   /hello:
     get:
       description: Returns a static hello world message as a JSON object.
@@ -122,4 +159,9 @@ paths:
       summary: Get organization by ID
       tags:
       - Organizations
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
