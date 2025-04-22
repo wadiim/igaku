@@ -14,6 +14,7 @@ import (
 	igakuErrors "igaku/errors"
 	"igaku/models"
 	"igaku/repositories"
+	"igaku/utils"
 	testUtils "igaku/tests/utils"
 )
 
@@ -142,5 +143,73 @@ func TestGormUserRepository(t *testing.T) {
 			t, usr,
 			"Expected user to be nil when not found",
 		)
+	})
+
+	t.Run("FindAll_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormUserRepository(db)
+
+		userCount := 5
+		list, err := repo.FindAll(
+			0, userCount, models.Username, utils.Asc,
+		)
+
+		assert.NoError(
+			t, err, "Expected no error finding users",
+		)
+		assert.NotNil(
+			t, list, "Expected the user list not to be `nil`",
+		)
+		assert.Equal(
+			t, userCount, len(list),
+		)
+
+		assert.Equal(t,
+			list[0].ID.String(),
+			"99ab51c4-a544-4352-a8df-4632ff8b105d",
+		) // admin
+		assert.Equal(t,
+			list[1].ID.String(),
+			"1f783647-4e06-4493-ade7-3b97d7e353dd",
+		) // denji
+		assert.Equal(t,
+			list[2].ID.String(),
+			"2a0de906-d3b2-4161-9672-bdfeab141c6c",
+		) // fern
+		assert.Equal(t,
+			list[3].ID.String(),
+			"91c1c531-2c0c-4f71-a6f7-ecd5377329fc",
+		) // frieren
+		assert.Equal(t,
+			list[4].ID.String(),
+			"e2c66717-12bb-4b6a-b7b6-3be939e170ad",
+		) // ghouse
+	})
+
+	t.Run("CountAll_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormUserRepository(db)
+
+		count, err := repo.CountAll()
+
+		assert.NoError(
+			t, err, "Expected no error counting users",
+		)
+		assert.Equal(
+			t, int64(18), count,
+		)
+
+		// TODO: When `AddUser()` will be implemented, test if
+		// `CountAll()` still returns correct results when the count
+		// changes, since currently `return 18, nil` would be enough
+		// to pass.
 	})
 }

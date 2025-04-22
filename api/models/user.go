@@ -12,6 +12,18 @@ const (
 	Admin	Role = "admin"
 )
 
+type UserOrderableField string
+
+const (
+	ID		UserOrderableField = "id"
+	Username	UserOrderableField = "username"
+)
+
+var UserOrderableFieldsMap = map[string]UserOrderableField{
+	"id": ID,
+	"username": Username,
+}
+
 type User struct {
 	ID		uuid.UUID	`gorm:"type:uuid;primary_key;" json:"id" example:"0b6f13da-efb9-4221-9e89-e2729ae90030"`
 	Username	string		`gorm:"uniqueIndex;not null" json:"username" example:"jdoe"`

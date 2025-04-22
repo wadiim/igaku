@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"igaku/dtos"
+	"igaku/models"
 	"igaku/utils"
 )
 
@@ -51,6 +52,47 @@ func Authenticate() gin.HandlerFunc {
 
 		c.Set("id", claims.RegisteredClaims.Subject)
 		c.Set("role", claims.Role)
+
+		c.Next()
+	}
+}
+
+func Authorize(allowedRoles ...models.Role) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		roleStr, exists := c.Get("role")
+
+		if !exists {
+			c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{
+				Message: "User role not found in context",
+			})
+			c.Abort()
+			return
+		}
+
+		userRole, ok := roleStr.(models.Role)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{
+				Message: "Invalid role type in context",
+			})
+			c.Abort()
+			return
+		}
+
+		isAllowed := false
+		for _, allowedRole := range allowedRoles {
+			if userRole == allowedRole {
+				isAllowed = true
+				break
+			}
+		}
+
+		if !isAllowed {
+			c.JSON(http.StatusForbidden, dtos.ErrorResponse{
+				Message: "Insufficient permissions",
+			})
+			c.Abort()
+			return
+		}
 
 		c.Next()
 	}

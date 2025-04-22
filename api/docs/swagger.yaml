@@ -8,6 +8,18 @@ definitions:
         example: jdoe
         type: string
     type: object
+  dtos.AccountDetailsWithID:
+    properties:
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      role:
+        example: patient
+        type: string
+      username:
+        example: jdoe
+        type: string
+    type: object
   dtos.ErrorResponse:
     properties:
       error:
@@ -32,6 +44,18 @@ definitions:
     - password
     - username
     type: object
+  dtos.PaginatedResponse:
+    properties:
+      data: {}
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
   models.Organization:
     properties:
       address:
@@ -50,6 +74,66 @@ info:
   title: Igaku API
   version: 0.0.1
 paths:
+  /accounts/list:
+    get:
+      description: Retrieves a paginated list of all user accounts. Requires Admin
+        privileges.
+      parameters:
+      - description: 'Page number (default: 1)'
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: 'Number of items per page (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: pageSize
+        type: integer
+      - description: 'Field name to be ordered by: id (default) or username'
+        in: query
+        name: orderBy
+        type: string
+      - description: 'Ordering method: asc (default) or desc'
+        in: query
+        name: orderMethod
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of accounts
+          schema:
+            allOf:
+            - $ref: '#/definitions/dtos.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.AccountDetailsWithID'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request - Invalid query parameters (page, pageSize, orderBy,
+            orderMethod)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Admin role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to retrieve accounts
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List All Accounts (Admin)
+      tags:
+      - Accounts
   /accounts/self:
     get:
       description: Retrieves details (username, role, etc.) for the currently logged-in

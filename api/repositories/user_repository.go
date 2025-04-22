@@ -4,13 +4,21 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"fmt"
+
 	"igaku/errors"
 	"igaku/models"
+	"igaku/utils"
 )
 
 type UserRepository interface {
 	FindByID(id uuid.UUID) (*models.User, error)
 	FindByUsername(username string) (*models.User, error)
+	FindAll(
+		offset, limit int,
+		orderBy models.UserOrderableField, orderMethod utils.Ordering,
+	) ([]models.User, error)
+	CountAll() (int64, error)
 }
 
 type gormUserRepository struct {
@@ -37,4 +45,30 @@ func (r *gormUserRepository) FindByUsername(username string) (*models.User, erro
 		return nil, &errors.UserNotFoundError{}
 	}
 	return &usr, nil
+}
+
+func (r *gormUserRepository) FindAll(
+	offset, limit int,
+	orderBy models.UserOrderableField, orderMethod utils.Ordering,
+) ([]models.User, error) {
+	var users []models.User
+	err := r.db.
+		Order(fmt.Sprintf("%s %s", string(orderBy), string(orderMethod))).
+		Offset(offset).
+		Limit(limit).
+		Find(&users).
+		Error
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+
+func (r *gormUserRepository) CountAll() (int64, error) {
+	var count int64
+	err := r.db.Model(&models.User{}).Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
