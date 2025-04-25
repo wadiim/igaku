@@ -9,6 +9,7 @@ import (
 
 	"context"
 	"errors"
+	"strings"
 	"testing"
 
 	igakuErrors "igaku/errors"
@@ -207,9 +208,74 @@ func TestGormUserRepository(t *testing.T) {
 			t, int64(18), count,
 		)
 
-		// TODO: When `AddUser()` will be implemented, test if
+		// TODO: When `Persist()` will be implemented, test if
 		// `CountAll()` still returns correct results when the count
 		// changes, since currently `return 18, nil` would be enough
 		// to pass.
+	})
+
+	t.Run("Persist_InvalidUser", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormUserRepository(db)
+
+		id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+		assert.NoError(t, err)
+
+		// Duplicated ID
+		user := models.User{
+			ID: id,
+			Username: "validUsername",
+			Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+			Role: models.Patient,
+		}
+		err = repo.Persist(&user)
+		assert.Contains(t, strings.ToLower(err.Error()), "invalid user")
+		assert.Contains(t, strings.ToLower(err.Error()), "duplicated id")
+
+		id, err = uuid.Parse("358395da-2059-4768-ab9d-e41daf54af7d")
+		assert.NoError(t, err)
+
+		// Duplicated Username
+		user = models.User{
+			ID: id,
+			Username: "jdoe",
+			Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+			Role: models.Patient,
+		}
+		err = repo.Persist(&user)
+		assert.Contains(t, strings.ToLower(err.Error()), "invalid user")
+		assert.Contains(t, strings.ToLower(err.Error()), "duplicated username")
+	})
+
+	t.Run("Persist_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormUserRepository(db)
+
+		id, err := uuid.Parse("263bd7aa-46d1-4253-9232-fba5d68e161c")
+		assert.NoError(t, err)
+
+		user := models.User{
+			ID: id,
+			Username: "unique",
+			Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+			Role: models.Patient,
+		}
+		err = repo.Persist(&user)
+		assert.NoError(t, err)
+
+		found_user, err := repo.FindByID(id)
+		assert.NoError(t, err)
+
+		assert.Equal(t, user.ID, found_user.ID)
+		assert.Equal(t, user.Username, found_user.Username)
+		assert.Equal(t, user.Role, found_user.Role)
 	})
 }

@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 
 	"fmt"
+	"strings"
 
 	"igaku/errors"
 	"igaku/models"
@@ -19,6 +20,7 @@ type UserRepository interface {
 		orderBy models.UserOrderableField, orderMethod utils.Ordering,
 	) ([]models.User, error)
 	CountAll() (int64, error)
+	Persist(user *models.User) (error)
 }
 
 type gormUserRepository struct {
@@ -71,4 +73,23 @@ func (r *gormUserRepository) CountAll() (int64, error) {
 		return 0, err
 	}
 	return count, nil
+}
+
+func (r *gormUserRepository) Persist(user *models.User) (error) {
+	err := r.db.Create(user).Error
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate key") {
+			if strings.Contains(err.Error(), "users_pkey") {
+				return &errors.InvalidUserError{
+					"Duplicated ID",
+				}
+			} else if strings.Contains(err.Error(), "users_username") {
+				return &errors.InvalidUserError{
+					"Duplicated username",
+				}
+			}
+		}
+		return err
+	}
+	return err
 }

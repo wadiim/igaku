@@ -59,3 +59,9 @@ func (m *UserRepository) CountAll() (int64, error) {
 
 	return args.Get(0).(int64), args.Error(1)
 }
+
+func (m *UserRepository) Persist(user *models.User) (error) {
+	args := m.Called(user)
+
+	return args.Error(0)
+}
