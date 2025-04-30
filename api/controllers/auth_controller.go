@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"errors"
+	"fmt"
 	"net/http"
 
 	"igaku/dtos"
@@ -57,6 +58,45 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 	c.String(http.StatusOK, "%s", token)
 }
 
+// Register registers a new user and returns a JWT token on success.
+// @Summary	Register in the system
+// @Description	Registers a new user via username and password. Returns a JWT token as plain text on success.
+// @Tags	Authentication
+// @Accept	json
+// @Produce	plain
+// @Param	fields body dtos.RegistrationFields true "User registration fields (username and password)"
+// @Success	200 {string} string "Successfully registered, returns JWT token"
+// @Failure	409 {object} dtos.ErrorResponse "Conflict - Username already taken"
+// @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to process login (e.g., database error)"
+// @Router	/register [post]
+func (ctrl *AuthController) Register(c *gin.Context) {
+	var fields dtos.RegistrationFields
+	if err := c.ShouldBindJSON(&fields); err != nil {
+		c.JSON(http.StatusBadRequest, dtos.ErrorResponse{
+			Message: "Invalid request payload",
+		})
+		return
+	}
+
+	token, err := ctrl.service.Register(fields)
+	if err != nil {
+		if errors.Is(err, &igakuErrors.UsernameAlreadyTakenError{}) {
+			c.JSON(http.StatusConflict, dtos.ErrorResponse{
+				Message: fmt.Sprintf("Failed to register: %s",
+					err,
+				),
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{
+				Message: "Failed to register",
+			})
+		}
+	}
+
+	c.String(http.StatusOK, "%s", token)
+}
+
 func (ctrl *AuthController) RegisterRoutes(router *gin.Engine) {
 	router.POST("/login", ctrl.Login)
+	router.POST("/register", ctrl.Register)
 }

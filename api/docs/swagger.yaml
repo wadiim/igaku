@@ -56,6 +56,18 @@ definitions:
       total_pages:
         type: integer
     type: object
+  dtos.RegistrationFields:
+    properties:
+      password:
+        example: P@ssw0rd!
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - password
+    - username
+    type: object
   models.Organization:
     properties:
       address:
@@ -243,6 +255,38 @@ paths:
       summary: Get organization by ID
       tags:
       - Organizations
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user via username and password. Returns a JWT token
+        as plain text on success.
+      parameters:
+      - description: User registration fields (username and password)
+        in: body
+        name: fields
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RegistrationFields'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully registered, returns JWT token
+          schema:
+            type: string
+        "409":
+          description: Conflict - Username already taken
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to process login (e.g., database
+            error)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Register in the system
+      tags:
+      - Authentication
 securityDefinitions:
   BearerAuth:
     in: header

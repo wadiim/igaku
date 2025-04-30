@@ -183,3 +183,119 @@ func TestAuthController_Login_Success(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 }
+
+func TestAuthController_Registration_InvalidParams(t *testing.T) {
+	mockRepo := new(mocks.UserRepository)
+	router := setupAuthRouter(mockRepo)
+
+	body := []byte(`{"foo":"bar"}`)
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/register",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+
+	var responseBody map[string]string
+	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
+	assert.NoError(t, err)
+	assert.Equal(t, "Invalid request payload", responseBody["error"])
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
+	mockRepo := new(mocks.UserRepository)
+	router := setupAuthRouter(mockRepo)
+
+	usrID := uuid.New()
+	dupName := "jdoe"
+	hashedPassword := "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6"
+
+	existingUser := &models.User{
+		ID: usrID,
+		Username: dupName,
+		Password: hashedPassword,
+		Role: models.Patient,
+	}
+	mockRepo.On("FindByUsername", dupName).Return(existingUser, nil).Once()
+
+	body := []byte(fmt.Sprintf(`{"username":"%s", "password":"%s"}`,
+		dupName,
+		"P@ssw0rd!",
+	))
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/register",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusConflict, rec.Code)
+
+	var responseBody map[string]string
+	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
+	assert.NoError(t, err)
+	assert.Contains(t, responseBody["error"], "Username already taken")
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestAuthController_Registration_Success(t *testing.T) {
+	jwtSecretKey := []byte(os.Getenv("SECRET_KEY"))
+
+	mockRepo := new(mocks.UserRepository)
+	router := setupAuthRouter(mockRepo)
+
+	usrName := "newuser"
+
+	mockRepo.On("FindByUsername", usrName).
+		Return(nil, &errors.UserNotFoundError{}).Once()
+	mockRepo.On("Persist", mock.Anything).Return(nil).Once()
+
+	body := []byte(fmt.Sprintf(`{"username":"%s", "password":"%s"}`,
+		usrName,
+		"P@ssw0rd!",
+	))
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/register",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	responseToken := string(rec.Body.Bytes()[:])
+	claims := utils.Claims{}
+	_, err = jwt.ParseWithClaims(
+		responseToken,
+		&claims,
+		func(token *jwt.Token) (interface{}, error) {
+			return jwtSecretKey, nil
+		},
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, models.Patient, claims.Role)
+	assert.Equal(t, "igaku", claims.Issuer)
+	// We do not know the generated ID
+
+	mockRepo.AssertExpectations(t)
+}
