@@ -1,0 +1,107 @@
+definitions:
+  dtos.ErrorResponse:
+    properties:
+      error:
+        example: Specific error message
+        type: string
+    type: object
+  dtos.LoginCredentials:
+    properties:
+      password:
+        example: P@ssw0rd!
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  dtos.RegistrationFields:
+    properties:
+      password:
+        example: P@ssw0rd!
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - password
+    - username
+    type: object
+host: localhost:8081
+info:
+  contact: {}
+  title: Igaku Auth
+  version: 0.0.1
+paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user via username and password. Returns a JWT token
+        as plain text on success.
+      parameters:
+      - description: User login credentials (username and password)
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.LoginCredentials'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully authenticated, returns JWT token
+          schema:
+            type: string
+        "400":
+          description: Bad Request - Invalid request payload (e.g., missing fields,
+            wrong format)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid username or password
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to process login (e.g., database
+            error)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Login into the system
+      tags:
+      - Authentication
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new user via username and password. Returns a JWT token
+        as plain text on success.
+      parameters:
+      - description: User registration fields (username and password)
+        in: body
+        name: fields
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.RegistrationFields'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Successfully registered, returns JWT token
+          schema:
+            type: string
+        "409":
+          description: Conflict - Username already taken
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to process login (e.g., database
+            error)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Register in the system
+      tags:
+      - Authentication
+swagger: "2.0"

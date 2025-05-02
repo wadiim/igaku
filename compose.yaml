@@ -3,6 +3,7 @@ services:
     container_name: igaku-api
     image: cosmtrek/air
     working_dir: /app
+    command: ["-c", "api-service/air.api.toml"]
     env_file:
       - .env
     environment:
@@ -10,12 +11,26 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./api/:/app/
+      - ./:/app/
     networks:
       - igaku-network
     depends_on:
       db:
         condition: service_healthy
+
+  auth:
+    container_name: igaku-auth
+    image: cosmtrek/air
+    working_dir: /app
+    command: ["-c", "auth-service/air.auth.toml"]
+    env_file:
+      - .env
+    ports:
+      - 8081:8080
+    volumes:
+      - ./:/app/
+    networks:
+      - igaku-network
 
   db:
     container_name: igaku-db
