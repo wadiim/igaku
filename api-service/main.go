@@ -44,18 +44,17 @@ func main() {
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_DB"),
 	)
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
-		os.Exit(1)
 	}
 
 	err = utils.MigrateSchema(db)
 	if err != nil {
 		log.Fatalf("Failed to create database structures: %v", err)
-		os.Exit(1)
 	}
 
 	err = seedDatabase(db)
