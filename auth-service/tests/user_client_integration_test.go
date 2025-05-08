@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -20,63 +19,36 @@ import (
 
 func TestUserClient(t *testing.T) {
 	t.Run("TestSetup", func(t *testing.T) {
-		t.Parallel()
 		ctx := context.Background()
+		cleanup := testUtils.SetupTestServices(ctx, t)
+		defer cleanup()
+		url := "http://localhost:8080/hello"
 
-		netName := "test-setup"
-		network, netCleanup := testUtils.SetupTestNetwork(ctx, t, netName)
-		defer netCleanup()
-
-		db, dbCleanup := testUtils.SetupTestDatabase(ctx, t, network, netName)
-		defer dbCleanup()
-
-		client, clientCleanup := testUtils.SetupTestUserService(ctx, t, db, network, netName)
-		defer clientCleanup()
-
-		url := fmt.Sprintf("http://%s:%s/hello", client.Host, client.Port)
 		res, err := http.Get(url)
 		require.NoError(t, err)
 		require.Equal(t, http.StatusOK, res.StatusCode)
 	})
 
 	t.Run("TestFindByUsername_NotFound", func(t *testing.T) {
-		t.Parallel()
 		ctx := context.Background()
+		cleanup := testUtils.SetupTestServices(ctx, t)
+		url := "http://localhost:8080"
 
-		netName := "findbyusername-notfound"
-		network, netCleanup := testUtils.SetupTestNetwork(ctx, t, netName)
-		defer netCleanup()
-
-		db, dbCleanup := testUtils.SetupTestDatabase(ctx, t, network, netName)
-		defer dbCleanup()
-
-		client, clientCleanup := testUtils.SetupTestUserService(ctx, t, db, network, netName)
-		defer clientCleanup()
-
-		url := fmt.Sprintf("http://%s:%s", client.Host, client.Port)
 		userClient := clients.NewUserClient(url)
-
 		user, err := userClient.FindByUsername("nonexistinguser")
 		assert.Nil(t, user, "Expected no user to be returned")
 		require.NotNil(t, err, "Expected error when finding non-existend user")
 		assert.Contains(t, strings.ToLower(err.Error()), "user not found")
+
+		cleanup()
 	})
 
 	t.Run("TestFindByUsername_Success", func(t *testing.T) {
-		t.Parallel()
 		ctx := context.Background()
+		cleanup := testUtils.SetupTestServices(ctx, t)
+		defer cleanup()
+		url := "http://localhost:8080"
 
-		netName := "findbyusername-success"
-		network, netCleanup := testUtils.SetupTestNetwork(ctx, t, netName)
-		defer netCleanup()
-
-		db, dbCleanup := testUtils.SetupTestDatabase(ctx, t, network, netName)
-		defer dbCleanup()
-
-		client, clientCleanup := testUtils.SetupTestUserService(ctx, t, db, network, netName)
-		defer clientCleanup()
-
-		url := fmt.Sprintf("http://%s:%s", client.Host, client.Port)
 		userClient := clients.NewUserClient(url)
 
 		user, err := userClient.FindByUsername("jdoe")
@@ -104,20 +76,11 @@ func TestUserClient(t *testing.T) {
 	})
 
 	t.Run("TestPersist_Success", func(t *testing.T) {
-		t.Parallel()
 		ctx := context.Background()
+		cleanup := testUtils.SetupTestServices(ctx, t)
+		defer cleanup()
+		url := "http://localhost:8080"
 
-		netName := "persist-success"
-		network, netCleanup := testUtils.SetupTestNetwork(ctx, t, netName)
-		defer netCleanup()
-
-		db, dbCleanup := testUtils.SetupTestDatabase(ctx, t, network, netName)
-		defer dbCleanup()
-
-		client, clientCleanup := testUtils.SetupTestUserService(ctx, t, db, network, netName)
-		defer clientCleanup()
-
-		url := fmt.Sprintf("http://%s:%s", client.Host, client.Port)
 		userClient := clients.NewUserClient(url)
 
 		id, err := uuid.Parse("263bd7aa-46d1-4253-9232-fba5d68e161c")
@@ -155,5 +118,3 @@ func TestUserClient(t *testing.T) {
 		)
 	})
 }
-
-// TODO: Reduce code duplication
