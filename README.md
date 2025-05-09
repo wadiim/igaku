@@ -14,7 +14,6 @@ Visit:
 ## Testing
 
 ```console
-$ cd api
 $ go test ./api-service/tests/
 $ go test ./auth-service/tests/
 $ go test -tags=integration ./api-service/tests/ -v
