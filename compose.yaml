@@ -12,6 +12,8 @@ services:
       - 8080:8080
     volumes:
       - ./:/app/
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -29,6 +31,8 @@ services:
       - 8081:8080
     volumes:
       - ./:/app/
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
 
@@ -51,3 +55,7 @@ services:
 networks:
   igaku-network:
     driver: bridge
+
+volumes:
+  go-mod-cache:
+  go-build-cache:
