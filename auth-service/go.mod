@@ -1,8 +1,9 @@
-module igaku
+module igaku/auth-service
 
 go 1.23.7
 
 require (
+	igaku/commons v0.0.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
@@ -17,6 +18,8 @@ require (
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.26.1
 )
+
+replace igaku/commons => ../commons
 
 require (
 	dario.cat/mergo v1.0.1 // indirect

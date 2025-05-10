@@ -2,8 +2,8 @@ services:
   api:
     container_name: igaku-api
     image: cosmtrek/air
-    working_dir: /app
-    command: ["-c", "api-service/air.api.toml"]
+    working_dir: /app/api-service
+    command: ["-c", "air.api.toml"]
     env_file:
       - .env
     environment:
@@ -11,7 +11,8 @@ services:
     ports:
       - 8080:8080
     volumes:
-      - ./:/app/
+      - ./api-service:/app/api-service
+      - ./commons:/app/commons
       - go-mod-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
     networks:
@@ -23,14 +24,15 @@ services:
   auth:
     container_name: igaku-auth
     image: cosmtrek/air
-    working_dir: /app
-    command: ["-c", "auth-service/air.auth.toml"]
+    working_dir: /app/auth-service
+    command: ["-c", "air.auth.toml"]
     env_file:
       - .env
     ports:
       - 8081:8080
     volumes:
-      - ./:/app/
+      - ./auth-service:/app/auth-service
+      - ./commons:/app/commons
       - go-mod-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
     networks:

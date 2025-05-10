@@ -2,10 +2,10 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "go build -buildvcs=false -o ./tmp/api-service ./api-service/"
+cmd = "go build -buildvcs=false -o ./tmp/api-service ."
 bin = "./tmp/api-service"
 include_ext = ["go"]
-include_dir = ["api-service", "commons"]
+include_dir = ["./", "../commons"]
 exclude_dir = ["tmp", "bin", ".git"]
 log = "air_api.log"
 delay = 1000

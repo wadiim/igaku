@@ -14,17 +14,15 @@ Visit:
 ## Testing
 
 ```console
-$ go test ./api-service/tests/
-$ go test ./auth-service/tests/
-$ go test -tags=integration ./api-service/tests/ -v
-$ go test -tags=integration ./auth-service/tests/ -v
+$ go -C api-service test ./tests/
+$ go -C auth-service test ./tests/
+$ go -C api-service test -tags=integration ./tests/ -v
+$ go -C auth-service test -tags=integration ./tests/ -v
 ```
 
 ## Swagger documentation generation
 
 ```console
-cd api-service
-swag init -d .,../commons/dtos/,../commons/errors/,../commons/models/,../commons/utils/
-cd ../auth-service
-swag init -d .,../commons/dtos/,../commons/errors/,../commons/models/,../commons/utils/
+$ swag init -g main.go -o api-service/docs -d api-service,commons/dtos,commons/errors,commons/models,commons/utils
+$ swag init -g main.go -o auth-service/docs -d auth-service,commons/dtos,commons/errors,commons/models,commons/utils
 ```

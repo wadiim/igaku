@@ -98,7 +98,7 @@ func seedDatabase(db *gorm.DB) error {
 		return fmt.Errorf("Error checking seeding status: %w", err)
 	}
 
-	initScriptDir, err := filepath.Abs("./api-service/resources")
+	initScriptDir, err := filepath.Abs("./resources")
 	if err != nil {
 		return fmt.Errorf(
 			"Failed to get absolute path for resources/: %w", err,

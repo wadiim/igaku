@@ -2,10 +2,10 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "go build -buildvcs=false -o ./tmp/auth-service ./auth-service/"
+cmd = "go build -buildvcs=false -o ./tmp/auth-service ."
 bin = "./tmp/auth-service"
 include_ext = ["go"]
-include_dir = ["auth-service", "commons"]
+include_dir = ["./", "../commons"]
 exclude_dir = ["tmp", "bin", ".git"]
 log = "air_auth.log"
 delay = 1000

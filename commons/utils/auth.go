@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"igaku/auth-service/errors"
+	"igaku/commons/errors"
 	"igaku/commons/models"
 )
 
