@@ -1,25 +1,48 @@
 services:
-  api:
-    container_name: igaku-api
+  user:
+    container_name: igaku-user
     image: cosmtrek/air
-    working_dir: /app/api-service
-    command: ["-c", "air.api.toml"]
+    working_dir: /app/user-service
+    command: ["-c", "air.user.toml"]
     env_file:
       - .env
     environment:
-      - POSTGRES_HOST=igaku-db
+      - POSTGRES_HOST=igaku-user-db
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_USER=${USER_DB_USER}
+      - POSTGRES_PASSWORD=${USER_DB_PASSWORD}
     ports:
       - 8080:8080
     volumes:
-      - ./api-service:/app/api-service
+      - ./user-service:/app/user-service
       - ./commons:/app/commons
       - go-mod-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
-      db:
+      user-db:
         condition: service_healthy
+
+  user-db:
+    container_name: igaku-user-db
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${USER_DB_NAME}
+      - POSTGRES_USER=${USER_DB_USER}
+      - POSTGRES_PASSWORD=${USER_DB_PASSWORD}
+    ports:
+      - 5432:5432
+    networks:
+      - igaku-network
+    healthcheck:
+      test: pg_isready -U ${USER_DB_USER} -d ${USER_DB_NAME}
+      interval: 2s
+      timeout: 2s
+      retries: 3
 
   auth:
     container_name: igaku-auth
@@ -38,18 +61,47 @@ services:
     networks:
       - igaku-network
 
-  db:
-    container_name: igaku-db
+  encounter:
+    container_name: igaku-encounter
+    image: cosmtrek/air
+    working_dir: /app/encounter-service
+    command: ["-c", "air.encounter.toml"]
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_HOST=igaku-encounter-db
+      - POSTGRES_DB=${ENCOUNTER_DB_NAME}
+      - POSTGRES_USER=${ENCOUNTER_DB_USER}
+      - POSTGRES_PASSWORD=${ENCOUNTER_DB_PASSWORD}
+    ports:
+      - 8082:8080
+    volumes:
+      - ./encounter-service:/app/encounter-service
+      - ./commons:/app/commons
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    networks:
+      - igaku-network
+    depends_on:
+      encounter-db:
+        condition: service_healthy
+
+  encounter-db:
+    container_name: igaku-encounter-db
     image: postgres
     restart: always
     env_file:
       - .env
+    environment:
+      - POSTGRES_DB=${ENCOUNTER_DB_NAME}
+      - POSTGRES_USER=${ENCOUNTER_DB_USER}
+      - POSTGRES_PASSWORD=${ENCOUNTER_DB_PASSWORD}
     ports:
-      - 5432:5432
+      - 5433:5432
     networks:
       - igaku-network
     healthcheck:
-      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      test: pg_isready -U ${ENCOUNTER_DB_USER} -d ${ENCOUNTER_DB_NAME}
       interval: 2s
       timeout: 2s
       retries: 3

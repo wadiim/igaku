@@ -1,0 +1,86 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Igaku Encounter API",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "host": "localhost:8082",
+    "paths": {
+        "/organizations/{id}": {
+            "get": {
+                "description": "Retrieves details for a specific organization using its UUID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Organizations"
+                ],
+                "summary": "Get organization by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Organization ID (UUIDv4 format)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved organization",
+                        "schema": {
+                            "$ref": "#/definitions/models.Organization"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid UUID format",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Organization not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error - Failed to retrieve organization",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dtos.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Specific error message"
+                }
+            }
+        },
+        "models.Organization": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "295 Varnum Ave"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "86e6a1f3-d7aa-4e74-a20a-ea78bc13340b"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "The Lowell General Hospital"
+                }
+            }
+        }
+    }
+}

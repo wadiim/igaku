@@ -18,16 +18,21 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		return nil, fmt.Errorf("Failed to create stack: %w", err)
 	}
 
+	// TODO: Read from `.env`
 	env := map[string]string{
-		"POSTGRES_DB":		"igakudb",
-		"POSTGRES_USER":	"igaku",
+		"ENCOUNTER_DB_NAME":		"encounterdb",
+		"ENCOUNTER_DB_USER":		"encounter",
+		"ENCOUNTER_DB_PASSWORD":	"P@ssw0rd!",
+		"USER_DB_NAME":			"userdb",
+		"USER_DB_USER":			"user",
+		"USER_DB_PASSWORD":		"P@ssw0rd!",
 	}
 
 	err = stack.
 		WithEnv(env).
-		WaitForService("db", wait.ForHealthCheck()).
+		WaitForService("user-db", wait.ForHealthCheck()).
 		WaitForService(
-			"api",
+			"user",
 			wait.NewHTTPStrategy("/hello").
 				WithPort("8080/tcp").
 				WithStartupTimeout(180*time.Second).
