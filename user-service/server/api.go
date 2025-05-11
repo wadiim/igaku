@@ -29,9 +29,6 @@ func NewApiServer(accService services.AccountService) *ApiServer {
 	accController := controllers.NewAccountController(accService)
 	accController.RegisterRoutes(router)
 
-	internalAccController := controllers.NewInternalAccountController(accService)
-	internalAccController.RegisterRoutes(router)
-
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	server := &http.Server{
