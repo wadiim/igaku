@@ -12,7 +12,7 @@ import (
 	"igaku/commons/models"
 )
 
-func SeedDatabase(db *gorm.DB) error {
+func SeedDatabase(db *gorm.DB, path string) error {
 	var setting models.Setting
 	err := db.Where("key = ?", "db_seeded").First(&setting).Error
 	if err == nil {
@@ -25,7 +25,7 @@ func SeedDatabase(db *gorm.DB) error {
 		return fmt.Errorf("Error checking seeding status: %w", err)
 	}
 
-	initScriptDir, err := filepath.Abs("./resources")
+	initScriptDir, err := filepath.Abs(path)
 	if err != nil {
 		return fmt.Errorf(
 			"Failed to get absolute path for resources/: %w", err,

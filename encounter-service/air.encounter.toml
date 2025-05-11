@@ -2,11 +2,10 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "go build -buildvcs=false -o ./tmp/encounter-service ."
-bin = "./tmp/encounter-service"
+cmd = "go build -C encounter-service -buildvcs=false -o tmp/main igaku/encounter-service"
+bin = "encounter-service/tmp/main"
 include_ext = ["go"]
-include_dir = ["./", "../commons"]
-exclude_dir = ["tmp", "bin", ".git"]
+exclude_dir = ["encounter-service/tmp", "encounter-service/bin"]
 log = "air_encounter.log"
 delay = 1000
 

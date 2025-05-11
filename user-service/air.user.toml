@@ -2,12 +2,11 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "go build -buildvcs=false -o ./tmp/user-service ."
-bin = "./tmp/user-service"
+cmd = "go build -C user-service -buildvcs=false -o tmp/main igaku/user-service"
+bin = "user-service/tmp/main"
 include_ext = ["go"]
-include_dir = ["./", "../commons"]
-exclude_dir = ["tmp", "bin", ".git"]
-log = "air_api.log"
+exclude_dir = ["user-service/tmp", "user-service/bin"]
+log = "air_user.log"
 delay = 1000
 
 [misc]

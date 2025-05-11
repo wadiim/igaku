@@ -2,8 +2,8 @@ services:
   user:
     container_name: igaku-user
     image: cosmtrek/air
-    working_dir: /app/user-service
-    command: ["-c", "air.user.toml"]
+    working_dir: /app
+    command: ["-c", "user-service/air.user.toml"]
     env_file:
       - .env
     environment:
@@ -47,8 +47,8 @@ services:
   auth:
     container_name: igaku-auth
     image: cosmtrek/air
-    working_dir: /app/auth-service
-    command: ["-c", "air.auth.toml"]
+    working_dir: /app
+    command: ["-c", "auth-service/air.auth.toml"]
     env_file:
       - .env
     ports:
@@ -64,8 +64,8 @@ services:
   encounter:
     container_name: igaku-encounter
     image: cosmtrek/air
-    working_dir: /app/encounter-service
-    command: ["-c", "air.encounter.toml"]
+    working_dir: /app
+    command: ["-c", "encounter-service/air.encounter.toml"]
     env_file:
       - .env
     environment:

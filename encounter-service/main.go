@@ -51,7 +51,7 @@ func main() {
 		log.Fatalf("Failed to create database structures: %v", err)
 	}
 
-	err = commonsUtils.SeedDatabase(db)
+	err = commonsUtils.SeedDatabase(db, "./encounter-service/resources")
 	if err != nil {
 		log.Fatalf("Failed to seed database: %v", err)
 	}

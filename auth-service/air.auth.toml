@@ -2,11 +2,10 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-cmd = "go build -buildvcs=false -o ./tmp/auth-service ."
-bin = "./tmp/auth-service"
+cmd = "go build -C auth-service -buildvcs=false -o tmp/main igaku/auth-service"
+bin = "auth-service/tmp/main"
 include_ext = ["go"]
-include_dir = ["./", "../commons"]
-exclude_dir = ["tmp", "bin", ".git"]
+exclude_dir = ["auth-service/tmp", "auth-service/bin"]
 log = "air_auth.log"
 delay = 1000
 

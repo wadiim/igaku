@@ -11,7 +11,7 @@ import (
 	"igaku/auth-service/services"
 )
 
-// @title		Igaku Auth
+// @title		Igaku Auth API
 // @version		0.0.1
 // @host		localhost:8081
 
