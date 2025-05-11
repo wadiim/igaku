@@ -19,7 +19,7 @@ func main() {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
-	userClient := clients.NewUserClient("http://igaku-api:8080")
+	userClient := clients.NewUserClient("http://igaku-user:8080")
 	authService := services.NewAuthService(userClient)
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)
