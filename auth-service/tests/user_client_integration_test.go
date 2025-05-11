@@ -48,7 +48,7 @@ func TestUserClient(t *testing.T) {
 	})
 
 	t.Run("TestFindByUsername_NotFound", func(t *testing.T) {
-		url := "http://localhost:8080"
+		url := "amqp://rabbit:tibbar@localhost:5672/"
 
 		userClient := clients.NewUserClient(url)
 		user, err := userClient.FindByUsername("nonexistinguser")
@@ -58,7 +58,7 @@ func TestUserClient(t *testing.T) {
 	})
 
 	t.Run("TestFindByUsername_Success", func(t *testing.T) {
-		url := "http://localhost:8080"
+		url := "amqp://rabbit:tibbar@localhost:5672/"
 
 		userClient := clients.NewUserClient(url)
 
@@ -87,7 +87,7 @@ func TestUserClient(t *testing.T) {
 	})
 
 	t.Run("TestPersist_Success", func(t *testing.T) {
-		url := "http://localhost:8080"
+		url := "amqp://rabbit:tibbar@localhost:5672/"
 
 		userClient := clients.NewUserClient(url)
 

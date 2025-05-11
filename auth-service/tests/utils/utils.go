@@ -20,6 +20,8 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 
 	// TODO: Read from `.env`
 	env := map[string]string{
+		"RABBITMQ_USER":		"rabbit",
+		"RABBITMQ_PASS":		"tibbar",
 		"ENCOUNTER_DB_NAME":		"encounterdb",
 		"ENCOUNTER_DB_USER":		"encounter",
 		"ENCOUNTER_DB_PASSWORD":	"P@ssw0rd!",
@@ -31,6 +33,7 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 	err = stack.
 		WithEnv(env).
 		WaitForService("user-db", wait.ForHealthCheck()).
+		WaitForService("rabbitmq", wait.ForHealthCheck()).
 		WaitForService(
 			"user",
 			wait.NewHTTPStrategy("/hello").

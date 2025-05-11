@@ -1,12 +1,9 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"context"
 	"fmt"
@@ -15,11 +12,9 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"net/http"
 
-	"igaku/user-service/controllers"
-	"igaku/user-service/docs"
 	"igaku/user-service/repositories"
+	"igaku/user-service/server"
 	"igaku/user-service/services"
 	"igaku/user-service/utils"
 	commonsUtils "igaku/commons/utils"
@@ -65,7 +60,19 @@ func main() {
 		log.Fatalf("Failed to seed database: %v", err)
 	}
 
-	apiServer := NewApiServer(db)
+	userRepo := repositories.NewGormUserRepository(db)
+	accService := services.NewAccountService(userRepo)
+
+	// TODO: Read URI from `.env`
+	amqpURI := "amqp://rabbit:tibbar@rabbitmq:5672/"
+	rbServer, err := server.NewRabbitMQServer(amqpURI, accService)
+	failOnError(err, "Failed to initialize RabbitMQ server")
+	defer rbServer.Shutdown()
+
+	err = rbServer.Start()
+	failOnError(err, "Failed to start RabbitMQ listeners")
+
+	apiServer := server.NewApiServer(accService)
 	apiServer.Start()
 
 	quit := make(chan os.Signal, 1)
@@ -77,49 +84,13 @@ func main() {
 	)
 	defer cancelShutdown()
 
-	if err := apiServer.Shutdown(shutdownCtx); err != nil {
+	if err = apiServer.Shutdown(shutdownCtx); err != nil {
 		log.Println("Failed to shutdown REST API")
 	}
 }
 
-type ApiServer struct {
-	router *gin.Engine
-	server *http.Server
-}
-
-func NewApiServer(db *gorm.DB) *ApiServer {
-	router := gin.Default()
-	docs.SwaggerInfo.BasePath = "/"
-
-	helloController := controllers.NewHelloController()
-	helloController.RegisterRoutes(router)
-
-	userRepo := repositories.NewGormUserRepository(db)
-	accService := services.NewAccountService(userRepo)
-	accController := controllers.NewAccountController(accService)
-	accController.RegisterRoutes(router)
-
-	internalAccController := controllers.NewInternalAccountController(accService)
-	internalAccController.RegisterRoutes(router)
-
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-
-	server := &http.Server{
-		Addr: ":8080",
-		Handler: router,
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Panicf("%s: %s", msg, err)
 	}
-
-	return &ApiServer{router: router, server: server}
-}
-
-func (s *ApiServer) Start() {
-	go func() {
-		if err := s.server.ListenAndServe(); err != nil {
-			log.Fatalf("Failed to serve REST API: %v", err)
-		}
-	}()
-}
-
-func (s *ApiServer) Shutdown(ctx context.Context) error {
-	return s.server.Shutdown(ctx)
 }

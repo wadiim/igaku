@@ -3,7 +3,6 @@ module igaku/user-service
 go 1.23.7
 
 require (
-	igaku/commons v0.0.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
@@ -15,6 +14,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.35.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.26.1
+	igaku/commons v0.0.0
 )
 
 replace igaku/commons => ../commons
@@ -85,6 +85,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
+	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.12 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

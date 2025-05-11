@@ -1,4 +1,24 @@
 services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    networks:
+      - igaku-network
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
   user:
     container_name: igaku-user
     image: cosmtrek/air
@@ -22,6 +42,8 @@ services:
       - igaku-network
     depends_on:
       user-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   user-db:
@@ -60,6 +82,9 @@ services:
       - go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
   encounter:
     container_name: igaku-encounter
@@ -111,5 +136,7 @@ networks:
     driver: bridge
 
 volumes:
+  rabbitmq_data:
+  rabbitmq_logs:
   go-mod-cache:
   go-build-cache:

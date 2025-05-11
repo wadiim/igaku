@@ -19,7 +19,8 @@ func main() {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
-	userClient := clients.NewUserClient("http://igaku-user:8080")
+	// TODO: Read URI from `.env`
+	userClient := clients.NewUserClient("amqp://rabbit:tibbar@rabbitmq:5672/")
 	authService := services.NewAuthService(userClient)
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)

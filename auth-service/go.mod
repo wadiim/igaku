@@ -3,7 +3,6 @@ module igaku/auth-service
 go 1.23.7
 
 require (
-	igaku/commons v0.0.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
@@ -17,6 +16,7 @@ require (
 	golang.org/x/crypto v0.37.0
 	gorm.io/driver/postgres v1.5.11
 	gorm.io/gorm v1.26.1
+	igaku/commons v0.0.0
 )
 
 replace igaku/commons => ../commons
@@ -172,6 +172,7 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/r3labs/sse v0.0.0-20210224172625-26fe804710bc // indirect
+	github.com/rabbitmq/amqp091-go v1.10.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.4.0 // indirect
 	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b // indirect
