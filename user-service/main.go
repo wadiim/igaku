@@ -8,9 +8,14 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
+	"net/http"
 
 	"igaku/user-service/controllers"
 	"igaku/user-service/docs"
@@ -60,6 +65,29 @@ func main() {
 		log.Fatalf("Failed to seed database: %v", err)
 	}
 
+	apiServer := NewApiServer(db)
+	apiServer.Start()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	shutdownCtx, cancelShutdown := context.WithTimeout(
+		context.Background(), 10*time.Second,
+	)
+	defer cancelShutdown()
+
+	if err := apiServer.Shutdown(shutdownCtx); err != nil {
+		log.Println("Failed to shutdown REST API")
+	}
+}
+
+type ApiServer struct {
+	router *gin.Engine
+	server *http.Server
+}
+
+func NewApiServer(db *gorm.DB) *ApiServer {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
@@ -75,5 +103,23 @@ func main() {
 	internalAccController.RegisterRoutes(router)
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	router.Run()
+
+	server := &http.Server{
+		Addr: ":8080",
+		Handler: router,
+	}
+
+	return &ApiServer{router: router, server: server}
+}
+
+func (s *ApiServer) Start() {
+	go func() {
+		if err := s.server.ListenAndServe(); err != nil {
+			log.Fatalf("Failed to serve REST API: %v", err)
+		}
+	}()
+}
+
+func (s *ApiServer) Shutdown(ctx context.Context) error {
+	return s.server.Shutdown(ctx)
 }
