@@ -32,10 +32,10 @@ definitions:
 host: localhost:8081
 info:
   contact: {}
-  title: Igaku Auth
+  title: Igaku Auth API
   version: 0.0.1
 paths:
-  /login:
+  /auth/login:
     post:
       consumes:
       - application/json
@@ -72,7 +72,7 @@ paths:
       summary: Login into the system
       tags:
       - Authentication
-  /register:
+  /auth/register:
     post:
       consumes:
       - application/json

@@ -32,7 +32,7 @@ func NewAuthController(service services.AuthService) *AuthController {
 // @Failure	400 {object} dtos.ErrorResponse "Bad Request - Invalid request payload (e.g., missing fields, wrong format)"
 // @Failure	401 {object} dtos.ErrorResponse "Unauthorized - Invalid username or password"
 // @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to process login (e.g., database error)"
-// @Router	/login [post]
+// @Router	/auth/login [post]
 func (ctrl *AuthController) Login(c *gin.Context) {
 	var creds dtos.LoginCredentials
 	if err := c.ShouldBindJSON(&creds); err != nil {
@@ -69,7 +69,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 // @Success	200 {string} string "Successfully registered, returns JWT token"
 // @Failure	409 {object} dtos.ErrorResponse "Conflict - Username already taken"
 // @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to process login (e.g., database error)"
-// @Router	/register [post]
+// @Router	/auth/register [post]
 func (ctrl *AuthController) Register(c *gin.Context) {
 	var fields dtos.RegistrationFields
 	if err := c.ShouldBindJSON(&fields); err != nil {
@@ -98,6 +98,9 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 }
 
 func (ctrl *AuthController) RegisterRoutes(router *gin.Engine) {
-	router.POST("/login", ctrl.Login)
-	router.POST("/register", ctrl.Register)
+	routes := router.Group("/auth")
+	{
+		routes.POST("/login", ctrl.Login)
+		routes.POST("/register", ctrl.Register)
+	}
 }

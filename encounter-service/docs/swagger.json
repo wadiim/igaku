@@ -7,7 +7,7 @@
     },
     "host": "localhost:8082",
     "paths": {
-        "/organizations/{id}": {
+        "/encounter/organizations/{id}": {
             "get": {
                 "description": "Retrieves details for a specific organization using its UUID.",
                 "produces": [

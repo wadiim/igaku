@@ -61,7 +61,7 @@ func TestAccountController_GetSelf_NoToken(t *testing.T) {
 	mockRepo := new(mocks.UserRepository)
 	w, router := setupAccountRouter(t, mockRepo)
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/self", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/self", nil)
 	require.NoError(t, err)
 
 	router.ServeHTTP(w, req)
@@ -90,7 +90,7 @@ func TestAccountController_GetSelf_InvalidTokenFormat(t *testing.T) {
 	mockRepo := new(mocks.UserRepository)
 	w, router := setupAccountRouter(t, mockRepo)
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/self", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/self", nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", "INVALID.TOKEN")
@@ -121,7 +121,7 @@ func TestAccountController_GetSelf_ExpiredToken(t *testing.T) {
 	mockRepo := new(mocks.UserRepository)
 	w, router := setupAccountRouter(t, mockRepo)
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/self", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/self", nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -183,7 +183,7 @@ func TestAccountController_GetSelf_Success(t *testing.T) {
 	}
 	mockRepo.On("FindByID", testID).Return(expectedUser, nil).Once()
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/self", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/self", nil)
 	require.NoError(t, err)
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -211,7 +211,7 @@ func TestAccountController_ListAccounts_NoToken(t *testing.T) {
 	mockRepo := new(mocks.UserRepository)
 	w, router := setupAccountRouter(t, mockRepo)
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/list", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
 	require.NoError(t, err)
 
 	router.ServeHTTP(w, req)
@@ -241,7 +241,7 @@ func TestAccountController_ListAccounts_Unauthorized_Patient(t *testing.T) {
 	mockRepo := new(mocks.UserRepository)
 	w, router := setupAccountRouter(t, mockRepo)
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/list", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
 	require.NoError(t, err)
 
 	notAdmin := &models.User{
@@ -279,7 +279,7 @@ func TestAccountController_ListAccounts_Unauthorized_Doctor(t *testing.T) {
 	mockRepo := new(mocks.UserRepository)
 	w, router := setupAccountRouter(t, mockRepo)
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/list", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
 	require.NoError(t, err)
 
 	notAdmin := &models.User{
@@ -318,15 +318,15 @@ func TestAccountController_ListAccounts_InvalidPageParam(t *testing.T) {
 	w, router := setupAccountRouter(t, mockRepo)
 	adminToken := genAdminToken(t)
 
-	req1, err := http.NewRequest(http.MethodGet, "/accounts/list?page=abc", nil)
+	req1, err := http.NewRequest(http.MethodGet, "/user/list?page=abc", nil)
 	require.NoError(t, err)
 	req1.Header.Set("Authorization", adminToken)
 
-	req2, err := http.NewRequest(http.MethodGet, "/accounts/list?page=0", nil)
+	req2, err := http.NewRequest(http.MethodGet, "/user/list?page=0", nil)
 	require.NoError(t, err)
 	req2.Header.Set("Authorization", adminToken)
 
-	req3, err := http.NewRequest(http.MethodGet, "/accounts/list?page=-1", nil)
+	req3, err := http.NewRequest(http.MethodGet, "/user/list?page=-1", nil)
 	require.NoError(t, err)
 	req3.Header.Set("Authorization", adminToken)
 
@@ -366,15 +366,15 @@ func TestAccountController_ListAccounts_InvalidPageSizeParam(t *testing.T) {
 	w, router := setupAccountRouter(t, mockRepo)
 	adminToken := genAdminToken(t)
 
-	req1, err := http.NewRequest(http.MethodGet, "/accounts/list?pageSize=xyz", nil)
+	req1, err := http.NewRequest(http.MethodGet, "/user/list?pageSize=xyz", nil)
 	require.NoError(t, err)
 	req1.Header.Set("Authorization", adminToken)
 
-	req2, err := http.NewRequest(http.MethodGet, "/accounts/list?pageSize=0", nil)
+	req2, err := http.NewRequest(http.MethodGet, "/user/list?pageSize=0", nil)
 	require.NoError(t, err)
 	req2.Header.Set("Authorization", adminToken)
 
-	req3, err := http.NewRequest(http.MethodGet, "/accounts/list?pageSize=-5", nil)
+	req3, err := http.NewRequest(http.MethodGet, "/user/list?pageSize=-5", nil)
 	require.NoError(t, err)
 	req3.Header.Set("Authorization", adminToken)
 
@@ -415,7 +415,7 @@ func TestAccountController_ListAccounts_InvalidOrderByParam(t *testing.T) {
 	adminToken := genAdminToken(t)
 
 	req, err := http.NewRequest(
-		http.MethodGet, "/accounts/list?orderBy=invalidField", nil,
+		http.MethodGet, "/user/list?orderBy=invalidField", nil,
 	)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", adminToken)
@@ -448,7 +448,7 @@ func TestAccountController_ListAccounts_InvalidOrderMethodParam(t *testing.T) {
 	adminToken := genAdminToken(t)
 
 	req, err := http.NewRequest(
-		http.MethodGet, "/accounts/list?orderMethod=invalidMethod", nil,
+		http.MethodGet, "/user/list?orderMethod=invalidMethod", nil,
 	)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", adminToken)
@@ -487,7 +487,7 @@ func TestAccountController_ListAccounts_RepoError_FindAll(t *testing.T) {
 	mockRepo.On("FindAll", 0, 10, models.ID, utils.Asc).
 		Return(nil, repoError).Once()
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/list", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", adminToken)
 
@@ -514,7 +514,7 @@ func TestAccountController_ListAccounts_RepoError_CountAll(t *testing.T) {
 	mockRepo.On("CountAll").Return(int64(0), repoError).Once()
 	// FindAll should NOT be called if CountAll fails
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/list", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", adminToken)
 
@@ -558,7 +558,7 @@ func TestAccountController_ListAccounts_DefaultParams(t *testing.T) {
 	mockRepo.On("FindAll", 0, defaultPageSize, models.ID, utils.Asc).
 		Return(mockUsers[:defaultPageSize], nil).Once()
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/list", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", adminToken)
 
@@ -630,7 +630,7 @@ func TestAccountController_ListAccounts_WithParams(t *testing.T) {
 	).Return(mockUsers[5:10], nil).Once()
 
 	url := fmt.Sprintf(
-		"/accounts/list?page=%d&pageSize=%d&orderBy=%s&orderMethod=%s",
+		"/user/list?page=%d&pageSize=%d&orderBy=%s&orderMethod=%s",
 		page, pageSize, orderBy, orderMethod,
 	)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -698,7 +698,7 @@ func TestAccountController_ListAccounts_PageGreaterThanItemCount(t *testing.T) {
 		expectedOffset, expectedLimit, models.ID, utils.Asc,
 	).Return([]models.User{}, nil).Once()
 
-	url := fmt.Sprintf("/accounts/list?page=%d&pageSize=%d", page, pageSize)
+	url := fmt.Sprintf("/user/list?page=%d&pageSize=%d", page, pageSize)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", adminToken)
@@ -744,7 +744,7 @@ func TestAccountController_ListAccounts_EmptyList(t *testing.T) {
 		0, defaultPageSize, models.ID, utils.Asc,
 	).Return([]models.User{}, nil).Once()
 
-	req, err := http.NewRequest(http.MethodGet, "/accounts/list", nil)
+	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", adminToken)
 

@@ -15,7 +15,27 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/accounts/list": {
+        "/hello": {
+            "get": {
+                "description": "Returns a static hello world message as a JSON object.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hello"
+                ],
+                "summary": "Show a hello message",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.HelloOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/list": {
             "get": {
                 "security": [
                     {
@@ -108,7 +128,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/accounts/self": {
+        "/user/self": {
             "get": {
                 "security": [
                     {
@@ -144,73 +164,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error - Failed to retrieve account details",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/hello": {
-            "get": {
-                "description": "Returns a static hello world message as a JSON object.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Hello"
-                ],
-                "summary": "Show a hello message",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.HelloOutput"
-                        }
-                    }
-                }
-            }
-        },
-        "/organizations/{id}": {
-            "get": {
-                "description": "Retrieves details for a specific organization using its UUID.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Organizations"
-                ],
-                "summary": "Get organization by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Organization ID (UUIDv4 format)",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved organization",
-                        "schema": {
-                            "$ref": "#/definitions/models.Organization"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request - Invalid UUID format",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found - Organization not found",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error - Failed to retrieve organization",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrorResponse"
                         }
@@ -285,23 +238,6 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
-        },
-        "models.Organization": {
-            "type": "object",
-            "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "295 Varnum Ave"
-                },
-                "id": {
-                    "type": "string",
-                    "example": "86e6a1f3-d7aa-4e74-a20a-ea78bc13340b"
-                },
-                "name": {
-                    "type": "string",
-                    "example": "The Lowell General Hospital"
-                }
-            }
         }
     },
     "securityDefinitions": {
@@ -319,7 +255,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:8080",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Igaku API",
+	Title:            "Igaku User API",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

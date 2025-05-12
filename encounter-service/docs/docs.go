@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/organizations/{id}": {
+        "/encounter/organizations/{id}": {
             "get": {
                 "description": "Retrieves details for a specific organization using its UUID.",
                 "produces": [

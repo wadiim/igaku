@@ -41,7 +41,7 @@ func TestAuthController_Login_NoPasswordField(t *testing.T) {
 	body := []byte(`{"username":"jdoe"}`)
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"/login",
+		"/auth/login",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -75,7 +75,7 @@ func TestAuthController_Login_InvalidUsername(t *testing.T) {
 	))
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"/login",
+		"/auth/login",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -111,7 +111,7 @@ func TestAuthController_Login_InvalidPassword(t *testing.T) {
 	))
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"/login",
+		"/auth/login",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -155,7 +155,7 @@ func TestAuthController_Login_Success(t *testing.T) {
 	))
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"/login",
+		"/auth/login",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -191,7 +191,7 @@ func TestAuthController_Registration_InvalidParams(t *testing.T) {
 	body := []byte(`{"foo":"bar"}`)
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"/register",
+		"/auth/register",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -233,7 +233,7 @@ func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 	))
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"/register",
+		"/auth/register",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {
@@ -271,7 +271,7 @@ func TestAuthController_Registration_Success(t *testing.T) {
 	))
 	req, err := http.NewRequest(
 		http.MethodPost,
-		"/register",
+		"/auth/register",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {

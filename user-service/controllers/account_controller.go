@@ -35,7 +35,7 @@ func NewAccountController(service services.AccountService) *AccountController {
 // @Failure	404 {object} dtos.ErrorResponse  "Not Found - User associated with token not found"
 // @Failure	500 {object} dtos.ErrorResponse  "Internal Server Error - Failed to retrieve account details"
 // @Security	BearerAuth
-// @Router	/accounts/self [get]
+// @Router	/user/self [get]
 func (ctrl *AccountController) GetSelf(c *gin.Context) {
 	idStr, exists := c.Get("id")
 	if !exists {
@@ -85,7 +85,7 @@ func (ctrl *AccountController) GetSelf(c *gin.Context) {
 // @Failure	403  {object}  dtos.ErrorResponse  "Forbidden - User does not have Admin role"
 // @Failure	500  {object}  dtos.ErrorResponse  "Internal Server Error - Failed to retrieve accounts"
 // @Security	BearerAuth
-// @Router	/accounts/list [get]
+// @Router	/user/list [get]
 func (ctrl *AccountController) ListAccounts(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	pageSizeStr := c.DefaultQuery("pageSize", "10")
@@ -136,7 +136,7 @@ func (ctrl *AccountController) ListAccounts(c *gin.Context) {
 }
 
 func (ctrl *AccountController) RegisterRoutes(router *gin.Engine) {
-	routes := router.Group("/accounts")
+	routes := router.Group("/user")
 	routes.Use(middleware.Authenticate())
 	{
 		routes.GET("/self", ctrl.GetSelf)

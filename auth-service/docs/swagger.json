@@ -1,13 +1,13 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "Igaku Auth",
+        "title": "Igaku Auth API",
         "contact": {},
         "version": "0.0.1"
     },
     "host": "localhost:8081",
     "paths": {
-        "/login": {
+        "/auth/login": {
             "post": {
                 "description": "Authenticates a user via username and password. Returns a JWT token as plain text on success.",
                 "consumes": [
@@ -59,7 +59,7 @@
                 }
             }
         },
-        "/register": {
+        "/auth/register": {
             "post": {
                 "description": "Registers a new user via username and password. Returns a JWT token as plain text on success.",
                 "consumes": [
