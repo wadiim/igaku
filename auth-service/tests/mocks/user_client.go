@@ -28,3 +28,5 @@ func (m *UserClient) Persist(user *models.User) error {
 
 	return args.Error(0)
 }
+
+func (m *UserClient) Shutdown() {}

@@ -17,38 +17,50 @@ import (
 type UserClient interface {
 	FindByUsername(username string) (*models.User, error)
 	Persist(user *models.User) error
+	Shutdown()
 }
 
 type userClient struct {
-	url string
+	url	string
+	conn	*amqp.Connection
+	ch	*amqp.Channel
 }
 
-// TODO: Use custom errors
-// TODO: Reuse connection, channel, etc. between invocations.
-func (c *userClient) FindByUsername(username string) (*models.User, error) {
-	queueName := "find_by_username"
-
-	conn, err := amqp.Dial(c.url)
+func NewUserClient(url string) (UserClient, error) {
+	conn, err := amqp.Dial(url)
 	if err != nil {
 		log.Println("Failed to connect to RabbitMQ")
 		return nil, err
 	}
-	defer conn.Close()
 
 	ch, err := conn.Channel()
 	if err != nil {
 		log.Println("Failed to create a channel")
 		return nil, err
 	}
-	defer ch.Close()
 
-        q, err := ch.QueueDeclare("", false, false, true, false, nil)
+	return &userClient{url: url, conn: conn, ch: ch}, nil
+}
+
+func (s *userClient) Shutdown() {
+	if s.ch != nil { s.ch.Close() }
+	if s.conn != nil { s.conn.Close() }
+}
+
+// TODO: Use custom errors
+func (c *userClient) FindByUsername(username string) (*models.User, error) {
+	queueName := "find_by_username"
+
+        q, err := c.ch.QueueDeclare("", false, false, true, false, nil)
 	if err != nil {
 		log.Println("Failed to create a queue")
 		return nil, err
 	}
 
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := c.ch.Consume(
+		q.Name, "",
+		true, false, false, false, nil,
+	)
 	if err != nil {
 		log.Println("Failed to register a consumer")
 		return nil, err
@@ -56,10 +68,10 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 
 	corrId := utils.RandString(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
-	err = ch.PublishWithContext(
+	err = c.ch.PublishWithContext(
 		ctx, "", queueName, false, false,
 		amqp.Publishing{
 			ContentType:	"text/plain",
@@ -113,33 +125,18 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 }
 
 // TODO: Use custom errors
-// TODO: Reuse connection, channel, etc. between invocations.
 // TODO: Consider modifying this function so that it takes only username and
 // password as parameters.
 func (c *userClient) Persist(user *models.User) error {
 	queueName := "persist"
 
-	conn, err := amqp.Dial(c.url)
+        q, err := c.ch.QueueDeclare("", false, false, true, false, nil)
 	if err != nil {
-		log.Println("Failed to connect to RabbitMQ")
-		return err
-	}
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Println("Failed to create a channel")
-		return err
-	}
-	defer ch.Close()
-
-        q, err := ch.QueueDeclare("", false, false, true, false, nil)
-	if err != nil {
-		log.Println("Failed to create a queue")
+		log.Println("Failed to create a `persistReqQueue`")
 		return err
 	}
 
-	msgs, err := ch.Consume(q.Name, "", true, false, false, false, nil)
+	msgs, err := c.ch.Consume(q.Name, "", true, false, false, false, nil)
 	if err != nil {
 		log.Println("Failed to register a consumer")
 		return err
@@ -147,7 +144,7 @@ func (c *userClient) Persist(user *models.User) error {
 
 	corrId := utils.RandString(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
 	defer cancel()
 
 	userBytes, err := json.Marshal(user)
@@ -156,7 +153,7 @@ func (c *userClient) Persist(user *models.User) error {
 		return err
 	}
 
-	err = ch.PublishWithContext(
+	err = c.ch.PublishWithContext(
 		ctx, "", queueName, false, false,
 		amqp.Publishing{
 			ContentType:	"text/json",
@@ -190,8 +187,4 @@ func (c *userClient) Persist(user *models.User) error {
 	}
 
 	return fmt.Errorf("Failed to persist the user")
-}
-
-func NewUserClient(url string) UserClient {
-	return &userClient{url: url}
 }

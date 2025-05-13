@@ -50,7 +50,9 @@ func TestUserClient(t *testing.T) {
 	t.Run("TestFindByUsername_NotFound", func(t *testing.T) {
 		url := "amqp://rabbit:tibbar@localhost:5672/"
 
-		userClient := clients.NewUserClient(url)
+		userClient, err := clients.NewUserClient(url)
+		require.NoError(t, err)
+		defer userClient.Shutdown()
 		user, err := userClient.FindByUsername("nonexistinguser")
 		assert.Nil(t, user, "Expected no user to be returned")
 		require.NotNil(t, err, "Expected error when finding non-existend user")
@@ -60,7 +62,9 @@ func TestUserClient(t *testing.T) {
 	t.Run("TestFindByUsername_Success", func(t *testing.T) {
 		url := "amqp://rabbit:tibbar@localhost:5672/"
 
-		userClient := clients.NewUserClient(url)
+		userClient, err := clients.NewUserClient(url)
+		require.NoError(t, err)
+		defer userClient.Shutdown()
 
 		user, err := userClient.FindByUsername("jdoe")
 		assert.Nil(t, err, "Expected no error when finding existing user")
@@ -89,7 +93,9 @@ func TestUserClient(t *testing.T) {
 	t.Run("TestPersist_Success", func(t *testing.T) {
 		url := "amqp://rabbit:tibbar@localhost:5672/"
 
-		userClient := clients.NewUserClient(url)
+		userClient, err := clients.NewUserClient(url)
+		require.NoError(t, err)
+		defer userClient.Shutdown()
 
 		id, err := uuid.Parse("263bd7aa-46d1-4253-9232-fba5d68e161c")
 		require.NoError(t, err)

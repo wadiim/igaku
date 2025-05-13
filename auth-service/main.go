@@ -5,6 +5,8 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"log"
+
 	"igaku/auth-service/clients"
 	"igaku/auth-service/controllers"
 	"igaku/auth-service/docs"
@@ -20,7 +22,12 @@ func main() {
 	docs.SwaggerInfo.BasePath = "/"
 
 	// TODO: Read URI from `.env`
-	userClient := clients.NewUserClient("amqp://rabbit:tibbar@rabbitmq:5672/")
+	userClient, err := clients.NewUserClient("amqp://rabbit:tibbar@rabbitmq:5672/")
+	if err != nil {
+		log.Fatalf("Failed to connect create a client: %v", err)
+	}
+	defer userClient.Shutdown()
+
 	authService := services.NewAuthService(userClient)
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)
