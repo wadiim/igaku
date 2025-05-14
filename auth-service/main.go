@@ -28,6 +28,9 @@ func main() {
 	}
 	defer userClient.Shutdown()
 
+	healthController := controllers.NewHealthController()
+	healthController.RegisterRoutes(router)
+
 	authService := services.NewAuthService(userClient)
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)

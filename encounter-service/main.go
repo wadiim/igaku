@@ -59,6 +59,9 @@ func main() {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
+	healthController := controllers.NewHealthController()
+	healthController.RegisterRoutes(router)
+
 	orgRepo := repositories.NewGormOrganizationRepository(db)
 	orgService := services.NewOrganizationService(orgRepo)
 	orgController := controllers.NewOrganizationController(orgService)

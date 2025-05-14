@@ -23,6 +23,9 @@ func NewApiServer(accService services.AccountService) *ApiServer {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
+	healthController := controllers.NewHealthController()
+	healthController.RegisterRoutes(router)
+
 	helloController := controllers.NewHelloController()
 	helloController.RegisterRoutes(router)
 
