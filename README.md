@@ -8,10 +8,8 @@ $ docker compose up
 ```
 
 Visit:
-- <http://localhost:8080/swagger/index.html>
-- <http://localhost:8081/swagger/index.html>
-- <http://localhost:8082/swagger/index.html>
-- <http://localhost:15672>
+- [Swagger UI](http://localhost:8090/)
+- [RabbitMQ Management UI](http://localhost:15672)
 
 ## Testing
 

@@ -135,6 +135,19 @@ services:
     profiles:
       - disabled
 
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: igaku-swagger-ui
+    ports:
+      - 8090:8080
+    volumes:
+      - ./config/swagger/swagger-initializer.js:/usr/share/nginx/html/swagger-initializer.js:ro
+    depends_on:
+      - user
+      - auth
+    networks:
+      - igaku-network
+
 networks:
   igaku-network:
     driver: bridge

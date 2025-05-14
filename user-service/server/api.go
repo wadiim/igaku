@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -8,6 +9,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"igaku/user-service/controllers"
 	"igaku/user-service/docs"
@@ -22,6 +24,15 @@ type ApiServer struct {
 func NewApiServer(accService services.AccountService) *ApiServer {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8090"}, // Swagger UI origin
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           1*time.Hour,
+	}))
 
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"log"
+	"time"
 
 	"igaku/auth-service/clients"
 	"igaku/auth-service/controllers"
@@ -20,6 +22,15 @@ import (
 func main() {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:8090"}, // Swagger UI origin
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           1*time.Hour,
+	}))
 
 	// TODO: Read URI from `.env`
 	userClient, err := clients.NewUserClient("amqp://rabbit:tibbar@rabbitmq:5672/")
