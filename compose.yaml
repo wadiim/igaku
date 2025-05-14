@@ -110,6 +110,8 @@ services:
     depends_on:
       encounter-db:
         condition: service_healthy
+    profiles:
+      - disabled
 
   encounter-db:
     container_name: igaku-encounter-db
@@ -130,6 +132,8 @@ services:
       interval: 2s
       timeout: 2s
       retries: 3
+    profiles:
+      - disabled
 
 networks:
   igaku-network:
