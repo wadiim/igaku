@@ -40,6 +40,7 @@ func (s *accountService) GetAccountByUsername(username string) (*models.User, er
 	return user, nil
 }
 
+// TODO: Rename to CreateAccount
 func (s *accountService) Persist(user *models.User) error {
 	err := s.repo.Persist(user)
 
@@ -55,6 +56,7 @@ func (s *accountService) GetAccountDetails(id uuid.UUID) (*dtos.AccountDetails, 
 
 	details := dtos.AccountDetails{
 		Username: user.Username,
+		Email: user.Email,
 		Role: string(user.Role),
 	}
 
@@ -90,6 +92,7 @@ func (s *accountService) ListAccounts(
 		accountDetailsList = append(accountDetailsList, dtos.AccountDetailsWithID{
 			ID:        user.ID.String(),
 			Username:  user.Username,
+			Email:     user.Email,
 			Role:      string(user.Role),
 		})
 	}

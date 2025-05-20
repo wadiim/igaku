@@ -223,12 +223,13 @@ func TestGormUserRepository(t *testing.T) {
 		repo := repositories.NewGormUserRepository(db)
 
 		id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Duplicated ID
 		user := models.User{
 			ID: id,
 			Username: "validUsername",
+			Email: "validEmail@mail.com",
 			Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
 			Role: models.Patient,
 		}
@@ -237,12 +238,13 @@ func TestGormUserRepository(t *testing.T) {
 		assert.Contains(t, strings.ToLower(err.Error()), "duplicated id")
 
 		id, err = uuid.Parse("358395da-2059-4768-ab9d-e41daf54af7d")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Duplicated Username
 		user = models.User{
 			ID: id,
 			Username: "jdoe",
+			Email: "jdoe+1@mail.com",
 			Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
 			Role: models.Patient,
 		}
@@ -260,22 +262,24 @@ func TestGormUserRepository(t *testing.T) {
 		repo := repositories.NewGormUserRepository(db)
 
 		id, err := uuid.Parse("263bd7aa-46d1-4253-9232-fba5d68e161c")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		user := models.User{
 			ID: id,
 			Username: "unique",
+			Email: "unique@mail.com",
 			Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
 			Role: models.Patient,
 		}
 		err = repo.Persist(&user)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		found_user, err := repo.FindByID(id)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		assert.Equal(t, user.ID, found_user.ID)
 		assert.Equal(t, user.Username, found_user.Username)
+		assert.Equal(t, user.Email, found_user.Email)
 		assert.Equal(t, user.Role, found_user.Role)
 	})
 }

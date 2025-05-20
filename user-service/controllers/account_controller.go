@@ -25,7 +25,7 @@ func NewAccountController(service services.AccountService) *AccountController {
 	return &AccountController{service: service}
 }
 
-// GetSelfAccountDetails retrieves details for the currently authenticated user.
+// GetSelf retrieves details for the currently authenticated user.
 // @Summary	Get Own Account Details
 // @Description	Retrieves details (username, role, etc.) for the currently logged-in user based on the provided JWT.
 // @Tags	Accounts

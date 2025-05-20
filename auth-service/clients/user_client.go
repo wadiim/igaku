@@ -80,7 +80,17 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 			Body:		[]byte(username),
 		},
 	)
+	if err != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to publish request for username '%s': %w",
+			username,
+			err,
+		)
+		log.Println(errmsg)
+		return nil, fmt.Errorf(errmsg)
+	}
 
+	// TODO: Fix waiting indifinitely for a response
 	for d := range msgs {
 		if corrId != d.CorrelationId {
 			continue
@@ -162,7 +172,17 @@ func (c *userClient) Persist(user *models.User) error {
 			Body:		userBytes,
 		},
 	)
+	if err != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to publish request to persist '%s': %w",
+			user.Username,
+			err,
+		)
+		log.Println(errmsg)
+		return fmt.Errorf(errmsg)
+	}
 
+	// TODO: Fix waiting indifinitely for a response
 	for d := range msgs {
 		if corrId != d.CorrelationId {
 			continue

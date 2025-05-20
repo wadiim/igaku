@@ -1,15 +1,25 @@
 definitions:
   dtos.AccountDetails:
     properties:
+      email:
+        example: jdoe@mail.com
+        type: string
       role:
         example: patient
         type: string
       username:
         example: jdoe
         type: string
+    required:
+    - email
+    - role
+    - username
     type: object
   dtos.AccountDetailsWithID:
     properties:
+      email:
+        example: jdoe@mail.com
+        type: string
       id:
         example: 0b6f13da-efb9-4221-9e89-e2729ae90030
         type: string

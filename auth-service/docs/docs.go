@@ -144,10 +144,15 @@ const docTemplate = `{
         "dtos.RegistrationFields": {
             "type": "object",
             "required": [
+                "email",
                 "password",
                 "username"
             ],
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "jdoe@mail.com"
+                },
                 "password": {
                     "type": "string",
                     "example": "P@ssw0rd!"

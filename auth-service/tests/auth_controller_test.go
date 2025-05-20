@@ -217,18 +217,21 @@ func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 
 	usrID := uuid.New()
 	dupName := "jdoe"
+	email := "unique@mail.com"
 	hashedPassword := "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6"
 
 	existingUser := &models.User{
 		ID: usrID,
 		Username: dupName,
+		Email: email,
 		Password: hashedPassword,
 		Role: models.Patient,
 	}
 	mockClient.On("FindByUsername", dupName).Return(existingUser, nil).Once()
 
-	body := []byte(fmt.Sprintf(`{"username":"%s", "password":"%s"}`,
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "password":"%s"}`,
 		dupName,
+		email,
 		"P@ssw0rd!",
 	))
 	req, err := http.NewRequest(
@@ -260,13 +263,15 @@ func TestAuthController_Registration_Success(t *testing.T) {
 	router := setupAuthRouter(mockClient)
 
 	usrName := "newuser"
+	usrEmail := "newuser@mail.com"
 
 	mockClient.On("FindByUsername", usrName).
 		Return(nil, &errors.UserNotFoundError{}).Once()
 	mockClient.On("Persist", mock.Anything).Return(nil).Once()
 
-	body := []byte(fmt.Sprintf(`{"username":"%s", "password":"%s"}`,
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "password":"%s"}`,
 		usrName,
+		usrEmail,
 		"P@ssw0rd!",
 	))
 	req, err := http.NewRequest(

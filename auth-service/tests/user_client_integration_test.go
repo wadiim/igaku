@@ -73,6 +73,9 @@ func TestUserClient(t *testing.T) {
 			t, user.Username, "jdoe", "Expected username to match",
 		)
 		assert.Equal(
+			t, user.Email, "jdoe@mail.com", "Expected email to match",
+		)
+		assert.Equal(
 			t,
 			user.ID.String(),
 			"0b6f13da-efb9-4221-9e89-e2729ae90030",
@@ -100,11 +103,13 @@ func TestUserClient(t *testing.T) {
 		id, err := uuid.Parse("263bd7aa-46d1-4253-9232-fba5d68e161c")
 		require.NoError(t, err)
 		username := "unique"
+		email := "unique@mail.com"
 		password := "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6"
 
 		expected_user := models.User{
 			ID: id,
 			Username: username,
+			Email: email,
 			Password: password,
 			Role: models.Patient,
 		}
@@ -117,10 +122,13 @@ func TestUserClient(t *testing.T) {
 		require.NotNil(t, user, "Expected the newly-created user to be found")
 
 		assert.Equal(
+			t, user.ID, id, "Expected user ID to match",
+		)
+		assert.Equal(
 			t, user.Username, username, "Expected username to match",
 		)
 		assert.Equal(
-			t, user.ID, id, "Expected user ID to match",
+			t, user.Email, email, "Expected email to match",
 		)
 		assert.Equal(
 			t, user.Password, password,

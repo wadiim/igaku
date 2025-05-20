@@ -1,113 +1,131 @@
-INSERT INTO users (id, username, password, role)
+INSERT INTO users (id, username, email, password, role)
 VALUES
     (
         '0b6f13da-efb9-4221-9e89-e2729ae90030',
         'jdoe',
+        'jdoe@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         'e2c66717-12bb-4b6a-b7b6-3be939e170ad',
         'ghouse',
+        'ghouse@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'doctor'
     ),
     (
         '99ab51c4-a544-4352-a8df-4632ff8b105d',
         'admin',
+        'admin@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'admin'
     );
 
-INSERT INTO users (id, username, password, role)
+INSERT INTO users (id, username, email, password, role)
 VALUES
     (
         '20bd590d-a485-4571-8893-fc2aa1c93cd5',
         'okabe',
+        'okabe@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '6927f21d-3dc6-412b-ad2e-ad3283b9a296',
         'kurisu',
+        'kurisu@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '7d2395c9-2763-4ef0-b8b5-9974ec06b9d5',
         'mayuri',
+        'mayuri@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '9a2f36ee-423b-4a73-9fb7-5c968100a782',
         'itaru',
+        'itaru@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '1f783647-4e06-4493-ade7-3b97d7e353dd',
         'denji',
+        'denji@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         'deb6cbea-c57a-4038-ae73-56f09eaa54b2',
         'makima',
+        'makima@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         'f822ce28-f4e8-4885-9c21-4f591485059a',
         'power',
+        'power@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '2823438d-17d2-46de-b4e3-e9d7c7bf124c',
         'lain',
+        'lain@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '91c1c531-2c0c-4f71-a6f7-ecd5377329fc',
         'frieren',
+        'frieren@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '2a0de906-d3b2-4161-9672-bdfeab141c6c',
         'fern',
+        'fern@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '7e8a7d94-ea1a-430b-8a5c-d0b2ab23bb77',
         'stark',
+        'stark@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         'fe33f5cc-b7f0-4e04-9eaa-2050344bedf0',
         'kenzou',
+        'kenzou@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'doctor'
     ),
     (
         '3fd22a33-896c-4d63-b91b-82f5a7cca8d0',
         'jinwoo',
+        'jinwoo@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         '732fbd67-9912-4bd2-855d-1b42557f1673',
         'satoru',
+        'satoru@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     ),
     (
         'b4338f2b-382a-48a2-9e09-ce9d2b7f4126',
         'kasumi',
+        'kasumi@mail.com',
         '$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6',
         'patient'
     );

@@ -19,6 +19,9 @@ definitions:
     type: object
   dtos.RegistrationFields:
     properties:
+      email:
+        example: jdoe@mail.com
+        type: string
       password:
         example: P@ssw0rd!
         type: string
@@ -26,6 +29,7 @@ definitions:
         example: jdoe
         type: string
     required:
+    - email
     - password
     - username
     type: object

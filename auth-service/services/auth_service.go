@@ -47,6 +47,7 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 	return utils.GenerateJWTToken(usr, time.Now(), expirationTime)
 }
 
+// TODO: Check for email duplication.
 func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 	// TODO: Consider creating a UserRepository's method designed
 	// specifically to check if a user with the given Username exists,
@@ -61,6 +62,7 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 	usr := models.User {
 		ID: uuid.New(),
 		Username: fields.Username,
+		Email: fields.Email,
 		Password: string(hashedPassword),
 		Role: models.Patient,
 	}

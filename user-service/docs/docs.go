@@ -175,7 +175,16 @@ const docTemplate = `{
     "definitions": {
         "dtos.AccountDetails": {
             "type": "object",
+            "required": [
+                "email",
+                "role",
+                "username"
+            ],
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "jdoe@mail.com"
+                },
                 "role": {
                     "type": "string",
                     "example": "patient"
@@ -189,6 +198,10 @@ const docTemplate = `{
         "dtos.AccountDetailsWithID": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "jdoe@mail.com"
+                },
                 "id": {
                     "type": "string",
                     "example": "0b6f13da-efb9-4221-9e89-e2729ae90030"
