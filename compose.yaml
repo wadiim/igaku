@@ -165,8 +165,8 @@ services:
     container_name: igaku-swagger-ui
     ports:
       - 8090:8080
-    volumes:
-      - ./config/swagger/swagger-initializer.js:/usr/share/nginx/html/swagger-initializer.js:ro
+    env_file:
+      - config/swagger/env
     depends_on:
       - user
       - auth
