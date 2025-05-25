@@ -14,8 +14,6 @@ import (
 	"igaku/commons/utils"
 )
 
-const tokenDuration = time.Hour * 1 // TODO: Store in `.env`
-
 type AuthService interface {
 	Login(creds dtos.LoginCredentials) (string, error)
 	Register(fields dtos.RegistrationFields) (string, error)
@@ -24,12 +22,30 @@ type AuthService interface {
 type authService struct {
 	userClient clients.UserClient
 	mailClient clients.MailClient
+	tokenDuration time.Duration
+	from string
 }
 
 func NewAuthService(
-	userClient clients.UserClient, mailClient clients.MailClient,
-) AuthService {
-	return &authService{userClient: userClient, mailClient: mailClient}
+	userClient clients.UserClient,
+	mailClient clients.MailClient,
+	tokenDurationInHours int,
+	from string,
+) (AuthService, error) {
+	tokenDuration, err := time.ParseDuration(
+		fmt.Sprintf("%dh", tokenDurationInHours),
+	)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"Failed to parse token duration: %w", err,
+		)
+	}
+	return &authService{
+		userClient: userClient,
+		mailClient: mailClient,
+		tokenDuration: tokenDuration,
+		from: from,
+	}, nil
 }
 
 func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
@@ -47,7 +63,7 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 		return "", &errors.InvalidUsernameOrPasswordError{}
 	}
 
-	expirationTime := time.Now().Add(tokenDuration)
+	expirationTime := time.Now().Add(s.tokenDuration)
 	return utils.GenerateJWTToken(usr, time.Now(), expirationTime)
 }
 
@@ -72,7 +88,7 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 	}
 	err = s.userClient.Persist(&usr)
 
-	expirationTime := time.Now().Add(tokenDuration)
+	expirationTime := time.Now().Add(s.tokenDuration)
 	token, err := utils.GenerateJWTToken(&usr, time.Now(), expirationTime)
 	if err != nil {
 		return "", err
@@ -80,7 +96,7 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 
 	to := []string{usr.Email}
 	msg := []byte(
-		"From: support@igaku.com\r\n" + // TODO: Read from .env
+		fmt.Sprintf("From: %s\r\n", s.from) +
 		fmt.Sprintf("To: %s\r\n", usr.Email) +
 		"Subject: Igaku registration\r\n" +
 		"\r\n" +

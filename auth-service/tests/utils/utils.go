@@ -18,16 +18,16 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		return nil, fmt.Errorf("Failed to create stack: %w", err)
 	}
 
-	// TODO: Read from `.env`
 	env := map[string]string{
 		"RABBITMQ_USER":		"rabbit",
 		"RABBITMQ_PASS":		"tibbar",
-		"ENCOUNTER_DB_NAME":		"encounterdb",
-		"ENCOUNTER_DB_USER":		"encounter",
-		"ENCOUNTER_DB_PASSWORD":	"P@ssw0rd!",
 		"USER_DB_NAME":			"userdb",
 		"USER_DB_USER":			"user",
 		"USER_DB_PASSWORD":		"P@ssw0rd!",
+		"ENCOUNTER_DB_NAME":		"encounterdb",
+		"ENCOUNTER_DB_USER":		"encounter",
+		"ENCOUNTER_DB_PASSWORD":	"P@ssw0rd!",
+		"JWT_TOKEN_DURATION_IN_HOURS":	"1",
 	}
 
 	err = stack.

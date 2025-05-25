@@ -13,8 +13,7 @@ import (
 func main() {
 	service := services.NewMailService()
 
-	// TODO: Read URI from `.env`
-	amqpURI := "amqp://rabbit:tibbar@rabbitmq:5672/"
+	amqpURI := os.Getenv("RABBITMQ_URL")
 	rbServer, err := server.NewRabbitMQServer(amqpURI, service)
 	if err != nil {
 		log.Fatalf("Failed to initialize RabbitMQ server: %w", err)

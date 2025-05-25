@@ -31,6 +31,7 @@ services:
       - POSTGRES_DB=${USER_DB_NAME}
       - POSTGRES_USER=${USER_DB_USER}
       - POSTGRES_PASSWORD=${USER_DB_PASSWORD}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
     ports:
       - 8080:8080
     volumes:
@@ -71,6 +72,8 @@ services:
     image: cosmtrek/air
     working_dir: /app
     command: ["-c", "auth-service/air.auth.toml"]
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
     env_file:
       - .env
     ports:
@@ -91,6 +94,8 @@ services:
     image: cosmtrek/air
     working_dir: /app
     command: ["-c", "mail-service/air.mail.toml"]
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
     env_file:
       - .env
     ports:

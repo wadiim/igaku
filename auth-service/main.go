@@ -7,6 +7,8 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"log"
+	"os"
+	"strconv"
 	"time"
 
 	"igaku/auth-service/clients"
@@ -32,8 +34,7 @@ func main() {
 		MaxAge:           1*time.Hour,
 	}))
 
-	// TODO: Read URI from `.env`
-	amqpURI := "amqp://rabbit:tibbar@rabbitmq:5672/"
+	amqpURI := os.Getenv("RABBITMQ_URL")
 
 	userClient, err := clients.NewUserClient(amqpURI)
 	if err != nil {
@@ -50,7 +51,25 @@ func main() {
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
-	authService := services.NewAuthService(userClient, mailClient)
+	tokenDurationInHours, err := strconv.Atoi(
+		os.Getenv("JWT_TOKEN_DURATION_IN_HOURS"),
+	)
+	if err != nil {
+		log.Fatalf(
+			"Failed to parse `JWT_TOKEN_DURATION_IN_HOURS` " +
+			"from `.env`: %v", err,
+		)
+	}
+
+	authService, err := services.NewAuthService(
+		userClient, mailClient,
+		tokenDurationInHours, os.Getenv("SMTP_FROM"),
+	)
+	if err != nil {
+		log.Fatalf(
+			"Failed to initialize auth service: %v", err,
+		)
+	}
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)
 

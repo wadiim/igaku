@@ -63,8 +63,7 @@ func main() {
 	userRepo := repositories.NewGormUserRepository(db)
 	accService := services.NewAccountService(userRepo)
 
-	// TODO: Read URI from `.env`
-	amqpURI := "amqp://rabbit:tibbar@rabbitmq:5672/"
+	amqpURI := os.Getenv("RABBITMQ_URL")
 	rbServer, err := server.NewRabbitMQServer(amqpURI, accService)
 	failOnError(err, "Failed to initialize RabbitMQ server")
 	defer rbServer.Shutdown()

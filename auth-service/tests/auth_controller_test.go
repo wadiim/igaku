@@ -5,6 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/mock"
 
 	"bytes"
@@ -24,11 +25,15 @@ import (
 )
 
 func setupAuthRouter(
+	t *testing.T,
 	mockUserClient *mocks.UserClient, mockMailClient *mocks.MailClient,
 ) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
-	authService := services.NewAuthService(mockUserClient, mockMailClient)
+	authService, err := services.NewAuthService(
+		mockUserClient, mockMailClient, 1, "support@igaku.com",
+	)
+	require.NoError(t, err)
 	authController := controllers.NewAuthController(authService)
 
 	router := gin.Default()
@@ -39,7 +44,7 @@ func setupAuthRouter(
 func TestAuthController_Login_NoPasswordField(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(mockUserClient, mockMailClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient)
 
 	body := []byte(`{"username":"jdoe"}`)
 	req, err := http.NewRequest(
@@ -67,7 +72,7 @@ func TestAuthController_Login_NoPasswordField(t *testing.T) {
 func TestAuthController_Login_InvalidUsername(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(mockUserClient, mockMailClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient)
 
 	invalidUsername := "invalidUsername"
 	mockUserClient.On("FindByUsername", invalidUsername).
@@ -100,7 +105,7 @@ func TestAuthController_Login_InvalidUsername(t *testing.T) {
 func TestAuthController_Login_InvalidPassword(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(mockUserClient, mockMailClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient)
 
 	testUsername := "jdoe"
 	expectedUser := &models.User{
@@ -139,7 +144,7 @@ func TestAuthController_Login_Success(t *testing.T) {
 
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(mockUserClient, mockMailClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient)
 
 	testID := uuid.New()
 	testUsername := "jdoe"
@@ -193,7 +198,7 @@ func TestAuthController_Login_Success(t *testing.T) {
 func TestAuthController_Registration_InvalidParams(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(mockUserClient, mockMailClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient)
 
 	body := []byte(`{"foo":"bar"}`)
 	req, err := http.NewRequest(
@@ -221,7 +226,7 @@ func TestAuthController_Registration_InvalidParams(t *testing.T) {
 func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(mockUserClient, mockMailClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient)
 
 	usrID := uuid.New()
 	dupName := "jdoe"
@@ -269,7 +274,7 @@ func TestAuthController_Registration_Success(t *testing.T) {
 
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(mockUserClient, mockMailClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient)
 
 	usrName := "newuser"
 	usrEmail := "newuser@mail.com"
