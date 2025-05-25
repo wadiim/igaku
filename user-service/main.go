@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"igaku/user-service/repositories"
-	"igaku/user-service/server"
+	"igaku/user-service/servers"
 	"igaku/user-service/services"
 	"igaku/user-service/utils"
 	commonsUtils "igaku/commons/utils"
@@ -64,14 +64,14 @@ func main() {
 	accService := services.NewAccountService(userRepo)
 
 	amqpURI := os.Getenv("RABBITMQ_URL")
-	rbServer, err := server.NewRabbitMQServer(amqpURI, accService)
+	rbServer, err := servers.NewRabbitMQServer(amqpURI, accService)
 	failOnError(err, "Failed to initialize RabbitMQ server")
 	defer rbServer.Shutdown()
 
 	err = rbServer.Start()
 	failOnError(err, "Failed to start RabbitMQ listeners")
 
-	apiServer := server.NewApiServer(accService)
+	apiServer := servers.NewApiServer(accService)
 	apiServer.Start()
 
 	quit := make(chan os.Signal, 1)

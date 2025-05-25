@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"igaku/mail-service/server"
+	"igaku/mail-service/servers"
 	"igaku/mail-service/services"
 )
 
@@ -14,7 +14,7 @@ func main() {
 	service := services.NewMailService()
 
 	amqpURI := os.Getenv("RABBITMQ_URL")
-	rbServer, err := server.NewRabbitMQServer(amqpURI, service)
+	rbServer, err := servers.NewRabbitMQServer(amqpURI, service)
 	if err != nil {
 		log.Fatalf("Failed to initialize RabbitMQ server: %w", err)
 	}
