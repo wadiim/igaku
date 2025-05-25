@@ -33,16 +33,24 @@ func main() {
 	}))
 
 	// TODO: Read URI from `.env`
-	userClient, err := clients.NewUserClient("amqp://rabbit:tibbar@rabbitmq:5672/")
+	amqpURI := "amqp://rabbit:tibbar@rabbitmq:5672/"
+
+	userClient, err := clients.NewUserClient(amqpURI)
 	if err != nil {
-		log.Fatalf("Failed to connect create a client: %v", err)
+		log.Fatalf("Failed to create a user client: %v", err)
 	}
 	defer userClient.Shutdown()
+
+	mailClient, err := clients.NewMailClient(amqpURI)
+	if err != nil {
+		log.Fatalf("Failed to create a mail client: %v", err)
+	}
+	defer mailClient.Shutdown()
 
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
-	authService := services.NewAuthService(userClient)
+	authService := services.NewAuthService(userClient, mailClient)
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)
 

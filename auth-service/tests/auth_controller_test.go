@@ -23,10 +23,12 @@ import (
 	"igaku/commons/utils"
 )
 
-func setupAuthRouter(mockClient *mocks.UserClient) *gin.Engine {
+func setupAuthRouter(
+	mockUserClient *mocks.UserClient, mockMailClient *mocks.MailClient,
+) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
-	authService := services.NewAuthService(mockClient)
+	authService := services.NewAuthService(mockUserClient, mockMailClient)
 	authController := controllers.NewAuthController(authService)
 
 	router := gin.Default()
@@ -35,8 +37,9 @@ func setupAuthRouter(mockClient *mocks.UserClient) *gin.Engine {
 }
 
 func TestAuthController_Login_NoPasswordField(t *testing.T) {
-	mockClient := new(mocks.UserClient)
-	router := setupAuthRouter(mockClient)
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	router := setupAuthRouter(mockUserClient, mockMailClient)
 
 	body := []byte(`{"username":"jdoe"}`)
 	req, err := http.NewRequest(
@@ -58,15 +61,16 @@ func TestAuthController_Login_NoPasswordField(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Invalid request payload", responseBody["error"])
 
-	mockClient.AssertNotCalled(t, "FindByUsername", mock.Anything)
+	mockUserClient.AssertNotCalled(t, "FindByUsername", mock.Anything)
 }
 
 func TestAuthController_Login_InvalidUsername(t *testing.T) {
-	mockClient := new(mocks.UserClient)
-	router := setupAuthRouter(mockClient)
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	router := setupAuthRouter(mockUserClient, mockMailClient)
 
 	invalidUsername := "invalidUsername"
-	mockClient.On("FindByUsername", invalidUsername).
+	mockUserClient.On("FindByUsername", invalidUsername).
 		Return(nil, &errors.UserNotFoundError{}).Once()
 
 	body := []byte(fmt.Sprintf(
@@ -94,8 +98,9 @@ func TestAuthController_Login_InvalidUsername(t *testing.T) {
 }
 
 func TestAuthController_Login_InvalidPassword(t *testing.T) {
-	mockClient := new(mocks.UserClient)
-	router := setupAuthRouter(mockClient)
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	router := setupAuthRouter(mockUserClient, mockMailClient)
 
 	testUsername := "jdoe"
 	expectedUser := &models.User{
@@ -103,7 +108,7 @@ func TestAuthController_Login_InvalidPassword(t *testing.T) {
 		Username: testUsername,
 		Password: "P@ssw0rd!",
 	}
-	mockClient.On("FindByUsername", testUsername).Return(expectedUser, nil).Once()
+	mockUserClient.On("FindByUsername", testUsername).Return(expectedUser, nil).Once()
 
 	body := []byte(fmt.Sprintf(
 		`{"username":"%s", "password":"invalidPassword"}`,
@@ -132,8 +137,9 @@ func TestAuthController_Login_InvalidPassword(t *testing.T) {
 func TestAuthController_Login_Success(t *testing.T) {
 	jwtSecretKey := []byte(os.Getenv("SECRET_KEY"))
 
-	mockClient := new(mocks.UserClient)
-	router := setupAuthRouter(mockClient)
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	router := setupAuthRouter(mockUserClient, mockMailClient)
 
 	testID := uuid.New()
 	testUsername := "jdoe"
@@ -145,7 +151,7 @@ func TestAuthController_Login_Success(t *testing.T) {
 		Password: hashedPassword,
 		Role: models.Patient,
 	}
-	mockClient.On("FindByUsername", testUsername).
+	mockUserClient.On("FindByUsername", testUsername).
 		Return(expectedUser, nil).Once()
 
 	body := []byte(fmt.Sprintf(
@@ -181,12 +187,13 @@ func TestAuthController_Login_Success(t *testing.T) {
 	assert.Equal(t, "igaku", claims.Issuer)
 	assert.Equal(t, expectedUser.ID.String(), claims.Subject)
 
-	mockClient.AssertExpectations(t)
+	mockUserClient.AssertExpectations(t)
 }
 
 func TestAuthController_Registration_InvalidParams(t *testing.T) {
-	mockClient := new(mocks.UserClient)
-	router := setupAuthRouter(mockClient)
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	router := setupAuthRouter(mockUserClient, mockMailClient)
 
 	body := []byte(`{"foo":"bar"}`)
 	req, err := http.NewRequest(
@@ -208,12 +215,13 @@ func TestAuthController_Registration_InvalidParams(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "Invalid request payload", responseBody["error"])
 
-	mockClient.AssertExpectations(t)
+	mockUserClient.AssertExpectations(t)
 }
 
 func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
-	mockClient := new(mocks.UserClient)
-	router := setupAuthRouter(mockClient)
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	router := setupAuthRouter(mockUserClient, mockMailClient)
 
 	usrID := uuid.New()
 	dupName := "jdoe"
@@ -227,7 +235,7 @@ func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 		Password: hashedPassword,
 		Role: models.Patient,
 	}
-	mockClient.On("FindByUsername", dupName).Return(existingUser, nil).Once()
+	mockUserClient.On("FindByUsername", dupName).Return(existingUser, nil).Once()
 
 	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "password":"%s"}`,
 		dupName,
@@ -253,21 +261,34 @@ func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Contains(t, responseBody["error"], "Username already taken")
 
-	mockClient.AssertExpectations(t)
+	mockUserClient.AssertExpectations(t)
 }
 
 func TestAuthController_Registration_Success(t *testing.T) {
 	jwtSecretKey := []byte(os.Getenv("SECRET_KEY"))
 
-	mockClient := new(mocks.UserClient)
-	router := setupAuthRouter(mockClient)
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	router := setupAuthRouter(mockUserClient, mockMailClient)
 
 	usrName := "newuser"
 	usrEmail := "newuser@mail.com"
 
-	mockClient.On("FindByUsername", usrName).
+	mockUserClient.On("FindByUsername", usrName).
 		Return(nil, &errors.UserNotFoundError{}).Once()
-	mockClient.On("Persist", mock.Anything).Return(nil).Once()
+	mockUserClient.On("Persist", mock.Anything).Return(nil).Once()
+
+	to := []string{usrEmail}
+	msg := []byte(
+		"From: support@igaku.com\r\n" +
+		fmt.Sprintf("To: %s\r\n", usrEmail) +
+		"Subject: Igaku registration\r\n" +
+		"\r\n" +
+		fmt.Sprintf("Welcome %s\r\n", usrName),
+	)
+	mockMailClient.On(
+		"SendMail", to, msg,
+	).Return(nil).Once()
 
 	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "password":"%s"}`,
 		usrName,
@@ -302,5 +323,5 @@ func TestAuthController_Registration_Success(t *testing.T) {
 	assert.Equal(t, "igaku", claims.Issuer)
 	// We do not know the generated ID
 
-	mockClient.AssertExpectations(t)
+	mockUserClient.AssertExpectations(t)
 }

@@ -86,6 +86,26 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  mail:
+    container_name: igaku-mail
+    image: cosmtrek/air
+    working_dir: /app
+    command: ["-c", "mail-service/air.mail.toml"]
+    env_file:
+      - .env
+    ports:
+      - 8083:8080
+    volumes:
+      - ./mail-service:/app/mail-service
+      - ./commons:/app/commons
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    networks:
+      - igaku-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
   encounter:
     container_name: igaku-encounter
     image: cosmtrek/air

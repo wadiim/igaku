@@ -4,6 +4,13 @@
 
 ```console
 $ ln -s .env.example .env
+```
+
+> [!WARNING]
+> Most of the values in the `.env` file can remain unchanged but the SMTP
+> (Simple Mail Transfer Protocol) credentials must be set.
+
+```console
 $ docker compose up
 ```
 
