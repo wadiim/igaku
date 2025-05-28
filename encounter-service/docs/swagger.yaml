@@ -23,6 +23,19 @@ info:
   title: Igaku Encounter API
   version: 0.0.1
 paths:
+  /encounter/health:
+    get:
+      description: Returns an OK message
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Check health
+      tags:
+      - Health
   /encounter/organizations/{id}:
     get:
       description: Retrieves details for a specific organization using its UUID.

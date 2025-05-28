@@ -39,6 +39,19 @@ info:
   title: Igaku Auth API
   version: 0.0.1
 paths:
+  /auth/health:
+    get:
+      description: Returns an OK message
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Check health
+      tags:
+      - Health
   /auth/login:
     post:
       consumes:

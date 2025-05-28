@@ -13,6 +13,12 @@ func NewHealthController() *HealthController {
 	return &HealthController{}
 }
 
+// @Summary	Check health
+// @Description	Returns an OK message
+// @Tags	Health
+// @Produce	text/plain
+// @Success	200 {string} string
+// @Router	/encounter/health [get]
 func (ctrl *HealthController) GetHealth(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }

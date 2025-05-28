@@ -39,6 +39,7 @@ func setupAccountRouter(t *testing.T, mockRepo *mocks.UserRepository) (*httptest
 	return rec, router
 }
 
+// TODO: Move to auth service or commons
 func genAdminToken(t *testing.T) string {
 	admin := &models.User{
 		ID: uuid.New(),
@@ -106,6 +107,8 @@ func TestAccountController_GetSelf_InvalidTokenFormat(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &errResponse)
 	require.NoError(t, err, "Failed to unmarshal error response body")
 
+	// TODO: Change the error message to something like
+	//       "Invalid token format".
 	expectedErrMsg := "Unauthorized"
 	assert.Equal(
 		t, expectedErrMsg, errResponse.Message,
