@@ -19,6 +19,19 @@ services:
       timeout: 5s
       retries: 3
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+    container_name: igaku-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    networks:
+      - igaku-network
+
   logstash:
     image: docker.elastic.co/logstash/logstash:9.0.0
     container_name: igaku-logstash
@@ -35,6 +48,20 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:9.0.0
+    container_name: igaku-kibana
+    ports:
+      - 5601:5601
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - xpack.security.enabled=false
+      - xpack.encryptedSavedObjects.encryptionKey=${SECRET_KEY}
+    networks:
+      - igaku-network
 
   user:
     container_name: igaku-user
@@ -228,3 +255,4 @@ volumes:
   rabbitmq_logs:
   go-mod-cache:
   go-build-cache:
+  esdata:

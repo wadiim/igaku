@@ -17,6 +17,7 @@ $ docker compose up
 Visit:
 - [Swagger UI](http://localhost:8090/)
 - [RabbitMQ Management UI](http://localhost:15672)
+- [Kibana](http://localhost:5601)
 
 ## Testing
 
