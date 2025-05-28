@@ -43,11 +43,25 @@ func main() {
 		os.Getenv("POSTGRES_DB"),
 	)
 
+	prefixedWriter := &utils.PrefixedWriter{
+		Out:	os.Stdout,
+		Prefix:	"[GORM] ",
+	}
+
+	prefixedLogger := utils.PrefixedLogger{
+		Interface: logger.New(
+			log.New(prefixedWriter, "", log.LstdFlags),
+			logger.Config{
+				LogLevel:			logger.Info,
+				IgnoreRecordNotFoundError:	false,
+				Colorful:			false,
+			},
+		),
+		Prefix: "[SQL] ",
+	}
+
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		// Disable the GORM logger for now, since writing Logstash
-		// filters for them is pain in the ass.
-		// TODO: Consider using a custom logger.
-		Logger: logger.Default.LogMode(logger.Silent),
+		Logger: prefixedLogger,
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
