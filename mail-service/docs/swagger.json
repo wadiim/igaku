@@ -1,0 +1,31 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Igaku Mail API",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "host": "localhost:8083",
+    "paths": {
+        "/mail/health": {
+            "get": {
+                "description": "Returns an OK message",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Check health",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

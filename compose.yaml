@@ -168,8 +168,9 @@ services:
     env_file:
       - config/swagger/env
     depends_on:
-      - user
       - auth
+      - mail
+      - user
     networks:
       - igaku-network
 
