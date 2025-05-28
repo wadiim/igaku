@@ -19,6 +19,23 @@ services:
       timeout: 5s
       retries: 3
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.0.0
+    container_name: igaku-logstash
+    ports:
+      - 5044:5044 # Beats port
+      - 12201:12201/udp # GELF input port
+      - 9600:9600
+    volumes:
+      - ./config/logstash/pipeline/:/usr/share/logstash/pipeline/:ro
+    networks:
+      - igaku-network
+    healthcheck:
+      test: ["CMD", "curl", "-s", "-XGET", "localhost:9600"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
   user:
     container_name: igaku-user
     image: cosmtrek/air
@@ -46,6 +63,13 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "igaku-user-service"
 
   user-db:
     container_name: igaku-user-db
@@ -88,6 +112,13 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "igaku-auth-service"
 
   mail:
     container_name: igaku-mail
@@ -110,6 +141,13 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "igaku-mail-service"
 
   encounter:
     container_name: igaku-encounter
@@ -135,6 +173,13 @@ services:
     depends_on:
       encounter-db:
         condition: service_healthy
+      logstash:
+        condition: service_healthy
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "igaku-encounter-service"
     profiles:
       - disabled
 

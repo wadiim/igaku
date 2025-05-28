@@ -44,7 +44,10 @@ func main() {
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
+		// Disable the GORM logger for now, since writing Logstash
+		// filters for them is pain in the ass.
+		// TODO: Consider using a custom logger.
+		Logger: logger.Default.LogMode(logger.Silent),
 	})
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
