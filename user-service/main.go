@@ -22,7 +22,7 @@ import (
 
 // @title		Igaku User API
 // @version		0.0.1
-// @host		localhost:8080
+// @host		localhost:4000
 
 // @securityDefinitions.apikey BearerAuth
 // @in header

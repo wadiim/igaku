@@ -19,14 +19,14 @@ func NewHelloController() *HelloController {
 // @Tags	Hello
 // @Produce	json
 // @Success	200 {object} dtos.HelloOutput
-// @Router	/hello [get]
+// @Router	/user/hello [get]
 func (ctrl *HelloController) SayHello(c *gin.Context) {
 	response := dtos.HelloOutput{Message: "Hello world!"}
 	c.JSON(http.StatusOK, response)
 }
 
 func (ctrl *HelloController) RegisterRoutes(router *gin.Engine) {
-	helloRoutes := router.Group("/hello")
+	helloRoutes := router.Group("/user/hello")
 	{
 		helloRoutes.GET("", ctrl.SayHello)
 	}

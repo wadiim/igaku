@@ -14,7 +14,7 @@ import (
 
 // @title		Igaku Mail API
 // @version		0.0.1
-// @host		localhost:8083
+// @host		localhost:4000
 
 func main() {
 	service := services.NewMailService()

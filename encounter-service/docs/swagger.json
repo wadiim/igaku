@@ -5,7 +5,7 @@
         "contact": {},
         "version": "0.0.1"
     },
-    "host": "localhost:8082",
+    "host": "localhost:4000",
     "paths": {
         "/encounter/health": {
             "get": {

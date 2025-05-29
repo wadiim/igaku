@@ -17,7 +17,7 @@ definitions:
         example: The Lowell General Hospital
         type: string
     type: object
-host: localhost:8082
+host: localhost:4000
 info:
   contact: {}
   title: Igaku Encounter API

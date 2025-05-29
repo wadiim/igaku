@@ -15,26 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/hello": {
-            "get": {
-                "description": "Returns a static hello world message as a JSON object.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Hello"
-                ],
-                "summary": "Show a hello message",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.HelloOutput"
-                        }
-                    }
-                }
-            }
-        },
         "/user/health": {
             "get": {
                 "description": "Returns an OK message",
@@ -50,6 +30,26 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/hello": {
+            "get": {
+                "description": "Returns a static hello world message as a JSON object.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Hello"
+                ],
+                "summary": "Show a hello message",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.HelloOutput"
                         }
                     }
                 }
@@ -285,7 +285,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.0.1",
-	Host:             "localhost:8080",
+	Host:             "localhost:4000",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Igaku User API",

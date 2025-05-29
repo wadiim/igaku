@@ -22,7 +22,7 @@ import (
 
 // @title		Igaku Encounter API
 // @version		0.0.1
-// @host		localhost:8082
+// @host		localhost:4000
 
 func main() {
 	dsn := fmt.Sprintf(
@@ -67,6 +67,9 @@ func main() {
 	orgController := controllers.NewOrganizationController(orgService)
 	orgController.RegisterRoutes(router)
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET(
+		"/encounter/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
 	router.Run()
 }

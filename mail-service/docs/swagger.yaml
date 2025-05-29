@@ -1,4 +1,4 @@
-host: localhost:8083
+host: localhost:4000
 info:
   contact: {}
   title: Igaku Mail API

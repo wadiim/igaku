@@ -43,7 +43,10 @@ func NewApiServer(accService services.AccountService) *ApiServer {
 	accController := controllers.NewAccountController(accService)
 	accController.RegisterRoutes(router)
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET(
+		"/user/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
 
 	server := &http.Server{
 		Addr: ":8080",

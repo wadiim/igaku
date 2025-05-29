@@ -33,7 +33,7 @@ definitions:
     - password
     - username
     type: object
-host: localhost:8081
+host: localhost:4000
 info:
   contact: {}
   title: Igaku Auth API

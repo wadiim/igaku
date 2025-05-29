@@ -36,7 +36,10 @@ func NewApiServer() *ApiServer {
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET(
+		"/mail/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
 
 	server := &http.Server{
 		Addr: ":8080",

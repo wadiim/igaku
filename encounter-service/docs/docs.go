@@ -116,7 +116,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.0.1",
-	Host:             "localhost:8082",
+	Host:             "localhost:4000",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Igaku Encounter API",

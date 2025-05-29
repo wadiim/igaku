@@ -19,7 +19,7 @@ import (
 
 // @title		Igaku Auth API
 // @version		0.0.1
-// @host		localhost:8081
+// @host		localhost:4000
 
 func main() {
 	router := gin.Default()
@@ -73,6 +73,9 @@ func main() {
 	authController := controllers.NewAuthController(authService)
 	authController.RegisterRoutes(router)
 
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	router.GET(
+		"/auth/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
 	router.Run()
 }

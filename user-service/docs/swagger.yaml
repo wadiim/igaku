@@ -54,25 +54,12 @@ definitions:
       total_pages:
         type: integer
     type: object
-host: localhost:8080
+host: localhost:4000
 info:
   contact: {}
   title: Igaku User API
   version: 0.0.1
 paths:
-  /hello:
-    get:
-      description: Returns a static hello world message as a JSON object.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dtos.HelloOutput'
-      summary: Show a hello message
-      tags:
-      - Hello
   /user/health:
     get:
       description: Returns an OK message
@@ -86,6 +73,19 @@ paths:
       summary: Check health
       tags:
       - Health
+  /user/hello:
+    get:
+      description: Returns a static hello world message as a JSON object.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.HelloOutput'
+      summary: Show a hello message
+      tags:
+      - Hello
   /user/list:
     get:
       description: Retrieves a paginated list of all user accounts. Requires Admin

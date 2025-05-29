@@ -1,3 +1,3 @@
-URLS=[ { url: 'http://localhost:8081/swagger/doc.json', name: 'Auth Service' }, { url: 'http://localhost:8080/swagger/doc.json', name: 'User Service' }, { url: 'http://localhost:8083/swagger/doc.json', name: 'Mail Service' } ]
+URLS=[ { url: 'http://localhost:4000/auth/swagger/doc.json', name: 'Auth Service' }, { url: 'http://localhost:4000/user/swagger/doc.json', name: 'User Service' }, { url: 'http://localhost:4000/mail/swagger/doc.json', name: 'Mail Service' } ]
 
 # vim:syntax=sh
