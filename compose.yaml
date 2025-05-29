@@ -20,8 +20,10 @@ services:
       retries: 3
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     container_name: igaku-elasticsearch
+    env_file:
+      - .env
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -33,7 +35,7 @@ services:
       - igaku-network
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:9.0.0
+    image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
     container_name: igaku-logstash
     ports:
       - 5044:5044 # Beats port
@@ -52,16 +54,21 @@ services:
       - elasticsearch
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:9.0.0
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     container_name: igaku-kibana
     ports:
       - 5601:5601
+    env_file:
+      - .env
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      - xpack.security.enabled=false
-      - xpack.encryptedSavedObjects.encryptionKey=${SECRET_KEY}
+    volumes:
+      - ./config/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+      - kibana_data:/usr/share/kibana/data
     networks:
       - igaku-network
+    depends_on:
+      - elasticsearch
 
   user:
     container_name: igaku-user
@@ -256,3 +263,4 @@ volumes:
   go-mod-cache:
   go-build-cache:
   esdata:
+  kibana_data:
