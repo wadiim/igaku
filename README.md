@@ -17,6 +17,14 @@ $ docker compose up
 Visit:
 - [Swagger UI](http://localhost:8090/)
 - [RabbitMQ Management UI](http://localhost:15672)
+
+## Starting the [ELK](https://www.elastic.co/elastic-stack/) stack
+
+```console
+$ docker compose --profile elk up
+```
+
+Visit:
 - [Kibana](http://localhost:5601)
 
 ## Testing

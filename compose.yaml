@@ -33,6 +33,8 @@ services:
       - esdata:/usr/share/elasticsearch/data
     networks:
       - igaku-network
+    profiles:
+      - elk
 
   logstash:
     image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
@@ -52,6 +54,8 @@ services:
       retries: 10
     depends_on:
       - elasticsearch
+    profiles:
+      - elk
 
   kibana:
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
@@ -69,6 +73,8 @@ services:
       - igaku-network
     depends_on:
       - elasticsearch
+    profiles:
+      - elk
 
   user:
     container_name: igaku-user
@@ -99,6 +105,7 @@ services:
         condition: service_healthy
       logstash:
         condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -148,6 +155,7 @@ services:
         condition: service_healthy
       logstash:
         condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -177,6 +185,7 @@ services:
         condition: service_healthy
       logstash:
         condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -209,6 +218,7 @@ services:
         condition: service_healthy
       logstash:
         condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
