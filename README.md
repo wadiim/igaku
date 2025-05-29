@@ -18,6 +18,12 @@ Visit:
 - [Swagger UI](http://localhost:8090/)
 - [RabbitMQ Management UI](http://localhost:15672)
 
+## Service Replication
+
+```console
+$ docker compose up --scale auth=2 --scale user=2 --scale mail=2
+```
+
 ## Starting the [ELK](https://www.elastic.co/elastic-stack/) stack
 
 ```console
