@@ -9,7 +9,6 @@ import (
 
 	"context"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"testing"
@@ -39,14 +38,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestUserClient(t *testing.T) {
-	t.Run("TestSetup", func(t *testing.T) {
-		url := "http://localhost:8080/hello"
-
-		res, err := http.Get(url)
-		require.NoError(t, err)
-		require.Equal(t, http.StatusOK, res.StatusCode)
-	})
-
 	t.Run("TestFindByUsername_NotFound", func(t *testing.T) {
 		url := "amqp://rabbit:tibbar@localhost:5672/"
 

@@ -35,11 +35,11 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		WaitForService("user-db", wait.ForHealthCheck()).
 		WaitForService("rabbitmq", wait.ForHealthCheck()).
 		WaitForService(
-			"user",
-			wait.NewHTTPStrategy("/hello").
-				WithPort("8080/tcp").
-				WithStartupTimeout(180*time.Second).
-				WithPollInterval(2*time.Second),
+			"nginx",
+			wait.NewHTTPStrategy("/user/health").
+				WithPort("4000/tcp").
+				WithStartupTimeout(200*time.Second).
+				WithPollInterval(4*time.Second),
 		).
 		Up(ctx, compose.Wait(true))
 	if err != nil {
