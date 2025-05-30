@@ -53,7 +53,7 @@ $ go -C auth-service test -tags=integration ./tests/ -v
 ### Load Testing
 
 ```console
-$ jmeter -n -t config/jmeter/load_test.jmx -l ./report/load_test_$(date --iso-8601=seconds) -e -o ./report/report_$(date --iso-8601=seconds)
+$ ./tools/run-load-tests.sh
 ```
 
 ## Swagger documentation generation
