@@ -59,8 +59,5 @@ $ ./tools/run-load-tests.sh
 ## Swagger documentation generation
 
 ```console
-$ swag init -g main.go -o user-service/docs -d user-service,commons/dtos,commons/errors,commons/models,commons/utils
-$ swag init -g main.go -o auth-service/docs -d auth-service,commons/dtos,commons/errors,commons/models,commons/utils
-$ swag init -g main.go -o encounter-service/docs -d encounter-service,commons/dtos,commons/errors,commons/models,commons/utils
-$ swag init -g main.go -o mail-service/docs -d mail-service,commons/dtos,commons/errors,commons/models,commons/utils
+$ ./tools/gen-docs.sh
 ```
