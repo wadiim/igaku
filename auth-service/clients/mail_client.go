@@ -58,7 +58,7 @@ func (c *mailClient) SendMail(to []string, msg []byte) error {
 		)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 
 	sendMailReq := dtos.SendMailRequest{To: to, Msg: msg}

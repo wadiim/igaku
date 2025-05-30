@@ -113,7 +113,7 @@ func (s *RabbitMQServer) StartFindByUsernameListener() error {
 			}
 
 			publishCtx, cancelPublish := context.WithTimeout(
-				context.Background(), 5*time.Second,
+				context.Background(), 8*time.Second,
 			)
 
 			err = s.ch.PublishWithContext(publishCtx,
@@ -189,7 +189,7 @@ func (s *RabbitMQServer) StartPersistListener() error {
 			}
 
 			publishCtx, cancelPublish := context.WithTimeout(
-				context.Background(), 5*time.Second,
+				context.Background(), 8*time.Second,
 			)
 
 			err = s.ch.PublishWithContext(publishCtx,

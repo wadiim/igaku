@@ -68,7 +68,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 
 	corrId := utils.RandString(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 
 	err = c.ch.PublishWithContext(
@@ -154,7 +154,7 @@ func (c *userClient) Persist(user *models.User) error {
 
 	corrId := utils.RandString(16)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
 
 	userBytes, err := json.Marshal(user)
