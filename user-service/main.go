@@ -67,6 +67,14 @@ func main() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("Failed to get the database object: %v", err)
+	}
+	sqlDB.SetMaxIdleConns(50)
+	sqlDB.SetMaxOpenConns(100)
+	sqlDB.SetConnMaxLifetime(time.Hour)
+
 	err = utils.MigrateSchema(db)
 	if err != nil {
 		log.Fatalf("Failed to create database structures: %v", err)
