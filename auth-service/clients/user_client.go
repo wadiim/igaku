@@ -9,6 +9,7 @@ import (
 	"log"
 	"time"
 
+	"igaku/auth-service/errors"
 	"igaku/auth-service/utils"
 	"igaku/commons/dtos"
 	"igaku/commons/models"
@@ -53,8 +54,8 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 
         q, err := c.ch.QueueDeclare("", false, false, true, false, nil)
 	if err != nil {
-		log.Println("Failed to create a queue")
-		return nil, err
+		log.Printf("Failed to create a queue: %w", err)
+		return nil, &errors.InternalError{}
 	}
 
 	msgs, err := c.ch.Consume(
@@ -62,8 +63,8 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 		true, false, false, false, nil,
 	)
 	if err != nil {
-		log.Println("Failed to register a consumer")
-		return nil, err
+		log.Printf("Failed to register a consumer: %w", err)
+		return nil, &errors.InternalError{}
 	}
 
 	corrId := utils.RandString(16)
@@ -82,12 +83,13 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 	)
 	if err != nil {
 		errmsg := fmt.Sprintf(
-			"Failed to publish request for username '%s': %w",
+			"[%s] Failed to publish request for username '%s': %w",
+			corrId,
 			username,
 			err,
 		)
 		log.Println(errmsg)
-		return nil, fmt.Errorf(errmsg)
+		return nil, &errors.InternalError{}
 	}
 
 	// TODO: Fix waiting indifinitely for a response
@@ -98,40 +100,58 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 
 		var rpcResp dtos.RPCResponse
 		if err := json.Unmarshal(d.Body, &rpcResp); err != nil {
-			log.Printf("Failed to unmarshal RPC response: %w\n", err)
-			return nil, fmt.Errorf(
-				"Failed to unmarshal RPC response: %w", err,
+			errmsg := fmt.Sprintf(
+				"[%s] Failed to unmarshal RPC response: %w",
+				corrId,
+				err,
 			)
+			log.Println(errmsg)
+			return nil, &errors.InternalError{}
 		}
 
 		if rpcResp.Error != nil {
 			if rpcResp.Error.Code == "NOT_FOUND" {
-				return nil, fmt.Errorf(
-					"User not found: %s",
+				errmsg := fmt.Sprintf(
+					"[%s] User not found: %s",
+					corrId,
 					rpcResp.Error.Message,
 				)
+				log.Println(errmsg)
+				return nil, fmt.Errorf(errmsg)
 			} else if rpcResp.Error.Code == "INTERNAL" {
-				return nil, fmt.Errorf(
-					"User service internal error: %s",
+				errmsg := fmt.Sprintf(
+					"[%s] User service internal error: %s",
+					corrId,
 					rpcResp.Error.Message,
 				)
+				log.Println(errmsg)
+				return nil, &errors.InternalError{}
 			} else {
-				return nil, fmt.Errorf(
-					"Internal error: %s",
+				errmsg := fmt.Sprintf(
+					"[%s] Internal error: %s",
+					corrId,
 					rpcResp.Error.Message,
 				)
+				log.Println(errmsg)
+				return nil, &errors.InternalError{}
 			}
 		}
 
 		var user models.User
 		if err := json.Unmarshal(rpcResp.Data, &user); err != nil {
-			return nil, fmt.Errorf("Failed to unmarshal user: %w", err)
+				errmsg := fmt.Sprintf(
+					"[%s] Internal error: %w", corrId, err,
+				)
+				log.Println(errmsg)
+			return nil, &errors.InternalError{}
 		}
 
 		return &user, nil
 	}
 
-	return nil, fmt.Errorf("Failed to fetch the user")
+	errmsg := fmt.Sprintf("[%s] Failed to fetch the user", corrId)
+	log.Println(errmsg)
+	return nil, &errors.InternalError{}
 }
 
 // TODO: Use custom errors
@@ -142,14 +162,14 @@ func (c *userClient) Persist(user *models.User) error {
 
         q, err := c.ch.QueueDeclare("", false, false, true, false, nil)
 	if err != nil {
-		log.Println("Failed to create a `persistReqQueue`")
-		return err
+		log.Println("Failed to create a `persistReqQueue`: %w", err)
+		return &errors.InternalError{}
 	}
 
 	msgs, err := c.ch.Consume(q.Name, "", true, false, false, false, nil)
 	if err != nil {
-		log.Println("Failed to register a consumer")
-		return err
+		log.Println("Failed to register a consumer: %w", err)
+		return &errors.InternalError{}
 	}
 
 	corrId := utils.RandString(16)
@@ -159,8 +179,8 @@ func (c *userClient) Persist(user *models.User) error {
 
 	userBytes, err := json.Marshal(user)
 	if err != nil {
-		log.Println("Failed to marshal the user")
-		return err
+		log.Printf("[%s] Failed to marshal the user", corrId)
+		return &errors.InternalError{}
 	}
 
 	err = c.ch.PublishWithContext(
@@ -174,12 +194,13 @@ func (c *userClient) Persist(user *models.User) error {
 	)
 	if err != nil {
 		errmsg := fmt.Sprintf(
-			"Failed to publish request to persist '%s': %w",
+			"[%s] Failed to publish request to persist '%s': %w",
+			corrId,
 			user.Username,
 			err,
 		)
 		log.Println(errmsg)
-		return fmt.Errorf(errmsg)
+		return &errors.InternalError{}
 	}
 
 	// TODO: Fix waiting indifinitely for a response
@@ -190,21 +211,29 @@ func (c *userClient) Persist(user *models.User) error {
 
 		var rpcResp dtos.RPCResponse
 		if err := json.Unmarshal(d.Body, &rpcResp); err != nil {
-			log.Printf("Failed to unmarshal RPC response: %w\n", err)
-			return fmt.Errorf(
-				"Failed to unmarshal RPC response: %w", err,
+			errmsg := fmt.Sprintf(
+				"[%s] Failed to unmarshal RPC response: %w\n",
+				corrId,
+				err,
 			)
+			log.Println(errmsg)
+			return &errors.InternalError{}
 		}
 
 		if rpcResp.Error != nil {
-			return fmt.Errorf(
-				"Failed to persist the user: %s",
+			errmsg := fmt.Sprintf(
+				"[%s] Failed to persist the user: %s",
+				corrId,
 				rpcResp.Error.Message,
 			)
+			log.Println(errmsg)
+			return err
 		}
 
 		return nil
 	}
 
-	return fmt.Errorf("Failed to persist the user")
+	errmsg := fmt.Sprintf("[%s] Failed to persist the user", corrId)
+	log.Println(errmsg)
+	return &errors.InternalError{}
 }

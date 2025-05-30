@@ -6,12 +6,13 @@ import (
 
 	"fmt"
 	"time"
+	"errors"
 
 	"igaku/auth-service/clients"
 	"igaku/auth-service/dtos"
-	"igaku/auth-service/errors"
 	"igaku/commons/models"
 	"igaku/commons/utils"
+	igakuErrors "igaku/auth-service/errors"
 )
 
 type AuthService interface {
@@ -52,7 +53,11 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 	usr, err := s.userClient.FindByUsername(creds.Username)
 
 	if err != nil {
-		return "", &errors.InvalidUsernameOrPasswordError{}
+		if errors.Is(err, &igakuErrors.InternalError{}) {
+			return "", err
+		} else {
+			return "", &igakuErrors.InvalidUsernameOrPasswordError{}
+		}
 	}
 
 	err = bcrypt.CompareHashAndPassword(
@@ -60,7 +65,7 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 		[]byte(creds.Password),
 	)
 	if err != nil {
-		return "", &errors.InvalidUsernameOrPasswordError{}
+		return "", &igakuErrors.InvalidUsernameOrPasswordError{}
 	}
 
 	expirationTime := time.Now().Add(s.tokenDuration)
@@ -75,7 +80,11 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 	_, err := s.userClient.FindByUsername(fields.Username)
 
 	if err == nil {
-		return "", &errors.UsernameAlreadyTakenError{}
+		if errors.Is(err, &igakuErrors.InternalError{}) {
+			return "", err
+		} else {
+			return "", &igakuErrors.UsernameAlreadyTakenError{}
+		}
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(fields.Password), 2)
