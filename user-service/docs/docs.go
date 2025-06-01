@@ -35,26 +35,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/hello": {
-            "get": {
-                "description": "Returns a static hello world message as a JSON object.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Hello"
-                ],
-                "summary": "Show a hello message",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/dtos.HelloOutput"
-                        }
-                    }
-                }
-            }
-        },
         "/user/list": {
             "get": {
                 "security": [
@@ -242,15 +222,6 @@ const docTemplate = `{
                 "error": {
                     "type": "string",
                     "example": "Specific error message"
-                }
-            }
-        },
-        "dtos.HelloOutput": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string",
-                    "example": "Hello world!"
                 }
             }
         },

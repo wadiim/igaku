@@ -36,12 +36,6 @@ definitions:
         example: Specific error message
         type: string
     type: object
-  dtos.HelloOutput:
-    properties:
-      message:
-        example: Hello world!
-        type: string
-    type: object
   dtos.PaginatedResponse:
     properties:
       data: {}
@@ -73,19 +67,6 @@ paths:
       summary: Check health
       tags:
       - Health
-  /user/hello:
-    get:
-      description: Returns a static hello world message as a JSON object.
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dtos.HelloOutput'
-      summary: Show a hello message
-      tags:
-      - Hello
   /user/list:
     get:
       description: Retrieves a paginated list of all user accounts. Requires Admin

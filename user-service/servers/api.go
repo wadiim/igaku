@@ -37,9 +37,6 @@ func NewApiServer(accService services.AccountService) *ApiServer {
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
-	helloController := controllers.NewHelloController()
-	helloController.RegisterRoutes(router)
-
 	accController := controllers.NewAccountController(accService)
 	accController.RegisterRoutes(router)
 
