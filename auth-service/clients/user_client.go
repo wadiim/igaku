@@ -2,15 +2,16 @@ package clients
 
 import (
 	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/google/uuid"
 
 	"context"
 	"encoding/json"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"igaku/auth-service/errors"
-	"igaku/auth-service/utils"
 	"igaku/commons/dtos"
 	"igaku/commons/models"
 )
@@ -22,9 +23,16 @@ type UserClient interface {
 }
 
 type userClient struct {
-	url	string
-	conn	*amqp.Connection
-	ch	*amqp.Channel
+	url		string
+	conn		*amqp.Connection
+	ch		*amqp.Channel
+	replyMsgs	<-chan amqp.Delivery
+	pendingCalls	sync.Map
+}
+
+type responseChan struct {
+	ch	chan []byte
+	err	chan error
 }
 
 func NewUserClient(url string) (UserClient, error) {
@@ -40,200 +48,173 @@ func NewUserClient(url string) (UserClient, error) {
 		return nil, err
 	}
 
-	return &userClient{url: url, conn: conn, ch: ch}, nil
-}
-
-func (s *userClient) Shutdown() {
-	if s.ch != nil { s.ch.Close() }
-	if s.conn != nil { s.conn.Close() }
-}
-
-// TODO: Use custom errors
-func (c *userClient) FindByUsername(username string) (*models.User, error) {
-	queueName := "find_by_username"
-
-        q, err := c.ch.QueueDeclare("", false, false, true, false, nil)
-	if err != nil {
-		log.Printf("Failed to create a queue: %w", err)
-		return nil, &errors.InternalError{}
-	}
-
-	msgs, err := c.ch.Consume(
-		q.Name, "",
-		true, false, false, false, nil,
+	replyMsgs, err := ch.Consume(
+		"amq.rabbitmq.reply-to", "",
+		true, true, false, false, nil,
 	)
 	if err != nil {
-		log.Printf("Failed to register a consumer: %w", err)
-		return nil, &errors.InternalError{}
-	}
-
-	corrId := utils.RandString(16)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
-	defer cancel()
-
-	err = c.ch.PublishWithContext(
-		ctx, "", queueName, false, false,
-		amqp.Publishing{
-			ContentType:	"text/plain",
-			CorrelationId:	corrId,
-			ReplyTo:	q.Name,
-			Body:		[]byte(username),
-		},
-	)
-	if err != nil {
-		errmsg := fmt.Sprintf(
-			"[%s] Failed to publish request for username '%s': %w",
-			corrId,
-			username,
-			err,
+		ch.Close()
+		conn.Close()
+		return nil, fmt.Errorf(
+			"Failed to consume reply-to queue: %w", err,
 		)
-		log.Println(errmsg)
-		return nil, &errors.InternalError{}
 	}
 
-	// TODO: Fix waiting indifinitely for a response
-	for d := range msgs {
-		if corrId != d.CorrelationId {
-			continue
-		}
+	client := &userClient{
+		url: url, conn: conn, ch: ch, replyMsgs: replyMsgs,
+	}
 
-		var rpcResp dtos.RPCResponse
-		if err := json.Unmarshal(d.Body, &rpcResp); err != nil {
-			errmsg := fmt.Sprintf(
-				"[%s] Failed to unmarshal RPC response: %w",
-				corrId,
-				err,
-			)
-			log.Println(errmsg)
-			return nil, &errors.InternalError{}
-		}
+	go client.listen()
 
-		if rpcResp.Error != nil {
-			if rpcResp.Error.Code == "NOT_FOUND" {
-				errmsg := fmt.Sprintf(
-					"[%s] User not found: %s",
-					corrId,
-					rpcResp.Error.Message,
-				)
-				log.Println(errmsg)
-				return nil, fmt.Errorf(errmsg)
-			} else if rpcResp.Error.Code == "INTERNAL" {
-				errmsg := fmt.Sprintf(
-					"[%s] User service internal error: %s",
-					corrId,
-					rpcResp.Error.Message,
-				)
-				log.Println(errmsg)
-				return nil, &errors.InternalError{}
-			} else {
-				errmsg := fmt.Sprintf(
-					"[%s] Internal error: %s",
-					corrId,
-					rpcResp.Error.Message,
-				)
-				log.Println(errmsg)
-				return nil, &errors.InternalError{}
+	return client, nil
+}
+
+func (c *userClient) listen() {
+	for msg := range c.replyMsgs {
+		if val, ok := c.pendingCalls.Load(msg.CorrelationId); ok {
+			res := val.(*responseChan)
+			select {
+			case res.ch <- msg.Body:
+			default:
 			}
+			c.pendingCalls.Delete(msg.CorrelationId)
 		}
-
-		var user models.User
-		if err := json.Unmarshal(rpcResp.Data, &user); err != nil {
-				errmsg := fmt.Sprintf(
-					"[%s] Internal error: %w", corrId, err,
-				)
-				log.Println(errmsg)
-			return nil, &errors.InternalError{}
-		}
-
-		return &user, nil
 	}
+}
 
-	errmsg := fmt.Sprintf("[%s] Failed to fetch the user", corrId)
-	log.Println(errmsg)
-	return nil, &errors.InternalError{}
+func (c *userClient) Shutdown() {
+	if c.ch != nil { c.ch.Close() }
+	if c.conn != nil { c.conn.Close() }
 }
 
 // TODO: Use custom errors
-// TODO: Consider modifying this function so that it takes only username and
-// password as parameters.
-func (c *userClient) Persist(user *models.User) error {
-	queueName := "persist"
-
-        q, err := c.ch.QueueDeclare("", false, false, true, false, nil)
-	if err != nil {
-		log.Println("Failed to create a `persistReqQueue`: %w", err)
-		return &errors.InternalError{}
+func (c *userClient) call(routingKey string, body []byte) ([]byte, error) {
+	corrID := uuid.New().String()
+	res := &responseChan{
+		ch:	make(chan []byte, 1),
+		err:	make(chan error, 1),
 	}
 
-	msgs, err := c.ch.Consume(q.Name, "", true, false, false, false, nil)
-	if err != nil {
-		log.Println("Failed to register a consumer: %w", err)
-		return &errors.InternalError{}
-	}
+	c.pendingCalls.Store(corrID, res)
 
-	corrId := utils.RandString(16)
-
-	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
-	defer cancel()
-
-	userBytes, err := json.Marshal(user)
-	if err != nil {
-		log.Printf("[%s] Failed to marshal the user", corrId)
-		return &errors.InternalError{}
-	}
-
-	err = c.ch.PublishWithContext(
-		ctx, "", queueName, false, false,
+	err := c.ch.Publish(
+		"",
+		routingKey,
+		false,
+		false,
 		amqp.Publishing{
-			ContentType:	"text/json",
-			CorrelationId:	corrId,
-			ReplyTo:	q.Name,
-			Body:		userBytes,
+			ContentType:	"application/json",
+			CorrelationId:	corrID,
+			ReplyTo:	"amq.rabbitmq.reply-to",
+			Body:		body,
 		},
 	)
 	if err != nil {
-		errmsg := fmt.Sprintf(
-			"[%s] Failed to publish request to persist '%s': %w",
-			corrId,
-			user.Username,
-			err,
-		)
-		log.Println(errmsg)
-		return &errors.InternalError{}
+		c.pendingCalls.Delete(corrID)
+		return nil, fmt.Errorf("Failed to publish message: %w", err)
 	}
 
-	// TODO: Fix waiting indifinitely for a response
-	for d := range msgs {
-		if corrId != d.CorrelationId {
-			continue
-		}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
 
-		var rpcResp dtos.RPCResponse
-		if err := json.Unmarshal(d.Body, &rpcResp); err != nil {
+	select {
+	case reply := <-res.ch:
+		return reply, nil
+	case <-ctx.Done():
+		c.pendingCalls.Delete(corrID)
+		return nil, fmt.Errorf("Timeout waiting for RPC response")
+	}
+}
+
+func (c *userClient) FindByUsername(username string) (*models.User, error) {
+	reply, err := c.call("find_by_username", []byte(username))
+	if err != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to publish request for username '%s': %w",
+			username, err,
+		)
+		log.Println(errmsg)
+		return nil, &errors.InternalError{}
+	}
+
+	var rpcResp dtos.RPCResponse
+	if err := json.Unmarshal(reply, &rpcResp); err != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to unmarshal RPC response: %w", err,
+		)
+		log.Println(errmsg)
+		return nil, &errors.InternalError{}
+	}
+
+	if rpcResp.Error != nil {
+		if rpcResp.Error.Code == "NOT_FOUND" {
 			errmsg := fmt.Sprintf(
-				"[%s] Failed to unmarshal RPC response: %w\n",
-				corrId,
-				err,
+				"User not found: %s", rpcResp.Error.Message,
 			)
 			log.Println(errmsg)
-			return &errors.InternalError{}
-		}
-
-		if rpcResp.Error != nil {
+			return nil, fmt.Errorf(errmsg)
+		} else if rpcResp.Error.Code == "INTERNAL" {
 			errmsg := fmt.Sprintf(
-				"[%s] Failed to persist the user: %s",
-				corrId,
+				"User service internal error: %s",
 				rpcResp.Error.Message,
 			)
 			log.Println(errmsg)
-			return err
+			return nil, &errors.InternalError{}
+		} else {
+			errmsg := fmt.Sprintf(
+				"Internal error: %s", rpcResp.Error.Message,
+			)
+			log.Println(errmsg)
+			return nil, &errors.InternalError{}
 		}
-
-		return nil
 	}
 
-	errmsg := fmt.Sprintf("[%s] Failed to persist the user", corrId)
-	log.Println(errmsg)
-	return &errors.InternalError{}
+	var user models.User
+	if err := json.Unmarshal(rpcResp.Data, &user); err != nil {
+		errmsg := fmt.Sprintf("Internal error: %w", err)
+		log.Println(errmsg)
+		return nil, &errors.InternalError{}
+	}
+
+	return &user, nil
+}
+
+// TODO: Consider modifying this function so that it takes only username and
+// password hash as parameters.
+func (c *userClient) Persist(user *models.User) error {
+	userBytes, err := json.Marshal(user)
+	if err != nil {
+		log.Printf("Failed to marshal the user: %w", err)
+		return &errors.InternalError{}
+	}
+
+	reply, err := c.call("persist", userBytes)
+	if err != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to publish request to persist '%s': %w",
+			user.Username, err,
+		)
+		log.Println(errmsg)
+		return &errors.InternalError{}
+	}
+
+	var rpcResp dtos.RPCResponse
+	if err := json.Unmarshal(reply, &rpcResp); err != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to unmarshal RPC response: %w\n", err,
+		)
+		log.Println(errmsg)
+		return &errors.InternalError{}
+	}
+
+	if rpcResp.Error != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to persist the user: %s",
+			rpcResp.Error.Message,
+		)
+		log.Println(errmsg)
+		return err
+	}
+
+	return nil
 }
