@@ -1,4 +1,4 @@
 .env
 *.log
 tmp/
-report/
+reports/
