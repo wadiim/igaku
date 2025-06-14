@@ -1,12 +1,7 @@
 package main
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
-
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -17,7 +12,6 @@ import (
 	"igaku/user-service/servers"
 	"igaku/user-service/services"
 	"igaku/user-service/utils"
-	commonsUtils "igaku/commons/utils"
 )
 
 // @title		Igaku User API
@@ -29,60 +23,9 @@ import (
 // @name Authorization
 
 func main() {
-	dsn := fmt.Sprintf(
-		"host=%s "+
-		"user=%s "+
-		"password=%s "+
-		"dbname=%s "+
-		"port=5432 "+
-		"sslmode=disable "+
-		"TimeZone=Europe/Warsaw",
-		os.Getenv("POSTGRES_HOST"),
-		os.Getenv("POSTGRES_USER"),
-		os.Getenv("POSTGRES_PASSWORD"),
-		os.Getenv("POSTGRES_DB"),
-	)
-
-	prefixedWriter := &utils.PrefixedWriter{
-		Out:	os.Stdout,
-		Prefix:	"[GORM] ",
-	}
-
-	prefixedLogger := utils.PrefixedLogger{
-		Interface: logger.New(
-			log.New(prefixedWriter, "", log.LstdFlags),
-			logger.Config{
-				LogLevel:			logger.Info,
-				IgnoreRecordNotFoundError:	false,
-				Colorful:			false,
-			},
-		),
-		Prefix: "[SQL] ",
-	}
-
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: prefixedLogger,
-	})
+	db, err := utils.InitDatabase()
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
-
-	sqlDB, err := db.DB()
-	if err != nil {
-		log.Fatalf("Failed to get the database object: %v", err)
-	}
-	sqlDB.SetMaxIdleConns(50)
-	sqlDB.SetMaxOpenConns(100)
-	sqlDB.SetConnMaxLifetime(time.Hour)
-
-	err = utils.MigrateSchema(db)
-	if err != nil {
-		log.Fatalf("Failed to create database structures: %v", err)
-	}
-
-	err = commonsUtils.SeedDatabase(db, "./user-service/resources")
-	if err != nil {
-		log.Fatalf("Failed to seed database: %v", err)
+		log.Fatalf("%v", err)
 	}
 
 	userRepo := repositories.NewGormUserRepository(db)
