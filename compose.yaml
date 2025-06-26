@@ -279,9 +279,11 @@ networks:
     driver: bridge
 
 volumes:
+  go-mod-cache:
+    name: igaku-global-go-mod-cache
+  go-build-cache:
+    name: igaku-global-go-build-cache
   rabbitmq_data:
   rabbitmq_logs:
-  go-mod-cache:
-  go-build-cache:
   esdata:
   kibana_data:
