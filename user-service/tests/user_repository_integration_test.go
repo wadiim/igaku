@@ -208,10 +208,27 @@ func TestGormUserRepository(t *testing.T) {
 			t, int64(18), count,
 		)
 
-		// TODO: When `Persist()` will be implemented, test if
-		// `CountAll()` still returns correct results when the count
-		// changes, since currently `return 18, nil` would be enough
-		// to pass.
+		id, err := uuid.Parse("263bd7aa-46d1-4253-9232-fba5d68e161c")
+		require.NoError(t, err)
+
+		user := models.User{
+			ID: id,
+			Username: "unique",
+			Email: "unique@mail.com",
+			Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+			Role: models.Patient,
+		}
+		err = repo.Persist(&user)
+		require.NoError(t, err)
+
+		count, err = repo.CountAll()
+
+		assert.NoError(
+			t, err, "Expected no error counting users",
+		)
+		assert.Equal(
+			t, int64(19), count,
+		)
 	})
 
 	t.Run("Persist_InvalidUser", func(t *testing.T) {

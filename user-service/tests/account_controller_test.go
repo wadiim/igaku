@@ -39,7 +39,6 @@ func setupAccountRouter(t *testing.T, mockRepo *mocks.UserRepository) (*httptest
 	return rec, router
 }
 
-// TODO: Move to auth service or commons
 func genAdminToken(t *testing.T) string {
 	admin := &models.User{
 		ID: uuid.New(),
