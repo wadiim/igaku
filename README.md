@@ -4,13 +4,6 @@
 
 ```console
 $ ln -s .env.example .env
-```
-
-> [!WARNING]
-> Most of the values in the `.env` file can remain unchanged but the SMTP
-> (Simple Mail Transfer Protocol) credentials must be set.
-
-```console
 $ docker compose up
 ```
 
@@ -21,8 +14,17 @@ Visit:
 ## Service Replication
 
 ```console
-$ docker compose up --scale auth=2 --scale user=2 --scale mail=2
+$ docker compose up --scale auth=2 --scale user=2
 ```
+
+## Enabling the `mail` service
+
+By default, the `mail` service is disabled in order to minimize the number of
+steps needed to run the project for the first time. Enabling the `mail`
+service requires setting the `MAIL_ENABLED` variable in the `.env` file to
+a non-empty value. Additionally, the `SMTP_*` variables must be set to
+values appropriate to the SMTP (Simple Mail Transfer Protocol) server being
+used.
 
 ## Starting the [ELK](https://www.elastic.co/elastic-stack/) stack
 

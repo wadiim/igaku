@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"igaku/commons/dtos"
@@ -23,26 +24,35 @@ type mailClient struct {
 	ch	*amqp.Channel
 }
 
+type idleMailClient struct {}
+
 func NewMailClient(url string) (MailClient, error) {
-	conn, err := amqp.Dial(url)
-	if err != nil {
-		log.Println("Failed to connect to RabbitMQ")
-		return nil, err
-	}
+	is_mail_enabled := os.Getenv("MAIL_ENABLED") != ""
+	if is_mail_enabled {
+		conn, err := amqp.Dial(url)
+		if err != nil {
+			log.Println("Failed to connect to RabbitMQ")
+			return nil, err
+		}
 
-	ch, err := conn.Channel()
-	if err != nil {
-		log.Println("Failed to create a channel")
-		return nil, err
-	}
+		ch, err := conn.Channel()
+		if err != nil {
+			log.Println("Failed to create a channel")
+			return nil, err
+		}
 
-	return &mailClient{url: url, conn: conn, ch: ch}, nil
+		return &mailClient{url: url, conn: conn, ch: ch}, nil
+	} else {
+		return &idleMailClient{}, nil
+	}
 }
 
 func (s *mailClient) Shutdown() {
 	if s.ch != nil { s.ch.Close() }
 	if s.conn != nil { s.conn.Close() }
 }
+
+func (s *idleMailClient) Shutdown() {}
 
 // TODO: Use custom errors
 func (c *mailClient) SendMail(to []string, msg []byte) error {
@@ -83,5 +93,9 @@ func (c *mailClient) SendMail(to []string, msg []byte) error {
 		return fmt.Errorf(errmsg)
 	}
 
+	return nil
+}
+
+func (c *idleMailClient) SendMail(_ []string, _ []byte) error {
 	return nil
 }

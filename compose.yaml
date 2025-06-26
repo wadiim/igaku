@@ -6,12 +6,17 @@ services:
       - 4000:4000
     volumes:
       - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./config/nginx/conf.d/${NGINX_CONFIG_PROFILE:-default}:/etc/nginx/conf.d:ro
     networks:
       - igaku-network
     depends_on:
-      - auth
-      - mail
-      - user
+      auth:
+        condition: service_started
+      mail:
+        condition: service_started
+        required: false
+      user:
+        condition: service_started
 
   rabbitmq:
     image: rabbitmq:management
@@ -202,6 +207,8 @@ services:
       options:
         gelf-address: "udp://localhost:12201"
         tag: "igaku-mail-service"
+    profiles:
+      - mail
 
   encounter:
     container_name: igaku-encounter
@@ -268,9 +275,13 @@ services:
     env_file:
       - config/swagger/env
     depends_on:
-      - auth
-      - mail
-      - user
+      auth:
+        condition: service_started
+      mail:
+        condition: service_started
+        required: false
+      user:
+        condition: service_started
     networks:
       - igaku-network
 
