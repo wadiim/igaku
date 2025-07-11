@@ -5,10 +5,12 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
 
+	commonsErrors "igaku/commons/errors"
 	"igaku/commons/dtos"
 	"igaku/commons/models"
 	"igaku/user-service/services"
@@ -172,8 +174,15 @@ func (s *RabbitMQServer) StartPersistListener() error {
 			}
 
 			if err = s.service.Persist(&user); err != nil {
+				code := "DATABASE_ERROR"
+
+				var duplicatedEmailErr *commonsErrors.DuplicatedEmailError
+				if errors.As(err, &duplicatedEmailErr) {
+					code = "DUPLICATED_EMAIL"
+				}
+
 				resp.Error = &dtos.RPCError{
-					Code: "DATABASE_ERROR",
+					Code:    code,
 					Message: err.Error(),
 				}
 				goto send_response

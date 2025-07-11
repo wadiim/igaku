@@ -72,7 +72,6 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 	return utils.GenerateJWTToken(usr, time.Now(), expirationTime)
 }
 
-// TODO: Check for email duplication.
 func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 	// TODO: Consider creating a UserRepository's method designed
 	// specifically to check if a user with the given Username exists,
@@ -96,6 +95,9 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 		Role: models.Patient,
 	}
 	err = s.userClient.Persist(&usr)
+	if err != nil {
+		return "", err
+	}
 
 	expirationTime := time.Now().Add(s.tokenDuration)
 	token, err := utils.GenerateJWTToken(&usr, time.Now(), expirationTime)

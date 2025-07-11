@@ -76,18 +76,22 @@ func (r *gormUserRepository) CountAll() (int64, error) {
 	return count, nil
 }
 
-func (r *gormUserRepository) Persist(user *models.User) (error) {
+func (r *gormUserRepository) Persist(user *models.User) error {
 	err := r.db.Create(user).Error
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
 			if strings.Contains(err.Error(), "users_pkey") {
+				// TODO: Use `DuplicatedIDError`
 				return &errors.InvalidUserError{
 					"Duplicated ID",
 				}
 			} else if strings.Contains(err.Error(), "users_username") {
+				// TODO: Use `DuplicatedUsernameError`
 				return &errors.InvalidUserError{
 					"Duplicated username",
 				}
+			} else if strings.Contains(err.Error(), "idx_users_email") {
+				return &commonsErrors.DuplicatedEmailError{}
 			}
 		}
 		return err

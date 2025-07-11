@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+        commonsErrors "igaku/commons/errors"
 	"igaku/auth-service/errors"
 	"igaku/commons/dtos"
 	"igaku/commons/models"
@@ -179,8 +180,6 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 	return &user, nil
 }
 
-// TODO: Consider modifying this function so that it takes only username and
-// password hash as parameters.
 func (c *userClient) Persist(user *models.User) error {
 	userBytes, err := json.Marshal(user)
 	if err != nil {
@@ -208,12 +207,24 @@ func (c *userClient) Persist(user *models.User) error {
 	}
 
 	if rpcResp.Error != nil {
-		errmsg := fmt.Sprintf(
-			"Failed to persist the user: %s",
-			rpcResp.Error.Message,
-		)
-		log.Println(errmsg)
-		return err
+		if rpcResp.Error.Code == "DUPLICATED_EMAIL" {
+			errmsg := fmt.Sprintf(
+				"Failed to persist the user: %s",
+				rpcResp.Error.Message,
+			)
+			log.Println(errmsg)
+			return &commonsErrors.DuplicatedEmailError{
+				Message: fmt.Sprintf("%s email already taken",
+					user.Email),
+			}
+		} else {
+			errmsg := fmt.Sprintf(
+				"Failed to persist the user: %s",
+				rpcResp.Error.Message,
+			)
+			log.Println(errmsg)
+			return &errors.InternalError{}
+		}
 	}
 
 	return nil

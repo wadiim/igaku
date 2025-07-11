@@ -119,7 +119,7 @@ const docTemplate = `{
                         }
                     },
                     "409": {
-                        "description": "Conflict - Username already taken",
+                        "description": "Conflict - Username or Email already taken",
                         "schema": {
                             "$ref": "#/definitions/dtos.ErrorResponse"
                         }

@@ -10,6 +10,7 @@ import (
 	"igaku/auth-service/dtos"
 	"igaku/auth-service/services"
 	commonsDtos "igaku/commons/dtos"
+        commonsErrors "igaku/commons/errors"
 	igakuErrors "igaku/auth-service/errors"
 )
 
@@ -67,7 +68,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 // @Produce	plain
 // @Param	fields body dtos.RegistrationFields true "User registration fields (username and password)"
 // @Success	200 {string} string "Successfully registered, returns JWT token"
-// @Failure	409 {object} dtos.ErrorResponse "Conflict - Username already taken"
+// @Failure	409 {object} dtos.ErrorResponse "Conflict - Username or Email already taken"
 // @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to process login (e.g., database error)"
 // @Router	/auth/register [post]
 func (ctrl *AuthController) Register(c *gin.Context) {
@@ -81,7 +82,14 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 
 	token, err := ctrl.service.Register(fields)
 	if err != nil {
+                var dupEmailErr *commonsErrors.DuplicatedEmailError
 		if errors.Is(err, &igakuErrors.UsernameAlreadyTakenError{}) {
+			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
+				Message: fmt.Sprintf("Failed to register: %s",
+					err,
+				),
+			})
+		} else if errors.As(err, &dupEmailErr) {
 			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
 				Message: fmt.Sprintf("Failed to register: %s",
 					err,

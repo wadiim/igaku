@@ -13,6 +13,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"fmt"
 
 	"igaku/auth-service/clients"
 	"igaku/commons/models"
@@ -128,6 +129,34 @@ func TestUserClient(t *testing.T) {
 		assert.Equal(
 			t, user.Role, models.Patient,
 			"Expected user role to match",
+		)
+	})
+
+	t.Run("TestPersist_DuplicatedEmail", func(t *testing.T) {
+		url := "amqp://rabbit:tibbar@localhost:5672/"
+
+		userClient, err := clients.NewUserClient(url)
+		require.NoError(t, err)
+		defer userClient.Shutdown()
+
+		id, err := uuid.NewRandom()
+		require.NoError(t, err)
+		username := "unique"
+		email := "jdoe@mail.com" // Non-unique
+		password := "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6"
+
+		user := models.User{
+			ID: id,
+			Username: username,
+			Email: email,
+			Password: password,
+			Role: models.Patient,
+		}
+
+		err = userClient.Persist(&user)
+		assert.EqualError(
+			t, err,
+			fmt.Sprintf("%s email already taken", user.Email),
 		)
 	})
 }
