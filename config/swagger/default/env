@@ -1,0 +1,3 @@
+URLS=[ { url: 'http://localhost:4000/auth/swagger/doc.json', name: 'Auth Service' }, { url: 'http://localhost:4000/user/swagger/doc.json', name: 'User Service' } ]
+
+# vim:syntax=sh

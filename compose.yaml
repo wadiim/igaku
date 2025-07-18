@@ -273,7 +273,7 @@ services:
     ports:
       - 8090:8080
     env_file:
-      - config/swagger/env
+      - config/swagger/${SWAGGER_CONFIG_PROFILE:-default}/env
     depends_on:
       auth:
         condition: service_started
