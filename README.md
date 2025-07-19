@@ -63,3 +63,7 @@ $ ./tools/run-load-tests.sh
 ```console
 $ ./tools/gen-docs.sh
 ```
+
+## License
+
+[MIT](https://github.com/wadiim/igaku/blob/main/LICENSE)
