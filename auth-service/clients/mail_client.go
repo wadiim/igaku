@@ -5,11 +5,11 @@ import (
 
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"time"
 
+	commonsErrors "igaku/commons/errors"
 	"igaku/commons/dtos"
 )
 
@@ -31,14 +31,17 @@ func NewMailClient(url string) (MailClient, error) {
 	if is_mail_enabled {
 		conn, err := amqp.Dial(url)
 		if err != nil {
-			log.Println("Failed to connect to RabbitMQ")
-			return nil, err
+			log.Println("[RabbitMQ] Failed to connect: %w", err)
+			return nil, &commonsErrors.MessageBrokerError{}
 		}
 
 		ch, err := conn.Channel()
 		if err != nil {
-			log.Println("Failed to create a channel")
-			return nil, err
+			log.Println(
+				"[RabbitMQ] Failed to create a channel: %w",
+				err,
+			)
+			return nil, &commonsErrors.MessageBrokerError{}
 		}
 
 		return &mailClient{url: url, conn: conn, ch: ch}, nil
@@ -54,7 +57,6 @@ func (s *mailClient) Shutdown() {
 
 func (s *idleMailClient) Shutdown() {}
 
-// TODO: Use custom errors
 func (c *mailClient) SendMail(to []string, msg []byte) error {
 	exchangeName := "mail"
 
@@ -62,10 +64,13 @@ func (c *mailClient) SendMail(to []string, msg []byte) error {
 		exchangeName, "fanout", true, false, false, false, nil,
 	)
 	if err != nil {
-		return fmt.Errorf(
-			"Failed to declare an exchange '%s': %w",
+		log.Printf(
+			"[RabbitMQ] Failed to declare an exchange '%s': %w",
 			exchangeName, err,
 		)
+		return &commonsErrors.MailSendingError{
+			Err: &commonsErrors.MessageBrokerError{},
+		}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
@@ -75,7 +80,7 @@ func (c *mailClient) SendMail(to []string, msg []byte) error {
 	body, err := json.Marshal(sendMailReq)
 	if err != nil {
 		log.Println("Failed to marshal the `SendMailRequest`")
-		return err
+		return &commonsErrors.MailSendingError{}
 	}
 
 	err = c.ch.PublishWithContext(
@@ -86,11 +91,13 @@ func (c *mailClient) SendMail(to []string, msg []byte) error {
 		},
 	)
 	if err != nil {
-		errmsg := fmt.Sprintf(
-			"Failed to publish request to send mail: %w", err,
+		log.Printf(
+			"[RabbitMQ] Failed to publish request to `mail` queue: %w",
+			err,
 		)
-		log.Println(errmsg)
-		return fmt.Errorf(errmsg)
+		return &commonsErrors.MailSendingError{
+			Err: &commonsErrors.MessageBrokerError{},
+		}
 	}
 
 	return nil

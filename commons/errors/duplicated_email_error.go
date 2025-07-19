@@ -1,10 +1,14 @@
 package errors
 
-type DuplicatedEmailError struct {
-	Message string
+import (
+	"fmt"
+)
+
+type EmailAlreadyTakenError struct {
+	Email string
 }
 
-func (m *DuplicatedEmailError) Error() string {
-	return m.Message
+func (m *EmailAlreadyTakenError) Error() string {
+	return fmt.Sprintf("Email '%s' already taken", m.Email)
 }
 

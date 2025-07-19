@@ -33,11 +33,11 @@ func main() {
 
 	amqpURI := os.Getenv("RABBITMQ_URL")
 	rbServer, err := servers.NewRabbitMQServer(amqpURI, accService)
-	failOnError(err, "Failed to initialize RabbitMQ server")
+	failOnError(err, "[RabbitMQ] Failed to initialize server")
 	defer rbServer.Shutdown()
 
 	err = rbServer.Start()
-	failOnError(err, "Failed to start RabbitMQ listeners")
+	failOnError(err, "[RabbitMQ] Failed to start listeners")
 
 	apiServer := servers.NewApiServer(accService)
 	apiServer.Start()

@@ -6,7 +6,6 @@ import (
 
 	"context"
 	"errors"
-	"fmt"
 	"log"
 	"time"
 
@@ -28,13 +27,15 @@ func NewRabbitMQServer(
 ) (*RabbitMQServer, error) {
 	conn, err := amqp.Dial(amqpURI)
 	if err != nil {
-		return nil, fmt.Errorf("Failed to connect to RabbitMQ: %w", err)
+		log.Printf("[RabbitMQ] Failed to connect: %w", err)
+		return nil, &commonsErrors.MessageBrokerError{}
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
 		conn.Close()
-		return nil, fmt.Errorf("Failed to open a channel: %w", err)
+		log.Printf("[RabbitMQ] Failed to open a channel: %w", err)
+		return nil, &commonsErrors.MessageBrokerError{}
 	}
 
 	return &RabbitMQServer{conn: conn, ch: ch, service: service}, nil
@@ -42,10 +43,22 @@ func NewRabbitMQServer(
 
 func (s *RabbitMQServer) Start() error {
 	err := s.StartFindByUsernameListener()
-	if err != nil { return err }
+	if err != nil {
+		log.Printf(
+			"[RabbitMQ] Failed to start `FindByUsernameListener`: %w",
+			err,
+		)
+		return &commonsErrors.MessageBrokerError{}
+	}
 
 	err = s.StartPersistListener()
-	if err != nil { return err }
+	if err != nil {
+		log.Printf(
+			"[RabbitMQ] Failed to start `PersistListener`: %w",
+			err,
+		)
+		return &commonsErrors.MessageBrokerError{}
+	}
 
 	return nil
 }
@@ -60,17 +73,23 @@ func (s *RabbitMQServer) StartFindByUsernameListener() error {
 
 	q, err := s.ch.QueueDeclare(queueName, false, false, false, false, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to declare a queue '%s': %w", queueName, err)
+		log.Printf(
+			"[RabbitMQ] Failed to declare a queue '%s': %w",
+			queueName, err,
+		)
+		return &commonsErrors.MessageBrokerError{}
 	}
 
 	err = s.ch.Qos(1, 0, false)
 	if err != nil {
-		return fmt.Errorf("Failed to set QoS: %w", err)
+		log.Printf("[RabbitMQ] Failed to set QoS: %w", err)
+		return &commonsErrors.MessageBrokerError{}
 	}
 
 	msgs, err := s.ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to register a consumer: %w", err)
+		log.Printf("[RabbitMQ] Failed to register a consumer: %w", err)
+		return &commonsErrors.MessageBrokerError{}
 	}
 
 	go func() {
@@ -146,17 +165,23 @@ func (s *RabbitMQServer) StartPersistListener() error {
 
 	q, err := s.ch.QueueDeclare(queueName, false, false, false, false, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to declare a queue '%s': %w", queueName, err)
+		log.Printf(
+			"[RabbitMQ] Failed to declare a queue '%s': %w",
+			queueName, err,
+		)
+		return &commonsErrors.MessageBrokerError{}
 	}
 
 	err = s.ch.Qos(1, 0, false)
 	if err != nil {
-		return fmt.Errorf("Failed to set QoS: %w", err)
+		log.Printf("[RabbitMQ] Failed to set QoS: %w", err)
+		return &commonsErrors.MessageBrokerError{}
 	}
 
 	msgs, err := s.ch.Consume(q.Name, "", false, false, false, false, nil)
 	if err != nil {
-		return fmt.Errorf("Failed to register a consumer: %w", err)
+		log.Printf("[RabbitMQ] Failed to register a consumer: %w", err)
+		return &commonsErrors.MessageBrokerError{}
 	}
 
 	go func() {
@@ -166,6 +191,10 @@ func (s *RabbitMQServer) StartPersistListener() error {
 			var resp dtos.RPCResponse
 
 			if err := json.Unmarshal(d.Body, &user); err != nil {
+				log.Printf(
+					"Failed to unmarshal an RPC request: %w",
+					err,
+				)
 				resp.Error = &dtos.RPCError{
 					Code: "INVALID_REQUEST",
 					Message: err.Error(),
@@ -176,7 +205,7 @@ func (s *RabbitMQServer) StartPersistListener() error {
 			if err = s.service.Persist(&user); err != nil {
 				code := "DATABASE_ERROR"
 
-				var duplicatedEmailErr *commonsErrors.DuplicatedEmailError
+				var duplicatedEmailErr *commonsErrors.EmailAlreadyTakenError
 				if errors.As(err, &duplicatedEmailErr) {
 					code = "DUPLICATED_EMAIL"
 				}
@@ -191,6 +220,10 @@ func (s *RabbitMQServer) StartPersistListener() error {
 		send_response:
 			respBytes, err := json.Marshal(resp)
 			if err != nil {
+				log.Printf(
+					"Failed to marshal an RPC response: %w",
+					err,
+				)
 				resp.Error = &dtos.RPCError{
 					Code: "INTERNAL",
 					Message: err.Error(),

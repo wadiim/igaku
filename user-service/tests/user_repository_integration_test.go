@@ -9,6 +9,7 @@ import (
 
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"testing"
 
@@ -251,7 +252,6 @@ func TestGormUserRepository(t *testing.T) {
 			Role: models.Patient,
 		}
 		err = repo.Persist(&user)
-		assert.Contains(t, strings.ToLower(err.Error()), "invalid user")
 		assert.Contains(t, strings.ToLower(err.Error()), "duplicated id")
 
 		id, err = uuid.Parse("358395da-2059-4768-ab9d-e41daf54af7d")
@@ -266,8 +266,13 @@ func TestGormUserRepository(t *testing.T) {
 			Role: models.Patient,
 		}
 		err = repo.Persist(&user)
-		assert.Contains(t, strings.ToLower(err.Error()), "invalid user")
-		assert.Contains(t, strings.ToLower(err.Error()), "duplicated username")
+		assert.Contains(
+			t, strings.ToLower(err.Error()),
+			fmt.Sprintf(
+				"username '%s' already taken",
+				strings.ToLower(user.Username),
+			),
+		)
 	})
 
 	t.Run("Persist_Success", func(t *testing.T) {

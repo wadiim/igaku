@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"igaku/commons/models"
+	commonsErrors "igaku/commons/errors"
 	commonsUtils "igaku/commons/utils"
 )
 
@@ -25,8 +26,12 @@ func MigrateSchema(db *gorm.DB) error {
 		&models.Setting{},
 		&models.User{},
 	)
-
-	return err
+	if err != nil {
+		log.Printf("Failed to migrate DB schema: %w", err)
+		return &commonsErrors.DatabaseError{}
+	} else {
+		return nil
+	}
 }
 
 func InitDatabase() (*gorm.DB, error) {
@@ -65,18 +70,14 @@ func InitDatabase() (*gorm.DB, error) {
 		Logger: prefixedLogger,
 	})
 	if err != nil {
-		errmsg := fmt.Errorf(
-			"Failed to connect to database: %v", err,
-		)
-		return nil, errmsg
+		log.Printf("Failed to connect to database: %w", err)
+		return nil, &commonsErrors.DatabaseError{}
 	}
 
 	sqlDB, err := db.DB()
 	if err != nil {
-		errmsg := fmt.Errorf(
-			"Failed to get the database object: %v", err,
-		)
-		return nil, errmsg
+		log.Printf("Failed to get the database object: %w", err)
+		return nil, &commonsErrors.DatabaseError{}
 	}
 	sqlDB.SetMaxIdleConns(50)
 	sqlDB.SetMaxOpenConns(100)
@@ -84,18 +85,14 @@ func InitDatabase() (*gorm.DB, error) {
 
 	err = MigrateSchema(db)
 	if err != nil {
-		errmsg := fmt.Errorf(
-			"Failed to create database structures: %v", err,
-		)
-		return nil, errmsg
+		log.Printf("Failed to create database structures: %w", err)
+		return nil, &commonsErrors.DatabaseError{}
 	}
 
 	err = commonsUtils.SeedDatabase(db, "./user-service/resources")
 	if err != nil {
-		errmsg := fmt.Errorf(
-			"Failed to seed database: %v", err,
-		)
-		return nil, errmsg
+		log.Printf("Failed to seed database: %w", err)
+		return nil, &commonsErrors.DatabaseError{}
 	}
 
 	return db, nil

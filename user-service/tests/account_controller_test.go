@@ -106,8 +106,6 @@ func TestAccountController_GetSelf_InvalidTokenFormat(t *testing.T) {
 	err = json.Unmarshal(w.Body.Bytes(), &errResponse)
 	require.NoError(t, err, "Failed to unmarshal error response body")
 
-	// TODO: Change the error message to something like
-	//       "Invalid token format".
 	expectedErrMsg := "Unauthorized"
 	assert.Equal(
 		t, expectedErrMsg, errResponse.Message,

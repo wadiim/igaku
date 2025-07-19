@@ -99,7 +99,7 @@ func TestAuthController_Login_InvalidUsername(t *testing.T) {
 	var responseBody map[string]string
 	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
 	assert.NoError(t, err)
-	assert.Equal(t, "Invalid login or password", responseBody["error"])
+	assert.Equal(t, "Invalid username or password", responseBody["error"])
 }
 
 func TestAuthController_Login_InvalidPassword(t *testing.T) {
@@ -136,7 +136,7 @@ func TestAuthController_Login_InvalidPassword(t *testing.T) {
 	var responseBody map[string]string
 	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
 	assert.NoError(t, err)
-	assert.Equal(t, "Invalid login or password", responseBody["error"])
+	assert.Equal(t, "Invalid username or password", responseBody["error"])
 }
 
 func TestAuthController_Login_Success(t *testing.T) {
@@ -264,7 +264,10 @@ func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 	var responseBody map[string]string
 	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
 	assert.NoError(t, err)
-	assert.Contains(t, responseBody["error"], "Username already taken")
+	assert.Contains(
+		t, responseBody["error"],
+		fmt.Sprintf("Username '%s' already taken", existingUser.Username),
+	)
 
 	mockUserClient.AssertExpectations(t)
 }

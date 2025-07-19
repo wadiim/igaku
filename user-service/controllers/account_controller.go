@@ -57,7 +57,7 @@ func (ctrl *AccountController) GetSelf(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, &igakuErrors.UserNotFoundError{}) {
 			c.JSON(http.StatusNotFound, commonsDtos.ErrorResponse{
-				Message: "User not found",
+				err.Error(),
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{

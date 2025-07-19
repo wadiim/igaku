@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 
 	"fmt"
+	"log"
 	"strings"
 
 	"igaku/user-service/errors"
@@ -62,7 +63,8 @@ func (r *gormUserRepository) FindAll(
 		Find(&users).
 		Error
 	if err != nil {
-		return nil, err
+		log.Println("Failed to find all users in the database")
+		return nil, &commonsErrors.DatabaseError{}
 	}
 	return users, nil
 }
@@ -71,7 +73,7 @@ func (r *gormUserRepository) CountAll() (int64, error) {
 	var count int64
 	err := r.db.Model(&models.User{}).Count(&count).Error
 	if err != nil {
-		return 0, err
+		return 0, &commonsErrors.DatabaseError{}
 	}
 	return count, nil
 }
@@ -81,17 +83,15 @@ func (r *gormUserRepository) Persist(user *models.User) error {
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key") {
 			if strings.Contains(err.Error(), "users_pkey") {
-				// TODO: Use `DuplicatedIDError`
-				return &errors.InvalidUserError{
-					"Duplicated ID",
-				}
+				return &errors.DuplicatedIDError{user.ID}
 			} else if strings.Contains(err.Error(), "users_username") {
-				// TODO: Use `DuplicatedUsernameError`
-				return &errors.InvalidUserError{
-					"Duplicated username",
+				return &commonsErrors.UsernameAlreadyTakenError{
+					user.Username,
 				}
 			} else if strings.Contains(err.Error(), "idx_users_email") {
-				return &commonsErrors.DuplicatedEmailError{}
+				return &commonsErrors.EmailAlreadyTakenError{
+					user.Email,
+				}
 			}
 		}
 		return err

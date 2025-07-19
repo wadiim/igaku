@@ -154,9 +154,12 @@ func TestUserClient(t *testing.T) {
 		}
 
 		err = userClient.Persist(&user)
-		assert.EqualError(
-			t, err,
-			fmt.Sprintf("%s email already taken", user.Email),
+		assert.Contains(
+			t, strings.ToLower(err.Error()),
+			fmt.Sprintf(
+				"email '%s' already taken",
+				strings.ToLower(user.Email),
+			),
 		)
 	})
 }

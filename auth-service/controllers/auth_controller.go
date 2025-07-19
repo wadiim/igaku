@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"errors"
-	"fmt"
 	"net/http"
 
 	"igaku/auth-service/dtos"
@@ -47,7 +46,7 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, &igakuErrors.InvalidUsernameOrPasswordError{}) {
 			c.JSON(http.StatusUnauthorized, commonsDtos.ErrorResponse{
-				Message: "Invalid login or password",
+				Message: err.Error(),
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{
@@ -82,18 +81,16 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 
 	token, err := ctrl.service.Register(fields)
 	if err != nil {
-                var dupEmailErr *commonsErrors.DuplicatedEmailError
-		if errors.Is(err, &igakuErrors.UsernameAlreadyTakenError{}) {
+		var dupUsrNameErr *commonsErrors.UsernameAlreadyTakenError
+                var dupEmailErr *commonsErrors.EmailAlreadyTakenError
+
+		if errors.As(err, &dupUsrNameErr) {
 			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
-				Message: fmt.Sprintf("Failed to register: %s",
-					err,
-				),
+				Message: err.Error(),
 			})
 		} else if errors.As(err, &dupEmailErr) {
 			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
-				Message: fmt.Sprintf("Failed to register: %s",
-					err,
-				),
+				Message: err.Error(),
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{

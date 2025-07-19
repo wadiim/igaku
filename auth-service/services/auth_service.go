@@ -4,14 +4,16 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"fmt"
-	"time"
 	"errors"
+	"fmt"
+	"log"
+	"time"
 
 	"igaku/auth-service/clients"
 	"igaku/auth-service/dtos"
 	"igaku/commons/models"
 	"igaku/commons/utils"
+	commonsErrors "igaku/commons/errors"
 	igakuErrors "igaku/auth-service/errors"
 )
 
@@ -37,9 +39,10 @@ func NewAuthService(
 		fmt.Sprintf("%dh", tokenDurationInHours),
 	)
 	if err != nil {
-		return nil, fmt.Errorf(
+		log.Printf(
 			"Failed to parse token duration: %w", err,
 		)
+		return nil, &igakuErrors.InternalError{}
 	}
 	return &authService{
 		userClient: userClient,
@@ -75,14 +78,16 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 	// TODO: Consider creating a UserRepository's method designed
 	// specifically to check if a user with the given Username exists,
-	// without fetching the user.
+	// without fetching the user. `isUsernameTaken()` maybe?
 	_, err := s.userClient.FindByUsername(fields.Username)
 
 	if err == nil {
 		if errors.Is(err, &igakuErrors.InternalError{}) {
 			return "", err
 		} else {
-			return "", &igakuErrors.UsernameAlreadyTakenError{}
+			return "", &commonsErrors.UsernameAlreadyTakenError{
+				fields.Username,
+			}
 		}
 	}
 
@@ -114,6 +119,8 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 		fmt.Sprintf("Welcome %s\r\n", usr.Username),
 	)
 
+	// Ignore email sending errors until email verification is
+	// implemented.
 	s.mailClient.SendMail(to, msg)
 
 	return token, nil

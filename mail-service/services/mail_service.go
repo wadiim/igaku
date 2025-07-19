@@ -2,8 +2,11 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"net/smtp"
 	"os"
+
+	"igaku/commons/errors"
 )
 
 type MailService interface {
@@ -31,5 +34,10 @@ func NewMailService() MailService {
 func (s *mailService) SendMail(to []string, msg []byte) error {
 	addr := fmt.Sprintf("%s:%s", s.host, s.port)
 	err := smtp.SendMail(addr, s.auth, "api", to, msg)
-	return err
+	if err != nil {
+		log.Printf("Failed to send email: %w", err)
+		return &errors.MailSendingError{}
+	} else {
+		return nil
+	}
 }

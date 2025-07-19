@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/golang-jwt/jwt/v5"
 
+	"log"
 	"os"
 	"time"
 
@@ -31,6 +32,7 @@ func GenerateJWTToken(user *models.User, issued time.Time, expires time.Time) (s
 	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).
 		SignedString(jwtSecretKey)
 	if err != nil {
+		log.Println("Failed to generate a JWT token")
 		return "", &errors.TokenGenerationError{}
 	}
 

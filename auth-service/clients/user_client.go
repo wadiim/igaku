@@ -39,14 +39,14 @@ type responseChan struct {
 func NewUserClient(url string) (UserClient, error) {
 	conn, err := amqp.Dial(url)
 	if err != nil {
-		log.Println("Failed to connect to RabbitMQ")
-		return nil, err
+		log.Printf("[RabbitMQ] Failed to connect: %w", err)
+		return nil, &commonsErrors.MessageBrokerError{}
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Println("Failed to create a channel")
-		return nil, err
+		log.Println("[RabbitMQ] Failed to create a channel: %w", err)
+		return nil, &commonsErrors.MessageBrokerError{}
 	}
 
 	replyMsgs, err := ch.Consume(
@@ -56,9 +56,11 @@ func NewUserClient(url string) (UserClient, error) {
 	if err != nil {
 		ch.Close()
 		conn.Close()
-		return nil, fmt.Errorf(
-			"Failed to consume reply-to queue: %w", err,
+		log.Printf(
+			"[RabbitMQ] Failed to consume `reply-to` queue: %w",
+			err,
 		)
+		return nil, &commonsErrors.MessageBrokerError{}
 	}
 
 	client := &userClient{
@@ -88,7 +90,6 @@ func (c *userClient) Shutdown() {
 	if c.conn != nil { c.conn.Close() }
 }
 
-// TODO: Use custom errors
 func (c *userClient) call(routingKey string, body []byte) ([]byte, error) {
 	corrID := uuid.New().String()
 	res := &responseChan{
@@ -112,7 +113,8 @@ func (c *userClient) call(routingKey string, body []byte) ([]byte, error) {
 	)
 	if err != nil {
 		c.pendingCalls.Delete(corrID)
-		return nil, fmt.Errorf("Failed to publish message: %w", err)
+		log.Printf("[RabbitMQ] Failed to publish a message: %w", err)
+		return nil, &commonsErrors.MessageBrokerError{}
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
@@ -123,7 +125,8 @@ func (c *userClient) call(routingKey string, body []byte) ([]byte, error) {
 		return reply, nil
 	case <-ctx.Done():
 		c.pendingCalls.Delete(corrID)
-		return nil, fmt.Errorf("Timeout waiting for RPC response")
+		log.Println("[RabbitMQ] Timeout waiting for RPC response")
+		return nil, &commonsErrors.MessageBrokerError{}
 	}
 }
 
@@ -131,7 +134,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 	reply, err := c.call("find_by_username", []byte(username))
 	if err != nil {
 		errmsg := fmt.Sprintf(
-			"Failed to publish request for username '%s': %w",
+			"[RabbitMQ] Failed to publish request for username '%s': %w",
 			username, err,
 		)
 		log.Println(errmsg)
@@ -141,7 +144,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 	var rpcResp dtos.RPCResponse
 	if err := json.Unmarshal(reply, &rpcResp); err != nil {
 		errmsg := fmt.Sprintf(
-			"Failed to unmarshal RPC response: %w", err,
+			"[RabbitMQ] Failed to unmarshal RPC response: %w", err,
 		)
 		log.Println(errmsg)
 		return nil, &errors.InternalError{}
@@ -153,7 +156,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 				"User not found: %s", rpcResp.Error.Message,
 			)
 			log.Println(errmsg)
-			return nil, fmt.Errorf(errmsg)
+			return nil, &commonsErrors.UserNotFoundError{}
 		} else if rpcResp.Error.Code == "INTERNAL" {
 			errmsg := fmt.Sprintf(
 				"User service internal error: %s",
@@ -172,7 +175,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 
 	var user models.User
 	if err := json.Unmarshal(rpcResp.Data, &user); err != nil {
-		errmsg := fmt.Sprintf("Internal error: %w", err)
+		errmsg := fmt.Sprintf("Failed to unmarshal a user: %w", err)
 		log.Println(errmsg)
 		return nil, &errors.InternalError{}
 	}
@@ -183,14 +186,14 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 func (c *userClient) Persist(user *models.User) error {
 	userBytes, err := json.Marshal(user)
 	if err != nil {
-		log.Printf("Failed to marshal the user: %w", err)
+		log.Printf("Failed to marshal a user: %w", err)
 		return &errors.InternalError{}
 	}
 
 	reply, err := c.call("persist", userBytes)
 	if err != nil {
 		errmsg := fmt.Sprintf(
-			"Failed to publish request to persist '%s': %w",
+			"[RabbitMQ] Failed to publish request to persist '%s': %w",
 			user.Username, err,
 		)
 		log.Println(errmsg)
@@ -200,7 +203,7 @@ func (c *userClient) Persist(user *models.User) error {
 	var rpcResp dtos.RPCResponse
 	if err := json.Unmarshal(reply, &rpcResp); err != nil {
 		errmsg := fmt.Sprintf(
-			"Failed to unmarshal RPC response: %w\n", err,
+			"[RabbitMQ] Failed to unmarshal RPC response: %w\n", err,
 		)
 		log.Println(errmsg)
 		return &errors.InternalError{}
@@ -213,9 +216,8 @@ func (c *userClient) Persist(user *models.User) error {
 				rpcResp.Error.Message,
 			)
 			log.Println(errmsg)
-			return &commonsErrors.DuplicatedEmailError{
-				Message: fmt.Sprintf("%s email already taken",
-					user.Email),
+			return &commonsErrors.EmailAlreadyTakenError{
+				user.Email,
 			}
 		} else {
 			errmsg := fmt.Sprintf(

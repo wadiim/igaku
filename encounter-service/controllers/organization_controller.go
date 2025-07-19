@@ -45,7 +45,7 @@ func (ctrl *OrganizationController) GetByID(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, &igakuErrors.OrganizationNotFoundError{}) {
 			c.JSON(http.StatusNotFound, dtos.ErrorResponse{
-				Message: "Organization not found",
+				err.Error(),
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, dtos.ErrorResponse{
