@@ -2,42 +2,17 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="210mm"
-   height="297mm"
-   viewBox="0 0 210 297"
+   width="154.646mm"
+   height="154.646mm"
+   viewBox="0 0 154.646 154.646"
    version="1.1"
    id="svg1"
-   sodipodi:docname="logo.svg"
-   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview1"
-     pagecolor="#ffffff"
-     bordercolor="#000000"
-     borderopacity="0.25"
-     inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#d1d1d1"
-     inkscape:document-units="mm"
-     inkscape:zoom="0.70710678"
-     inkscape:cx="382.54477"
-     inkscape:cy="562.857"
-     inkscape:window-width="1916"
-     inkscape:window-height="1031"
-     inkscape:window-x="0"
-     inkscape:window-y="22"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="g6"
-     showgrid="false" />
   <defs
      id="defs1">
     <linearGradient
-       id="swatch6"
-       inkscape:swatch="solid">
+       id="swatch6">
       <stop
          style="stop-color:#000000;stop-opacity:1;"
          offset="0"
@@ -45,29 +20,25 @@
     </linearGradient>
   </defs>
   <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1">
+     id="layer1"
+     transform="translate(-27.712083,-71.172726)">
     <g
        id="g6"
        transform="translate(3.9841463,1.8109756)"
        style="stroke-width:2.8;stroke-dasharray:none;stroke:#000000;stroke-opacity:1">
       <g
          id="g21"
-         transform="rotate(-45,235.35964,77.617235)"
-         inkscape:export-filename="pill.svg"
-         inkscape:export-xdpi="96"
-         inkscape:export-ydpi="96">
+         transform="rotate(-45,235.35964,77.617235)">
         <g
            id="g10"
            transform="translate(-11.400866,-62.790745)">
           <path
              id="rect1"
-             style="fill:#c8c8c8;fill-opacity:1;stroke:#000000;stroke-width:2.8;stroke-dasharray:none;stroke-opacity:1"
+             style="fill:#f7768e;fill-opacity:1;stroke:#000000;stroke-width:2.8;stroke-dasharray:none;stroke-opacity:1"
              d="M 102.37071,126.17122 H 40.71245 c -17.67015,0 -31.8957302,-14.22557 -31.8957302,-31.895724 0,-17.670154 14.2255802,-31.895727 31.8957302,-31.895727 h 61.65826 a 93.903442,93.903442 0 0 0 -5.58261,31.895727 93.903442,93.903442 0 0 0 5.58261,31.895724 z" />
           <path
              id="path6"
-             style="fill:#116496;fill-opacity:1;stroke:#000000;stroke-width:2.8;stroke-dasharray:none;stroke-opacity:1"
+             style="fill:#7aa2f7;fill-opacity:1;stroke:#000000;stroke-width:2.8;stroke-dasharray:none;stroke-opacity:1"
              d="M 102.37071,126.17122 A 93.903442,93.903442 0 0 1 96.7881,94.275496 93.903442,93.903442 0 0 1 102.37071,62.379769 h 62.82045 c 17.67016,0 31.89573,14.225573 31.89573,31.895727 0,17.670154 -14.22557,31.895724 -31.89573,31.895724 z" />
         </g>
         <circle
