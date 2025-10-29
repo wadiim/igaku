@@ -1,5 +1,9 @@
 # Igaku
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1859108e-11f0-4f9b-a0a4-0331697153eb" style="width: 32%; height: auto;" />
+</p>
+
 ## Quick Start
 
 ```console
