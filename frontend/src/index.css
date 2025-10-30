@@ -1,52 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+    --color-tn-d-fg:      #c0caf5;
+    --color-tn-d-bg:      #1a1b26;
+    --color-tn-d-black:   #15161e;
+    --color-tn-d-red:     #f7768e;
+    --color-tn-d-green:   #9ece6a;
+    --color-tn-d-yellow:  #e0af68;
+    --color-tn-d-blue:    #7aa2f7;
+    --color-tn-d-magenta: #bb9af7;
+    --color-tn-d-cyan:    #7dcfff;
+    --color-tn-d-white:   #a9b1d6;
+
+    --color-tn-l-bg:      #e1e2e7;
+    --color-tn-l-fg:      #3760bf;
+    --color-tn-l-black:   #b4b5b9;
+    --color-tn-l-red:     #f52a65;
+    --color-tn-l-green:   #587539;
+    --color-tn-l-yellow:  #8c6c3e;
+    --color-tn-l-blue:    #2e7de9;
+    --color-tn-l-magenta: #9854f1;
+    --color-tn-l-cyan:    #007197;
+    --color-tn-l-white:   #6172b0;
+}
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  background-color: #1a1b26;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  color: #c0caf5;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  color: #c0caf5;
-  background-color: #15161e;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #7aa2f7;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+    @apply bg-tn-l-bg;
+    @variant dark {
+        @apply bg-tn-d-bg;
+    }
 }
