@@ -1,16 +1,16 @@
 services:
-  frontend:
+  client:
     image: node
-    container_name: igaku-frontend
+    container_name: igaku-client
     working_dir: /app
     env_file:
       - .env
     environment:
-      - VITE_PORT=${FRONTEND_PORT}
+      - VITE_PORT=${CLIENT_PORT}
     ports:
-      - ${FRONTEND_PORT}:${FRONTEND_PORT}
+      - ${CLIENT_PORT}:${CLIENT_PORT}
     volumes:
-      - ./frontend:/app
+      - ./client:/app
     command: sh -c "npm install && npm run dev"
 
   nginx:
