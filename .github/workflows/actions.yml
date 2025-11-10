@@ -61,12 +61,6 @@ jobs:
           source /tmp/go_build.sh
           go_build auth-service
 
-      - name: Build & test encounter-service
-        shell: bash
-        run: |
-          source /tmp/go_build.sh
-          go_build encounter-service
-
       - name: Build & test user-service
         shell: bash
         run: |
