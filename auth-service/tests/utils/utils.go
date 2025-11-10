@@ -19,6 +19,8 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 	}
 
 	env := map[string]string{
+		"MAIL_ENABLED":			"",
+		"CLIENT_PORT":			"8080",
 		"RABBITMQ_USER":		"rabbit",
 		"RABBITMQ_PASS":		"tibbar",
 		"USER_DB_NAME":			"userdb",
