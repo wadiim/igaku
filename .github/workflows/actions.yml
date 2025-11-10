@@ -1,0 +1,74 @@
+name: Run unit tests
+
+on:
+  push:
+    branches:
+      - main
+    pull_request:
+      types: [opened, synchronize]
+      branches:
+        - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Go environment
+        uses: actions/setup-go@v6
+        with:
+          go-version: ">=1.25.0"
+          check-latest: true
+          cache-dependency-path: |
+            auth-service/go.sum
+            commons/go.sum
+            encounter-service/go.sum
+            mail-service/go.sum
+            user-service/go.sum
+
+      - name: Define `go_build` function
+        run: |
+          set -euo pipefail
+          cat > /tmp/go_build.sh <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          go_build() {
+            local svc=$1
+            echo "=== $svc: start ==="
+            if [ -d "$svc" ]; then
+              go -C "$svc" mod tidy
+              go -C "$svc" build
+              go -C "$svc" test ./tests
+            else
+              echo "Service $svc not found" >&2
+              return 1
+            fi
+            echo "=== $svc: done ==="
+          }
+          EOF
+          chmod +x /tmp/go_build.sh
+
+      - name: Build & test auth-service
+        shell: bash
+        run: |
+          source /tmp/go_build.sh
+          go_build auth-service
+
+      - name: Build & test encounter-service
+        shell: bash
+        run: |
+          source /tmp/go_build.sh
+          go_build encounter-service
+
+      - name: Build & test user-service
+        shell: bash
+        run: |
+          source /tmp/go_build.sh
+          go_build user-service
+                    
