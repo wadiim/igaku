@@ -85,26 +85,26 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/client:latest
 
-      - name: Build Docker image for user-service
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/user:latest -f user-service/Dockerfile .
+      - name: Build and push user-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: user-service/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/user:latest
 
-      - name: Push user-service image to GHCR
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/user:latest
+      - name: Build and push auth-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: auth-service/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/auth:latest
 
-      - name: Build Docker image for auth-service
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/auth:latest -f auth-service/Dockerfile .
-
-      - name: Push auth-service image to GHCR
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/auth:latest
-
-      - name: Build Docker image for mail-service
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/mail:latest -f mail-service/Dockerfile .
-
-      - name: Push mail-service image to GHCR
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/mail:latest
+      - name: Build and push mail-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: mail-service/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/mail:latest
