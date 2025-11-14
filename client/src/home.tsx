@@ -1,7 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router'
+import { isTokenExpired } from './utils/auth'
 
-function App() {
+function Home() {
   const [count, setCount] = useState(0)
+
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    let jwt = localStorage.getItem("jwt");
+    if (isTokenExpired(jwt)) {
+      navigate("/auth/login");
+    }
+  });
 
   return (
     <>
@@ -29,4 +40,4 @@ function App() {
   )
 }
 
-export default App
+export default Home;
