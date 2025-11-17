@@ -110,6 +110,7 @@ function Login() {
           <button
             type="submit"
             className={`
+              cursor-pointer
               flex w-full justify-center rounded-md
               px-3 py-1.5 mt-8
               bg-tn-d-dblue
