@@ -15,28 +15,22 @@ function Home() {
   });
 
   return (
-    <>
-      <div
+    <div className={`flex-1 flex flex-col items-center justify-center`}>
+      <button
         className={`
-          flex items-center justify-center h-screen
+          bg-tn-d-black text-tn-d-fg
+          px-4 py-2
+          rounded-md
+          cursor-pointer
+          border border-transparent
+          hover:border hover:border-tn-d-blue
+          transition-border duration-250
         `}
+        onClick={() => setCount((count) => count + 1)}
       >
-        <button
-          className={`
-            bg-tn-d-black text-tn-d-fg
-            px-4 py-2
-            rounded-md
-            cursor-pointer
-            border border-transparent
-            hover:border hover:border-tn-d-blue
-            transition-border duration-250
-          `}
-          onClick={() => setCount((count) => count + 1)}
-        >
-          count is {count}
-        </button>
-      </div>
-    </>
+        count is {count}
+      </button>
+    </div>
   )
 }
 
