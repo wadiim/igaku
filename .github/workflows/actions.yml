@@ -108,3 +108,9 @@ jobs:
           file: mail-service/Dockerfile
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/mail:latest
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
