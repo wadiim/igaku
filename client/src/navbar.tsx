@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate, useMatch, useResolvedPath } from 'react-router'
 
 function Navbar() {
   let navigate = useNavigate();
@@ -12,9 +12,19 @@ function Navbar() {
   return (
     <nav
       className={`
-        flex-none bg-tn-d-black flex flex-row-reverse
+        flex-none bg-tn-d-black flex
       `}
     >
+      <ul
+        className={`
+          flex-1 flex
+          font-bold text-tn-d-fg text-2xl
+          gap-8 px-4 items-center
+        `}
+      >
+        <NavLink to="/">Home</NavLink>
+        <NavLink to="/profile">Profile</NavLink>
+      </ul>
       <button
         className={`
           cursor-pointer
@@ -32,6 +42,26 @@ function Navbar() {
         Sign out
       </button>
     </nav>
+  );
+}
+
+function NavLink({ to, children }) {
+  let path = useResolvedPath(to);
+  let isActive = useMatch({ path: path.pathname, end: true });
+
+  return (
+    <li>
+      <Link
+        to={to}
+        className={`
+          cursor-pointer
+          hover:text-tn-d-blue
+          ${isActive ? "text-tn-d-dblue" : ""}
+        `}
+      >
+        {children}
+      </Link>
+    </li>
   );
 }
 
