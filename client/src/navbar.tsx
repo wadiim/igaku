@@ -106,7 +106,13 @@ function Navbar() {
   );
 }
 
-function NavLink({ to, toggle, children }) {
+interface NavLinkProps {
+  to: string,
+  toggle?: () => void,
+  children: React.ReactNode,
+}
+
+function NavLink({ to, toggle, children }: NavLinkProps) {
   let path = useResolvedPath(to);
   let isActive = useMatch({ path: path.pathname, end: true });
 

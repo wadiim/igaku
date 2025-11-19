@@ -1,9 +1,19 @@
 import { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { isTokenExpired } from './utils/auth'
 
+interface UserData {
+  username: string,
+  email: string,
+  role: string,
+}
+
 function Profile() {
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState<UserData>({
+    username: "",
+    email: "",
+    role: "",
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,6 +25,9 @@ function Profile() {
       navigate("/");
     }
 
+    if (jwt === null) {
+      throw new Error("JWT is null");
+    }
     fetch('http://localhost:4000/user/self/', {
       method: 'GET',
       headers: {
@@ -30,7 +43,7 @@ function Profile() {
       })
       .then((data) => {
         setUserData(data);
-        setError(false);
+        setError(null);
         setLoading(false);
       })
       .catch((err) => {
@@ -65,7 +78,9 @@ function Profile() {
            border-2 border-tn-d-fg rounded-2xl pb-0 md:pb-4 p-4 md:gap-y-2
          `}
        >
-         <ProfileItem title="Username" value={userData.username} />
+         <ProfileItem title="Username" value={
+           userData ? userData.username : ""
+         } />
          <ProfileItem title="Email" value={userData.email} />
          <ProfileItem title="Role" value={userData.role} />
        </div>
@@ -73,7 +88,7 @@ function Profile() {
    );
 }
 
-function ProfileItem({ title, value }) {
+function ProfileItem({ title, value }: { title: string, value: string }) {
   return (
     <>
       <span className="font-bold">{ title }:</span>
