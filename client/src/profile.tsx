@@ -60,9 +60,9 @@ function Profile() {
      <div className={`flex-1 flex flex-col items-center justify-center`}>
        <div
          className={`
-           grid grid-cols-[max-content_1fr]
+           grid grid-cols-1 md:grid-cols-[max-content_1fr]
            text-tn-d-fg text-2xl
-           border-2 border-tn-d-fg rounded-2xl p-4 gap-y-2
+           border-2 border-tn-d-fg rounded-2xl pb-0 md:pb-4 p-4 md:gap-y-2
          `}
        >
          <ProfileItem title="Username" value={userData.username} />
@@ -71,15 +71,22 @@ function Profile() {
        </div>
      </div>
    );
- }
+}
 
 function ProfileItem({ title, value }) {
-   return (
-     <>
-       <span className="font-bold">{ title }:</span>
-       <span className="ms-4">{ value }</span>
-     </>
-   );
+  return (
+    <>
+      <span className="font-bold">{ title }:</span>
+      <div
+        className={`
+          overflow-x-auto whitespace-nowrap
+          pb-4 md:pb-0 md:ps-4
+        `}
+      >
+        <span>{ value }</span>
+      </div>
+    </>
+  );
 }
 
 export default Profile;
