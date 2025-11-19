@@ -62,6 +62,13 @@ $ go -C auth-service test -tags=integration ./tests/ -v
 $ ./tools/run-load-tests.sh
 ```
 
+### Client code type checking
+
+```console
+$ cd client
+$ npx tsc --project tsconfig.app.json --noEmit --watch
+```
+
 ## Swagger documentation generation
 
 ```console
