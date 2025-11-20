@@ -28,8 +28,8 @@ services:
     networks:
       - igaku-network
     depends_on:
-#      auth:
-#        condition: service_started
+      auth:
+        condition: service_started
       mail:
         condition: service_started
         required: false
