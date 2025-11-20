@@ -8,11 +8,16 @@ import NotFoundPage from './not-found-page.tsx'
 import Register from './register.tsx'
 
 import { BrowserRouter, Routes, Route } from 'react-router'
-import { StrictMode } from 'react'
+import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
+import { hideSplashScreen } from 'vite-plugin-splash-screen/runtime'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+function App() {
+  useEffect(() => {
+    hideSplashScreen();
+  });
+
+  return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Root />}>
@@ -26,5 +31,11 @@ createRoot(document.getElementById('root')!).render(
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
-  </StrictMode>,
-)
+  );
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>
+);
