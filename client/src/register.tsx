@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+
 import { isTokenExpired } from './utils/auth'
+import { sendNotification } from './utils/notify'
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -36,6 +38,7 @@ function Register() {
       return res.text()
     }).then(data => {
       localStorage.setItem("jwt", data);
+      sendNotification("Welcome to Igaku!");
       navigate("/");
     }).catch(err => {
       setErrorMessage(err.message);

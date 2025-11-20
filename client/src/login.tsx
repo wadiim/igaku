@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+
 import { isTokenExpired } from './utils/auth'
+import { sendNotification } from './utils/notify'
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -34,6 +36,7 @@ function Login() {
       return res.text()
     }).then(data => {
       localStorage.setItem("jwt", data);
+      sendNotification("Welcome back!");
       navigate("/");
     }).catch(err => {
       setErrorMessage(err.message);
