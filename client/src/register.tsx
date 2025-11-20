@@ -54,7 +54,9 @@ function Register() {
           </label>
           <div className={`mt-2`}>
             <input
+              id="username"
               name="username"
+              autoComplete="username"
               value={username}
               onChange={e => {
                 setUsername(e.target.value);
@@ -83,8 +85,10 @@ function Register() {
           </label>
           <div className={`mt-2`}>
             <input
+              id="email"
               name="email"
               type="email"
+              autoComplete="email"
               value={email}
               onChange={e => {
                 setEmail(e.target.value);
@@ -113,6 +117,7 @@ function Register() {
           </label>
           <div className={`mt-2`}>
             <input
+              id="password"
               name="password"
               type="password"
               value={password}

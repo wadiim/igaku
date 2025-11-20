@@ -52,7 +52,9 @@ function Login() {
           </label>
           <div className={`mt-2`}>
             <input
+              id="username"
               name="username"
+              autoComplete="username"
               value={username}
               onChange={e => {
                 setUsername(e.target.value);
@@ -81,6 +83,7 @@ function Login() {
           </label>
           <div className={`mt-2`}>
             <input
+              id="password"
               name="password"
               type="password"
               value={password}
