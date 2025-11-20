@@ -15,7 +15,7 @@ function Profile() {
     role: "",
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   let navigate = useNavigate();
 
@@ -26,15 +26,15 @@ function Profile() {
     }
 
     if (jwt === null) {
-      throw new Error("JWT is null");
-    }
-    fetch('http://localhost:4000/user/self/', {
-      method: 'GET',
-      headers: {
-        'accept': 'application/json',
-        'Authorization': jwt,
-      }
-    })
+      throw new Error("Authentication failed");
+    } else {
+      fetch('http://localhost:4000/user/self/', {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': jwt,
+        }
+      })
       .then((res) => {
         if (!res.ok) {
           throw new Error("Failed to load user data");
@@ -43,13 +43,28 @@ function Profile() {
       })
       .then((data) => {
         setUserData(data);
+        localStorage.setItem("userData", JSON.stringify(data));
         setError(null);
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
-        setLoading(false);
+        if (err instanceof TypeError && err.message === "Failed to fetch") {
+          // No network connection.
+          // NOTE: This detection mechanism does not work in Firefox.
+          const catchedUserData = localStorage.getItem("userData");
+          if (catchedUserData) {
+            setUserData(JSON.parse(catchedUserData));
+            setError(null);
+          } else {
+            setError("Failed to load user data");
+          }
+          setLoading(false);
+        } else {
+          setError(err.message);
+          setLoading(false);
+        }
       })
+    }
   }, [navigate]);
 
   if (loading) {
