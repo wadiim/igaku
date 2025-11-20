@@ -56,15 +56,29 @@ function Navbar() {
             <FontAwesomeIcon icon={faBars} />
           </button>
         </div>
+        <div
+          className={`
+            hidden md:flex
+            px-4 items-center
+          `}
+        >
+          <NavLink to="/" >
+            <img
+              className="size-8"
+              src="/logo.svg"
+            />
+          </NavLink>
+        </div>
         <ul
           className={`
             flex-1 hidden md:flex
             font-bold text-tn-d-fg text-2xl
-            gap-8 px-4 items-center
+            gap-8 px-4 items-center justify-end
           `}
         >
-          <NavLink to="/" >Home</NavLink>
-          <NavLink to="/profile">Profile</NavLink>
+          <li>
+            <NavLink to="/profile">Profile</NavLink>
+          </li>
         </ul>
         <button
           className={`
@@ -98,8 +112,12 @@ function Navbar() {
             text-xl
           `}
         >
-          <NavLink to="/" toggle={toggleMobileMenu}>Home</NavLink>
-          <NavLink to="/profile" toggle={toggleMobileMenu}>Profile</NavLink>
+          <li>
+            <NavLink to="/" toggle={toggleMobileMenu}>Home</NavLink>
+          </li>
+          <li>
+            <NavLink to="/profile" toggle={toggleMobileMenu}>Profile</NavLink>
+          </li>
         </ul>
       </div>
     </>
@@ -117,19 +135,17 @@ function NavLink({ to, toggle, children }: NavLinkProps) {
   let isActive = useMatch({ path: path.pathname, end: true });
 
   return (
-    <li>
-      <Link
-        to={to}
-        onClick={toggle}
-        className={`
-          cursor-pointer
-          hover:text-tn-d-blue
-          ${isActive ? "text-tn-d-dblue" : "text-tn-d-fg"}
-        `}
-      >
-        {children}
-      </Link>
-    </li>
+    <Link
+      to={to}
+      onClick={toggle}
+      className={`
+        cursor-pointer
+        hover:text-tn-d-blue
+        ${isActive ? "text-tn-d-dblue" : "text-tn-d-fg"}
+      `}
+    >
+      {children}
+    </Link>
   );
 }
 
