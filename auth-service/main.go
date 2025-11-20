@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	actuator "github.com/sinhashubham95/go-actuator"
 
 	"log"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"igaku/auth-service/controllers"
 	"igaku/auth-service/docs"
 	"igaku/auth-service/services"
+	configs "igaku/commons/configs"
 )
 
 // @title		Igaku Auth API
@@ -77,5 +79,16 @@ func main() {
 		"/auth/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
 	)
+
+	actuatorHandler := actuator.GetActuatorHandler(configs.ActuatorConfig)
+	ginActuatorHandler := func(ctx *gin.Context) {
+		actuatorHandler(ctx.Writer, ctx.Request)
+	}
+
+	router.GET(
+		"/auth/actuator/*endpoint",
+		ginActuatorHandler,
+	)
 	router.Run()
+
 }
