@@ -26,8 +26,8 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		"USER_DB_NAME":			"userdb",
 		"USER_DB_USER":			"user",
 		"USER_DB_PASSWORD":		"P@ssw0rd!",
-		"ENCOUNTER_DB_NAME":		"encounterdb",
-		"ENCOUNTER_DB_USER":		"encounter",
+		"ENCOUNTER_DB_NAME":		"visitdb",
+		"ENCOUNTER_DB_USER":		"visit",
 		"ENCOUNTER_DB_PASSWORD":	"P@ssw0rd!",
 		"JWT_TOKEN_DURATION_IN_HOURS":	"1",
 	}

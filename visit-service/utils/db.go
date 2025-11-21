@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 
-	"igaku/encounter-service/models"
+	"igaku/visit-service/models"
 	commonsErrors "igaku/commons/errors"
 	commonsModels "igaku/commons/models"
 )

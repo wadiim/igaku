@@ -12,10 +12,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"igaku/encounter-service/controllers"
-	"igaku/encounter-service/errors"
-	"igaku/encounter-service/models"
-	"igaku/encounter-service/services"
+	"igaku/visit-service/controllers"
+	"igaku/visit-service/errors"
+	"igaku/visit-service/models"
+	"igaku/visit-service/services"
 )
 
 type MockOrganizationRepository struct {
@@ -61,7 +61,7 @@ func TestOrganizationController_GetByID_Success(t *testing.T) {
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("/encounter/organizations/%s", testOrgID.String()),
+		fmt.Sprintf("/visit/organizations/%s", testOrgID.String()),
 		nil,
 	)
 	if err != nil {
@@ -94,7 +94,7 @@ func TestOrganizationController_GetByID_NotFound(t *testing.T) {
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("/encounter/organizations/%s", testOrgID.String()),
+		fmt.Sprintf("/visit/organizations/%s", testOrgID.String()),
 		nil,
 	)
 	if err != nil {
@@ -122,7 +122,7 @@ func TestOrganizationController_GetByID_InvalidUUID(t *testing.T) {
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("/encounter/organizations/%s", invalidUUID),
+		fmt.Sprintf("/visit/organizations/%s", invalidUUID),
 		nil,
 	)
 	if err != nil {

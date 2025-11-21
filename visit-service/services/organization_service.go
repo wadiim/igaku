@@ -3,8 +3,8 @@ package services
 import (
 	"github.com/google/uuid"
 
-	"igaku/encounter-service/models"
-	"igaku/encounter-service/repositories"
+	"igaku/visit-service/models"
+	"igaku/visit-service/repositories"
 )
 
 type OrganizationService interface {

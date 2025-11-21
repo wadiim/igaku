@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"errors"
 
-	"igaku/encounter-service/services"
+	"igaku/visit-service/services"
 	"igaku/commons/dtos"
-	igakuErrors "igaku/encounter-service/errors"
+	igakuErrors "igaku/visit-service/errors"
 )
 
 type OrganizationController struct {
@@ -30,7 +30,7 @@ func NewOrganizationController(service services.OrganizationService) *Organizati
 // @Failure	400 {object} dtos.ErrorResponse "Bad Request - Invalid UUID format"
 // @Failure	404 {object} dtos.ErrorResponse "Not Found - Organization not found"
 // @Failure	500 {object} dtos.ErrorResponse "Internal Server Error - Failed to retrieve organization"
-// @Router	/encounter/organizations/{id} [get]
+// @Router	/visit/organizations/{id} [get]
 func (ctrl *OrganizationController) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := uuid.Parse(idStr)
@@ -59,7 +59,7 @@ func (ctrl *OrganizationController) GetByID(c *gin.Context) {
 }
 
 func (ctrl *OrganizationController) RegisterRoutes(router *gin.Engine) {
-	routes := router.Group("/encounter")
+	routes := router.Group("/visit")
 	{
 		routes.GET("/organizations/:id", ctrl.GetByID)
 	}

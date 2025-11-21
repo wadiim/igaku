@@ -224,29 +224,29 @@ services:
     profiles:
       - mail
 
-  encounter:
-    container_name: igaku-encounter
+  visit:
+    container_name: igaku-visit
     image: cosmtrek/air
     working_dir: /app
-    command: ["-c", "encounter-service/air.encounter.toml"]
+    command: ["-c", "visit-service/air.visit.toml"]
     env_file:
       - .env
     environment:
-      - POSTGRES_HOST=igaku-encounter-db
+      - POSTGRES_HOST=igaku-visit-db
       - POSTGRES_DB=${ENCOUNTER_DB_NAME}
       - POSTGRES_USER=${ENCOUNTER_DB_USER}
       - POSTGRES_PASSWORD=${ENCOUNTER_DB_PASSWORD}
     expose:
       - 8080
     volumes:
-      - ./encounter-service:/app/encounter-service
+      - ./visit-service:/app/visit-service
       - ./commons:/app/commons
       - go-mod-cache:/go/pkg/mod
       - go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
-      encounter-db:
+      visit-db:
         condition: service_healthy
       logstash:
         condition: service_healthy
@@ -255,12 +255,12 @@ services:
       driver: "gelf"
       options:
         gelf-address: "udp://localhost:12201"
-        tag: "igaku-encounter-service"
+        tag: "igaku-visit-service"
     profiles:
       - disabled
 
-  encounter-db:
-    container_name: igaku-encounter-db
+  visit-db:
+    container_name: igaku-visit-db
     image: postgres
     restart: always
     env_file:

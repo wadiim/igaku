@@ -4,8 +4,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
-	"igaku/encounter-service/errors"
-	"igaku/encounter-service/models"
+	"igaku/visit-service/errors"
+	"igaku/visit-service/models"
 )
 
 type OrganizationRepository interface {

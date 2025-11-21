@@ -46,7 +46,7 @@ Visit:
 ```console
 $ go -C user-service test ./tests/
 $ go -C auth-service test ./tests/
-$ go -C encounter-service test ./tests/
+$ go -C visit-service test ./tests/
 ```
 
 ### Integration Testing

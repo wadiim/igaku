@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -C visit-service -buildvcs=false -o tmp/main igaku/visit-service"
+bin = "visit-service/tmp/main"
+include_ext = ["go"]
+exclude_dir = ["visit-service/tmp", "visit-service/bin"]
+log = "air_visit.log"
+delay = 1000
+stop_on_error = true
+
+[misc]
+clean_on_exit = true

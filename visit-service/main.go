@@ -12,11 +12,11 @@ import (
 	"os"
 	"log"
 
-	"igaku/encounter-service/controllers"
-	"igaku/encounter-service/docs"
-	"igaku/encounter-service/repositories"
-	"igaku/encounter-service/services"
-	"igaku/encounter-service/utils"
+	"igaku/visit-service/controllers"
+	"igaku/visit-service/docs"
+	"igaku/visit-service/repositories"
+	"igaku/visit-service/services"
+	"igaku/visit-service/utils"
 	commonsUtils "igaku/commons/utils"
 )
 
@@ -51,7 +51,7 @@ func main() {
 		log.Fatalf("Failed to create database structures: %v", err)
 	}
 
-	err = commonsUtils.SeedDatabase(db, "./encounter-service/resources")
+	err = commonsUtils.SeedDatabase(db, "./visit-service/resources")
 	if err != nil {
 		log.Fatalf("Failed to seed database: %v", err)
 	}
@@ -68,7 +68,7 @@ func main() {
 	orgController.RegisterRoutes(router)
 
 	router.GET(
-		"/encounter/swagger/*any",
+		"/visit/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
 	)
 	router.Run()

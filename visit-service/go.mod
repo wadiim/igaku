@@ -1,4 +1,4 @@
-module igaku/encounter-service
+module igaku/visit-service
 
 go 1.23.7
 

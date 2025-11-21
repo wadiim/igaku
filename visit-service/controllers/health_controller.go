@@ -18,11 +18,11 @@ func NewHealthController() *HealthController {
 // @Tags	Health
 // @Produce	text/plain
 // @Success	200 {string} string
-// @Router	/encounter/health [get]
+// @Router	/visit/health [get]
 func (ctrl *HealthController) GetHealth(c *gin.Context) {
 	c.String(http.StatusOK, "OK")
 }
 
 func (ctrl *HealthController) RegisterRoutes(router *gin.Engine) {
-	router.GET("/encounter/health", ctrl.GetHealth)
+	router.GET("/visit/health", ctrl.GetHealth)
 }

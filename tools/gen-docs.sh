@@ -5,7 +5,7 @@ set -xe
 common_dirs="commons/dtos,commons/errors,commons/models,commons/utils"
 services=(
     "auth-service"
-    "encounter-service"
+    "visit-service"
     "mail-service"
     "user-service"
 )
