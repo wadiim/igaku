@@ -2,6 +2,7 @@ package utils
 
 import (
 	"gorm.io/gorm"
+	"log"
 
 	"igaku/encounter-service/models"
 	commonsErrors "igaku/commons/errors"
