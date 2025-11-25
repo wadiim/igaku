@@ -6,11 +6,9 @@ import (
 
 var ActuatorConfig = &actuator.Config{
 	Endpoints: []int{
-		actuator.Env,
 		actuator.Info,
 		actuator.Metrics,
 		actuator.Ping,
-		actuator.Shutdown,
 		actuator.ThreadDump,
 	},
 	Env: "dev",
