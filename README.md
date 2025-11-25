@@ -30,6 +30,19 @@ a non-empty value. Additionally, the `SMTP_*` variables must be set to
 values appropriate to the SMTP (Simple Mail Transfer Protocol) server being
 used.
 
+## Enabling remote logging service
+
+By default, the `vector` service is disabled in order to avoid incurring costs.
+Enabling logging to remote server [GrafanaCloud](https://grafana.com/) requires
+setting the `GRAFANA_USER_ID`, `GRAFANA_TOKEN` and `GRAFANA_URL` variables in
+the `.env` file to non-empty values.
+
+## Starting the [Vector](https://vector.dev/) logging service
+
+```console
+$ docker compose --profile vector up
+```
+
 ## Starting the [ELK](https://www.elastic.co/elastic-stack/) stack
 
 ```console

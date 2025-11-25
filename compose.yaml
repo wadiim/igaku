@@ -142,6 +142,9 @@ services:
       logstash:
         condition: service_healthy
         required: false
+      vector:
+        condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -191,6 +194,9 @@ services:
       logstash:
         condition: service_healthy
         required: false
+      vector:
+        condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -218,6 +224,9 @@ services:
       rabbitmq:
         condition: service_healthy
       logstash:
+        condition: service_healthy
+        required: false
+      vector:
         condition: service_healthy
         required: false
     logging:
@@ -253,6 +262,9 @@ services:
       encounter-db:
         condition: service_healthy
       logstash:
+        condition: service_healthy
+        required: false
+      vector:
         condition: service_healthy
         required: false
     logging:
@@ -302,6 +314,25 @@ services:
         condition: service_started
     networks:
       - igaku-network
+
+  vector:
+    image: timberio/vector:nightly-alpine
+    container_name: vector
+    volumes:
+      - ./vector.yaml:/etc/vector/vector.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+    env_file:
+      - .env
+    environment:
+      - GRAFANA_USER_ID=${GRAFANA_USER_ID}
+      - GRAFANA_TOKEN=${GRAFANA_TOKEN}
+      - GRAFANA_URL=${GRAFANA_URL}
+    networks:
+      - igaku-network
+    profiles:
+      - vector
 
 networks:
   igaku-network:

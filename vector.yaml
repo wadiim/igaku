@@ -1,0 +1,28 @@
+sources:
+  docker_compose:
+    type: docker_logs
+    include_containers:
+      - igaku-auth-1
+      - igaku-user-1
+
+transforms:
+  parse_docker_json:
+    type: remap
+    inputs: [docker_compose]
+    source: |
+      . = .message
+
+sinks:
+  loki:
+    type: loki
+    inputs: [parse_docker_json]
+    endpoint: "${GRAFANA_URL}"
+    path: "loki/api/v1/push"
+    encoding:
+      codec: text
+    labels:
+      service: "docker"
+    auth:
+      strategy: basic
+      user: "${GRAFANA_USER_ID}"
+      password: "${GRAFANA_TOKEN}"
