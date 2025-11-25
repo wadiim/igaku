@@ -19,6 +19,7 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 	}
 
 	env := map[string]string{
+		"CLIENT_PORT":			"8080",
 		"RABBITMQ_USER":		"rabbit",
 		"RABBITMQ_PASS":		"tibbar",
 		"USER_DB_NAME":			"userdb",
@@ -28,6 +29,11 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		"ENCOUNTER_DB_USER":		"encounter",
 		"ENCOUNTER_DB_PASSWORD":	"P@ssw0rd!",
 		"JWT_TOKEN_DURATION_IN_HOURS":	"1",
+		"STACK_VERSION":		"9.0.0",
+		"GRAFANA_USER_ID":		"",
+		"GRAFANA_TOKEN":		"",
+		"GRAFANA_URL":			"",
+
 	}
 
 	err = stack.
