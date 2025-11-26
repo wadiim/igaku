@@ -26,10 +26,15 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		"USER_DB_NAME":			"userdb",
 		"USER_DB_USER":			"user",
 		"USER_DB_PASSWORD":		"P@ssw0rd!",
-		"ENCOUNTER_DB_NAME":		"visitdb",
-		"ENCOUNTER_DB_USER":		"visit",
-		"ENCOUNTER_DB_PASSWORD":	"P@ssw0rd!",
+		"VISIT_DB_NAME":		"visitdb",
+		"VISIT_DB_USER":		"visit",
+		"VISIT_DB_PASSWORD":		"P@ssw0rd!",
 		"JWT_TOKEN_DURATION_IN_HOURS":	"1",
+		"STACK_VERSION":		"9.0.0",
+		"GRAFANA_USER_ID":		"",
+		"GRAFANA_TOKEN":		"",
+		"GRAFANA_URL":			"",
+
 	}
 
 	err = stack.

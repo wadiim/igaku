@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "Igaku Encounter API",
+        "title": "Igaku Visit API",
         "contact": {},
         "version": "0.0.1"
     },

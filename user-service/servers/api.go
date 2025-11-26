@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	actuator "github.com/sinhashubham95/go-actuator"
 
 	"context"
 	"log"
@@ -12,6 +13,7 @@ import (
 	"igaku/user-service/controllers"
 	"igaku/user-service/docs"
 	"igaku/user-service/services"
+	configs "igaku/commons/configs"
 )
 
 type ApiServer struct {
@@ -29,9 +31,19 @@ func NewApiServer(accService services.AccountService) *ApiServer {
 	accController := controllers.NewAccountController(accService)
 	accController.RegisterRoutes(router)
 
+	actuatorHandler := actuator.GetActuatorHandler(configs.ActuatorConfig)
+	ginActuatorHandler := func(ctx *gin.Context) {
+		actuatorHandler(ctx.Writer, ctx.Request)
+	}
+
 	router.GET(
 		"/user/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
+
+	router.GET(
+		"/user/actuator/*endpoint",
+		ginActuatorHandler,
 	)
 
 	server := &http.Server{

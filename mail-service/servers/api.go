@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	actuator "github.com/sinhashubham95/go-actuator"
 
 	"context"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 	"igaku/mail-service/controllers"
 	"igaku/mail-service/docs"
+	configs "igaku/commons/configs"
 )
 
 type ApiServer struct {
@@ -25,9 +27,19 @@ func NewApiServer() *ApiServer {
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
+	actuatorHandler := actuator.GetActuatorHandler(configs.ActuatorConfig)
+	ginActuatorHandler := func(ctx *gin.Context) {
+		actuatorHandler(ctx.Writer, ctx.Request)
+	}
+
 	router.GET(
 		"/mail/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
+
+	router.GET(
+		"/mail/actuator/*endpoint",
+		ginActuatorHandler,
 	)
 
 	server := &http.Server{

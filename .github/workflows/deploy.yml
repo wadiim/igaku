@@ -1,0 +1,49 @@
+name: Push Docker images
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push client
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: client/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/client:latest
+
+      - name: Build and push user-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: user-service/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/user:latest
+
+      - name: Build and push auth-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: auth-service/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/auth:latest
+
+      - name: Build and push mail-service
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: mail-service/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/mail:latest
+

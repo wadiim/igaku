@@ -9,8 +9,12 @@ services:
       - VITE_PORT=${CLIENT_PORT}
     ports:
       - ${CLIENT_PORT}:${CLIENT_PORT}
+    networks:
+      - igaku-network
     volumes:
       - ./client:/app
+    expose:
+      - 8080
     command: bash -c "npm install && npm run dev"
 
   nginx:
@@ -138,6 +142,9 @@ services:
       logstash:
         condition: service_healthy
         required: false
+      vector:
+        condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -187,6 +194,9 @@ services:
       logstash:
         condition: service_healthy
         required: false
+      vector:
+        condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -216,6 +226,9 @@ services:
       logstash:
         condition: service_healthy
         required: false
+      vector:
+        condition: service_healthy
+        required: false
     logging:
       driver: "gelf"
       options:
@@ -233,9 +246,9 @@ services:
       - .env
     environment:
       - POSTGRES_HOST=igaku-visit-db
-      - POSTGRES_DB=${ENCOUNTER_DB_NAME}
-      - POSTGRES_USER=${ENCOUNTER_DB_USER}
-      - POSTGRES_PASSWORD=${ENCOUNTER_DB_PASSWORD}
+      - POSTGRES_DB=${VISIT_DB_NAME}
+      - POSTGRES_USER=${VISIT_DB_USER}
+      - POSTGRES_PASSWORD=${VISIT_DB_PASSWORD}
     expose:
       - 8080
     volumes:
@@ -249,6 +262,9 @@ services:
       visit-db:
         condition: service_healthy
       logstash:
+        condition: service_healthy
+        required: false
+      vector:
         condition: service_healthy
         required: false
     logging:
@@ -266,15 +282,15 @@ services:
     env_file:
       - .env
     environment:
-      - POSTGRES_DB=${ENCOUNTER_DB_NAME}
-      - POSTGRES_USER=${ENCOUNTER_DB_USER}
-      - POSTGRES_PASSWORD=${ENCOUNTER_DB_PASSWORD}
+      - POSTGRES_DB=${VISIT_DB_NAME}
+      - POSTGRES_USER=${VISIT_DB_USER}
+      - POSTGRES_PASSWORD=${VISIT_DB_PASSWORD}
     ports:
       - 5433:5432
     networks:
       - igaku-network
     healthcheck:
-      test: pg_isready -U ${ENCOUNTER_DB_USER} -d ${ENCOUNTER_DB_NAME}
+      test: pg_isready -U ${VISIT_DB_USER} -d ${VISIT_DB_NAME}
       interval: 2s
       timeout: 2s
       retries: 3
@@ -299,9 +315,30 @@ services:
     networks:
       - igaku-network
 
+  vector:
+    image: timberio/vector:nightly-alpine
+    container_name: vector
+    volumes:
+      - ./config/vector/vector.yaml:/etc/vector/vector.yaml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/log:/var/log:ro
+    env_file:
+      - .env
+    environment:
+      - GRAFANA_USER_ID=${GRAFANA_USER_ID}
+      - GRAFANA_TOKEN=${GRAFANA_TOKEN}
+      - GRAFANA_URL=${GRAFANA_URL}
+    networks:
+      - igaku-network
+    profiles:
+      - vector
+
 networks:
   igaku-network:
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: "igaku"
 
 volumes:
   go-mod-cache:

@@ -119,7 +119,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "localhost:4000",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Igaku Encounter API",
+	Title:            "Igaku Visit API",
 	Description:      "",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

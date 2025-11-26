@@ -20,7 +20,7 @@ import (
 	commonsUtils "igaku/commons/utils"
 )
 
-// @title		Igaku Encounter API
+// @title		Igaku Visit API
 // @version		0.0.1
 // @host		localhost:4000
 
