@@ -297,6 +297,35 @@ services:
     profiles:
       - disabled
 
+  med:
+    container_name: igaku-med
+    image: cosmtrek/air
+    working_dir: /app
+    command: ["-c", "med-service/air.med.toml"]
+    expose:
+      - 8080
+    volumes:
+      - ./med-service:/app/med-service
+      - ./commons:/app/commons
+      - go-mod-cache:/go/pkg/mod
+      - go-build-cache:/root/.cache/go-build
+    networks:
+      - igaku-network
+    depends_on:
+      logstash:
+        condition: service_healthy
+        required: false
+      vector:
+        condition: service_healthy
+        required: false
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "igaku-med-service"
+    profiles:
+      - disabled
+
   swagger-ui:
     image: swaggerapi/swagger-ui
     container_name: igaku-swagger-ui

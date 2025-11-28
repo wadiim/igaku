@@ -7,6 +7,7 @@ services=(
     "auth-service"
     "visit-service"
     "mail-service"
+    "med-service"
     "user-service"
 )
 
