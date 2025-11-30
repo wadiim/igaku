@@ -92,7 +92,7 @@ function Users() {
   return (
     <div
       className={`
-        flex flex-col items-center justify-center h-screen
+        flex flex-col items-center justify-center
       `}
     >
       <ul>
@@ -104,7 +104,7 @@ function Users() {
 
 function UserList({ usersData }: { usersData: UserData[] }) {
   const list = usersData.map(user =>
-    <li>
+    <li key={user.id}>
       <ProfileCard userData={user} />
     </li>
   );
