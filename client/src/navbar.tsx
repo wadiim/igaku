@@ -146,7 +146,7 @@ interface NavLinkProps {
 
 function NavLink({ to, toggle, children }: NavLinkProps) {
   let path = useResolvedPath(to);
-  let isActive = useMatch({ path: path.pathname, end: true });
+  let isActive = useMatch({ path: path.pathname, end: false });
 
   return (
     <Link
