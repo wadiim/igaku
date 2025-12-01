@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAngleLeft, faAngleRight } from '@fortawesome/free-solid-svg-icons'
+import {
+  faAngleLeft, faAngleRight, faArrowUpLong, faArrowDownLong,
+} from '@fortawesome/free-solid-svg-icons'
 
 import type { UserData } from './utils/user-data'
 import ProfileCard from './profile-card'
@@ -16,12 +18,20 @@ function Users() {
 
   const [currPage, setCurrPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
+  const [sortBy, setSortBy] = useState("id");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   let navigate = useNavigate();
   let params = useParams();
 
-  const fetchUserList = async (page: number, jwt: string): Promise<any> => {
-    fetch(`http://localhost:4000/user/list/?page=${page}`, {
+  const fetchUserList = async (
+    jwt: string,
+    page: number,
+    sortBy: string,
+    sortOrder: string,
+  ): Promise<any> => {
+    let params = `page=${page}&orderBy=${sortBy}&orderMethod=${sortOrder}`;
+    fetch(`http://localhost:4000/user/list/?${params}`, {
       method: 'GET',
       headers: {
         'accept': 'application/json',
@@ -89,7 +99,7 @@ function Users() {
       }
       setCurrPage(page);
 
-      fetchUserList(page, jwt);
+      fetchUserList(jwt, page, sortBy, sortOrder);
     }
   }, [navigate, nextId]);
 
@@ -110,13 +120,24 @@ function Users() {
     );
   }
 
+  const handleSortByChange = (value: string) => {
+    fetchUserList(getJwt(), currPage, value, sortOrder);
+    setSortBy(value);
+  }
+
+  const handleSortOrderChange = () => {
+    let order = (sortOrder === "asc") ? "desc" : "asc";
+    fetchUserList(getJwt(), currPage, sortBy, order);
+    setSortOrder(order);
+  }
+
   const handlePrevClick = () => {
     if (currPage <= 1) return;
 
     let jwt = getJwt();
     let prevPage = currPage - 1;
     setCurrPage(prevPage);
-    fetchUserList(prevPage, jwt);
+    fetchUserList(jwt, prevPage, sortBy, sortOrder);
   }
 
   const handleNextClick = () => {
@@ -125,7 +146,7 @@ function Users() {
     let jwt = getJwt();
     let nextPage = currPage + 1;
     setCurrPage(nextPage);
-    fetchUserList(nextPage, jwt);
+    fetchUserList(jwt, nextPage, sortBy, sortOrder);
   }
 
   return (
@@ -134,7 +155,47 @@ function Users() {
         flex flex-col items-center justify-center
       `}
     >
-      <ul className="mt-4">
+    <div
+      className={`
+        text-tn-d-fg
+        m-4
+      `}
+    >
+      <label
+        htmlFor="sortBy"
+      >
+        Sort by:
+      </label>
+      <select
+        id="sortBy"
+        name="sortBy"
+        value={sortBy}
+        onChange={e => handleSortByChange(e.target.value)}
+        className={`
+          bg-tn-d-black
+          p-2 mx-2
+        `}
+      >
+        <option value="id">ID</option>
+        <option value="username">Username</option>
+      </select>
+
+      <button
+        onClick={handleSortOrderChange}
+        className={`
+          cursor-pointer
+          hover:bg-tn-d-black
+          rounded-full
+          p-2 ms-2
+        `}
+      >
+        { (sortOrder === "asc")
+            && <FontAwesomeIcon icon={faArrowUpLong} />
+            || <FontAwesomeIcon icon={faArrowDownLong} />
+        }
+      </button>
+    </div>
+      <ul>
         <UserList usersData={usersData} />
       </ul>
       <div
