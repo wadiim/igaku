@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
-  faAngleLeft, faAngleRight, faArrowUpLong, faArrowDownLong,
+  faAngleLeft, faAngleRight, faArrowUpLong, faArrowDownLong, faFloppyDisk,
 } from '@fortawesome/free-solid-svg-icons'
 
-import type { UserData } from './utils/user-data'
+import type { UserData } from './utils/user'
+import { saveUserListToFile } from './utils/user'
 import ProfileCard from './profile-card'
 import { getRole, isTokenExpired } from './utils/auth'
 
@@ -131,6 +132,16 @@ function Users() {
     setSortOrder(order);
   }
 
+  const handleSaveClick = () => {
+    saveUserListToFile(
+      1,
+      10*pageCount,
+      sortBy,
+      sortOrder,
+      (err: string) => { alert(err); },
+    );
+  }
+
   const handlePrevClick = () => {
     if (currPage <= 1) return;
 
@@ -194,6 +205,19 @@ function Users() {
             || <FontAwesomeIcon icon={faArrowDownLong} />
         }
       </button>
+
+      <button
+        onClick={handleSaveClick}
+        className={`
+          cursor-pointer
+          hover:bg-tn-d-black
+          rounded-full
+          p-2 ms-2
+        `}
+      >
+        <FontAwesomeIcon icon={faFloppyDisk} />
+      </button>
+
     </div>
       <ul>
         <UserList usersData={usersData} />

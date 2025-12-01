@@ -1,4 +1,4 @@
-import type { UserData } from './utils/user-data'
+import type { UserData } from './utils/user'
 
 function ProfileCard({ userData }: { userData: UserData }) {
   return (

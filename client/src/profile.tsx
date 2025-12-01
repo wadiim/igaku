@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import { isTokenExpired } from './utils/auth'
 
 import ProfileCard from './profile-card'
-import type { UserData } from './utils/user-data'
+import type { UserData } from './utils/user'
 
 function Profile() {
   const [userData, setUserData] = useState<UserData>({
