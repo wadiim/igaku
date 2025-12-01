@@ -5,7 +5,7 @@ function ProfileCard({ userData }: { userData: UserData }) {
    <div
      className={`
        grid grid-cols-1 md:grid-cols-[max-content_1fr]
-       text-tn-d-fg text-2xl
+       bg-tn-d-black text-tn-d-fg text-2xl
        border-2 border-tn-d-fg rounded-2xl my-2 pb-0 md:pb-4 p-4 md:gap-y-2
      `}
    >
