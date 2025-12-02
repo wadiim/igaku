@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { useNavigate } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faAngleLeft, faAngleRight, faArrowUpLong, faArrowDownLong, faFloppyDisk,
@@ -23,7 +23,6 @@ function Users() {
   const [sortOrder, setSortOrder] = useState("asc");
 
   let navigate = useNavigate();
-  let params = useParams();
 
   const fetchUserList = async (
     jwt: string,
@@ -94,15 +93,9 @@ function Users() {
   useEffect(() => {
     let jwt = getJwt();
     if (usersData.length === 0) {
-      let page = 1;
-      if (params.page !== undefined) {
-        page = +params.page;
-      }
-      setCurrPage(page);
-
-      fetchUserList(jwt, page, sortBy, sortOrder);
+      fetchUserList(jwt, currPage, sortBy, sortOrder);
     }
-  }, [navigate, nextId]);
+  });
 
   if (loading) {
     return <></>;

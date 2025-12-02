@@ -132,6 +132,11 @@ function Navbar() {
           <li>
             <NavLink to="/profile" toggle={toggleMobileMenu}>Profile</NavLink>
           </li>
+          <li>
+            { role === "admin"
+              && <NavLink to="/users" toggle={toggleMobileMenu}>Users</NavLink>
+            }
+          </li>
         </ul>
       </div>
     </>
@@ -146,7 +151,7 @@ interface NavLinkProps {
 
 function NavLink({ to, toggle, children }: NavLinkProps) {
   let path = useResolvedPath(to);
-  let isActive = useMatch({ path: path.pathname, end: false });
+  let isActive = useMatch({ path: path.pathname, end: true });
 
   return (
     <Link
