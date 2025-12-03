@@ -1,3 +1,30 @@
+definitions:
+  dtos.ErrorResponse:
+    properties:
+      error:
+        example: Specific error message
+        type: string
+    type: object
+  dtos.Location:
+    properties:
+      display_name:
+        example: Manhattan, New York County, City of New York, New York, United States
+        type: string
+      lat:
+        example: "40.7579554"
+        type: string
+      lon:
+        example: "-73.9855319"
+        type: string
+      place_id:
+        example: 331711420
+        type: integer
+    required:
+    - display_name
+    - lat
+    - lon
+    - place_id
+    type: object
 host: localhost:4000
 info:
   contact: {}
@@ -17,4 +44,28 @@ paths:
       summary: Check health
       tags:
       - Health
+  /geo/search/{address}:
+    get:
+      description: Performs geocoding, i.e. conversion of the given textual description
+        or addres into geographic coordinates.
+      parameters:
+      - description: Textual description or address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            items:
+              $ref: '#/definitions/dtos.Location'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Lookup a location from address
 swagger: "2.0"

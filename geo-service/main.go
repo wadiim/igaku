@@ -20,6 +20,9 @@ func main() {
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
+	geoController := controllers.NewGeoController()
+	geoController.RegisterRoutes(router)
+
 	router.GET(
 		"/geo/swagger/*any",
 		ginSwagger.WrapHandler(swaggerFiles.Handler),

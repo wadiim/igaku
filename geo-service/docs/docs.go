@@ -34,6 +34,79 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/geo/search/{address}": {
+            "get": {
+                "description": "Performs geocoding, i.e. conversion of the given textual description or addres into geographic coordinates.",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Lookup a location from address",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Textual description or address",
+                        "name": "address",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dtos.Location"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dtos.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string",
+                    "example": "Specific error message"
+                }
+            }
+        },
+        "dtos.Location": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "lat",
+                "lon",
+                "place_id"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "example": "Manhattan, New York County, City of New York, New York, United States"
+                },
+                "lat": {
+                    "type": "string",
+                    "example": "40.7579554"
+                },
+                "lon": {
+                    "type": "string",
+                    "example": "-73.9855319"
+                },
+                "place_id": {
+                    "type": "integer",
+                    "example": 331711420
+                }
+            }
         }
     }
 }`
