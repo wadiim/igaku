@@ -57,8 +57,9 @@ Visit:
 ### Unit Testing
 
 ```console
-$ go -C user-service test ./tests/
 $ go -C auth-service test ./tests/
+$ go -C geo-service test ./tests/
+$ go -C user-service test ./tests/
 $ go -C visit-service test ./tests/
 ```
 

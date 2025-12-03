@@ -12,7 +12,6 @@ import (
 	"time"
 
         commonsErrors "igaku/commons/errors"
-	"igaku/auth-service/errors"
 	"igaku/commons/dtos"
 	"igaku/commons/models"
 )
@@ -138,7 +137,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 			username, err,
 		)
 		log.Println(errmsg)
-		return nil, &errors.InternalError{}
+		return nil, &commonsErrors.InternalError{}
 	}
 
 	var rpcResp dtos.RPCResponse
@@ -147,7 +146,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 			"[RabbitMQ] Failed to unmarshal RPC response: %w", err,
 		)
 		log.Println(errmsg)
-		return nil, &errors.InternalError{}
+		return nil, &commonsErrors.InternalError{}
 	}
 
 	if rpcResp.Error != nil {
@@ -163,13 +162,13 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 				rpcResp.Error.Message,
 			)
 			log.Println(errmsg)
-			return nil, &errors.InternalError{}
+			return nil, &commonsErrors.InternalError{}
 		} else {
 			errmsg := fmt.Sprintf(
 				"Internal error: %s", rpcResp.Error.Message,
 			)
 			log.Println(errmsg)
-			return nil, &errors.InternalError{}
+			return nil, &commonsErrors.InternalError{}
 		}
 	}
 
@@ -177,7 +176,7 @@ func (c *userClient) FindByUsername(username string) (*models.User, error) {
 	if err := json.Unmarshal(rpcResp.Data, &user); err != nil {
 		errmsg := fmt.Sprintf("Failed to unmarshal a user: %w", err)
 		log.Println(errmsg)
-		return nil, &errors.InternalError{}
+		return nil, &commonsErrors.InternalError{}
 	}
 
 	return &user, nil
@@ -187,7 +186,7 @@ func (c *userClient) Persist(user *models.User) error {
 	userBytes, err := json.Marshal(user)
 	if err != nil {
 		log.Printf("Failed to marshal a user: %w", err)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 
 	reply, err := c.call("persist", userBytes)
@@ -197,7 +196,7 @@ func (c *userClient) Persist(user *models.User) error {
 			user.Username, err,
 		)
 		log.Println(errmsg)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 
 	var rpcResp dtos.RPCResponse
@@ -206,7 +205,7 @@ func (c *userClient) Persist(user *models.User) error {
 			"[RabbitMQ] Failed to unmarshal RPC response: %w\n", err,
 		)
 		log.Println(errmsg)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 
 	if rpcResp.Error != nil {
@@ -225,7 +224,7 @@ func (c *userClient) Persist(user *models.User) error {
 				rpcResp.Error.Message,
 			)
 			log.Println(errmsg)
-			return &errors.InternalError{}
+			return &commonsErrors.InternalError{}
 		}
 	}
 

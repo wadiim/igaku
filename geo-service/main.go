@@ -7,6 +7,7 @@ import (
 
 	"igaku/geo-service/controllers"
 	"igaku/geo-service/docs"
+	"igaku/geo-service/services"
 )
 
 // @title		Igaku Geo API
@@ -20,7 +21,8 @@ func main() {
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
-	geoController := controllers.NewGeoController()
+	geoService := services.NewGeoService()
+	geoController := controllers.NewGeoController(geoService)
 	geoController.RegisterRoutes(router)
 
 	router.GET(

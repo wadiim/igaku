@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - cicd
+      - geo
     pull_request:
       types: [opened, synchronize]
       branches:
@@ -26,9 +27,10 @@ jobs:
           cache-dependency-path: |
             auth-service/go.sum
             commons/go.sum
-            visit-service/go.sum
+            geo-service/go.sum
             mail-service/go.sum
             user-service/go.sum
+            visit-service/go.sum
 
       - name: Define `go_build` function
         run: |
@@ -63,6 +65,12 @@ jobs:
         run: |
           source /tmp/go_build.sh
           go_build user-service
+
+      - name: Build & test geo-service
+        shell: bash
+        run: |
+          source /tmp/go_build.sh
+          go_build geo-service
 
       - name: Log in to GHCR
         uses: docker/login-action@v2
