@@ -302,6 +302,13 @@ services:
     image: cosmtrek/air
     working_dir: /app
     command: ["-c", "med-service/air.med.toml"]
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_HOST=igaku-med-db
+      - POSTGRES_DB=${MED_DB_NAME}
+      - POSTGRES_USER=${MED_DB_USER}
+      - POSTGRES_PASSWORD=${MED_DB_PASSWORD}
     expose:
       - 8080
     volumes:
@@ -312,6 +319,8 @@ services:
     networks:
       - igaku-network
     depends_on:
+      med-db:
+        condition: service_healthy
       logstash:
         condition: service_healthy
         required: false
@@ -325,6 +334,28 @@ services:
         tag: "igaku-med-service"
     profiles:
       - disabled
+
+  med-db:
+    container_name: igaku-med-db
+    image: postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${MED_DB_NAME}
+      - POSTGRES_USER=${MED_DB_USER}
+      - POSTGRES_PASSWORD=${MED_DB_PASSWORD}
+    volumes:
+      - med_pgdata:/var/lib/postgresql/
+    ports:
+      - 5434:5432
+    networks:
+      - igaku-network
+    healthcheck:
+      test: pg_isready -U ${MED_DB_USER} -d ${MED_DB_NAME}
+      interval: 2s
+      timeout: 2s
+      retries: 3
 
   swagger-ui:
     image: swaggerapi/swagger-ui
@@ -378,3 +409,4 @@ volumes:
   rabbitmq_logs:
   esdata:
   kibana_data:
+  med_pgdata:

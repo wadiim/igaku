@@ -6,8 +6,13 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	actuator "github.com/sinhashubham95/go-actuator"
 
+	"log"
+
 	"igaku/med-service/controllers"
 	"igaku/med-service/docs"
+	"igaku/med-service/repositories"
+	"igaku/med-service/services"
+	"igaku/med-service/utils"
 	configs "igaku/commons/configs"
 )
 
@@ -16,6 +21,13 @@ import (
 // @host		localhost:4000
 
 func main() {
+	rxNormURL := "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses?classTypes=DISEASE"
+	api := utils.RxNormAPI{rxNormURL}
+	db, err := utils.InitDatabase(&api)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
@@ -36,6 +48,11 @@ func main() {
 		"/med/actuator/*endpoint",
 		ginActuatorHandler,
 	)
+
+	diseaseRepo := repositories.NewGormDiseaseRepository(db)
+	diseaseService := services.NewDiseaseService(diseaseRepo)
+	diseaseController := controllers.NewDiseaseController(diseaseService)
+	diseaseController.RegisterRoutes(router)
 
 	router.Run()
 
