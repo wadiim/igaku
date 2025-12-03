@@ -1,0 +1,31 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Igaku Geo API",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "host": "localhost:4000",
+    "paths": {
+        "/geo/health": {
+            "get": {
+                "description": "Returns an OK message",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Check health",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
