@@ -28,13 +28,13 @@ func TestGormDiseaseRepository(t *testing.T) {
 	targetID1, err := uuid.Parse("32f5c8d5-9cb0-4b1a-b900-ad2aa78f3a19")
 	require.NoError(t, err, "Failed to parse first target UUID")
 
-	targetID2, err := uuid.Parse("ecdfed12-066d-4c45-837f-f159ca19ee22")
+	targetID2, err := uuid.Parse("4140b999-d05b-46eb-a83b-6ff1f06a9eda")
 	require.NoError(t, err, "Failed to parse second target UUID")
 
 	targetRxNormID1 := "D008177"
-	targetRxNormID2 := "D008181"
+	targetRxNormID2 := "D008179"
 	targetName1 := "Lupus Vulgaris"
-	targetName2 := "Lupus Nephritis"
+	targetName2 := "Panniculitis, Lupus Erythematosus"
 	targetResultsNum := 2
 
 	name := "Lupus"

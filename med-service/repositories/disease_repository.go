@@ -22,7 +22,7 @@ func NewGormDiseaseRepository(db *gorm.DB) DiseaseRepository {
 
 func (r *gormDiseaseRepository) FindByName(name string) ([]*models.Disease, error) {
 	var diseases []*models.Disease
-	result := r.db.Where("name LIKE ?", name+"%").Find(&diseases)
+	result := r.db.Where("name LIKE ?", "%"+name+"%").Find(&diseases)
 	if result.Error != nil {
 		return nil, &errors.DatabaseError{}
 	}

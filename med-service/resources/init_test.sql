@@ -11,11 +11,6 @@ VALUES
     'Lupus Vulgaris'
 ),
 (
-    'ecdfed12-066d-4c45-837f-f159ca19ee22',
-    'D008181',
-    'Lupus Nephritis'
-),
-(
     '4140b999-d05b-46eb-a83b-6ff1f06a9eda',
     'D008179',
     'Panniculitis, Lupus Erythematosus'

@@ -37,7 +37,6 @@ func (ctrl *DiseaseController) GetByName(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, diseases)
-	// TODO: Create repository in `main.go`
 }
 
 func (ctrl *DiseaseController) RegisterRoutes(router *gin.Engine) {
