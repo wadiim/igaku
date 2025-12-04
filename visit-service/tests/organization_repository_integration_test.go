@@ -11,9 +11,9 @@ import (
 	"errors"
 	"testing"
 
-	igakuErrors "igaku/user-service/errors"
-	"igaku/user-service/repositories"
-	testUtils "igaku/user-service/tests/utils"
+	igakuErrors "igaku/visit-service/errors"
+	"igaku/visit-service/repositories"
+	testUtils "igaku/visit-service/tests/utils"
 )
 
 func TestGormOrganizationRepository(t *testing.T) {

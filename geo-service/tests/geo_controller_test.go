@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
+	"igaku/commons/dtos"
 	"igaku/geo-service/controllers"
-	"igaku/geo-service/dtos"
 	"igaku/geo-service/errors"
 	"igaku/geo-service/tests/mocks"
 )

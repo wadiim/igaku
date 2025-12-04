@@ -26,9 +26,9 @@ func NewGeoController(service services.GeoService) *GeoController {
 // @Description	Performs geocoding, i.e. conversion of the given textual description or addres into geographic coordinates.
 // @Produce	json
 // @Param	address path string true "Textual description or address"
-// @Success	200 {object} []dtos.Location "Success"
-// @Failure	400 {object} dtos.ErrorResponse "Invalid Request"
-// @Failure	500 {object} dtos.ErrorResponse "Internal Server Error"
+// @Success	200 {object} []commonsDtos.Location "Success"
+// @Failure	400 {object} commonsDtos.ErrorResponse "Invalid Request"
+// @Failure	500 {object} commonsDtos.ErrorResponse "Internal Server Error"
 // @Router	/geo/search/{address} [get]
 func (ctrl *GeoController) Search(c *gin.Context) {
 	address := c.Param("address")

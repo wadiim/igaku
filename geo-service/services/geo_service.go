@@ -7,23 +7,30 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 
-	"igaku/geo-service/dtos"
+	"igaku/commons/dtos"
 	"igaku/geo-service/errors"
-)
-
-const (
-	NORMATIM_URL = "https://nominatim.openstreetmap.org"
 )
 
 type GeoService interface {
 	Search(address string) ([]dtos.Location, error)
+	Reverse(lat, lon string) (*dtos.Location, error)
 }
 
-type geoService struct {}
+type geoService struct{
+	nominatimURL string
+}
 
 func NewGeoService() GeoService {
-	return &geoService{}
+	nominatimURL := os.Getenv("NOMINATIM_URL")
+	if nominatimURL == "" {
+		nominatimURL = "https://nominatim.openstreetmap.org"
+	}
+
+	return &geoService{
+		nominatimURL: nominatimURL,
+	}
 }
 
 func (s *geoService) Search(address string) ([]dtos.Location, error) {
@@ -31,7 +38,7 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 
 	requestUrl := fmt.Sprintf(
 		"%s/search?q=%s&format=json",
-		NORMATIM_URL, escaped,
+		s.nominatimURL, escaped,
 	)
 
 	req, err := http.NewRequest("GET", requestUrl, nil)
@@ -75,4 +82,53 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	}
 
 	return locations, nil
+}
+
+func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
+	requestUrl := fmt.Sprintf(
+		"%s/reverse?lat=%s&lon=%s&format=json",
+		s.nominatimURL, lat, lon,
+	)
+
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		log.Printf("Failed to create request: %v\n", err)
+		return nil, &errors.RequestError{
+			Message: "Failed to create request",
+		}
+	}
+
+	req.Header.Set("User-Agent", "curl/8.17.0")
+	req.Header.Set("Accept", "*/*")
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil || res.StatusCode != 200 {
+		if res.StatusCode == 400 {
+			return nil, &errors.InvalidAddressError{}
+		}
+		return nil, &errors.RequestError{
+			Message: "Failed to perform a lookup",
+		}
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("Failed to read response body: %v\n", err)
+		return nil, &errors.RequestError{
+			Message: "Failed to read response body",
+		}
+	}
+
+	var location dtos.Location
+	if err := json.Unmarshal(body, &location); err != nil {
+		log.Printf("Failed to parse JSON: %v\n", err)
+		return nil, &errors.RequestError{
+			Message: "Failed to parse external API response",
+		}
+	}
+
+	return &location, nil
 }

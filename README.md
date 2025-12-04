@@ -68,6 +68,7 @@ $ go -C visit-service test ./tests/
 ```console
 $ go -C user-service test -tags=integration ./tests/ -v
 $ go -C auth-service test -tags=integration ./tests/ -v
+$ go -C visit-service test -tags=integration ./tests/ -v
 ```
 
 ### Load Testing

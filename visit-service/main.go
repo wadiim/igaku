@@ -59,6 +59,14 @@ func main() {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
+	amqpURI := os.Getenv("RABBITMQ_URL")
+
+	geoClient, err := clients.NewGeoClient(amqpURI)
+	if err != nil {
+		log.Fatalf("Failed to create a geo client: %v", err)
+	}
+	defer geoClient.Shutdown()
+
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 

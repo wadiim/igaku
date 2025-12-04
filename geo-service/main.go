@@ -1,12 +1,16 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"igaku/geo-service/controllers"
 	"igaku/geo-service/docs"
+	"igaku/geo-service/servers"
 	"igaku/geo-service/services"
 )
 
@@ -24,6 +28,18 @@ func main() {
 	geoService := services.NewGeoService()
 	geoController := controllers.NewGeoController(geoService)
 	geoController.RegisterRoutes(router)
+
+	amqpURI := os.Getenv("RABBITMQ_URL")
+
+	rbServer, err := servers.NewRabbitMQServer(amqpURI, geoService)
+	if err != nil {
+		log.Fatalf("[RabbitMQ] Failed to start listeners: %v", err)
+	}
+	defer rbServer.Shutdown()
+
+	if err := rbServer.Start(); err != nil {
+		log.Fatalf("Failed to start RabbitMQ server: %v", err)
+	}
 
 	router.GET(
 		"/geo/swagger/*any",
