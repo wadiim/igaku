@@ -30,7 +30,7 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	escaped := url.QueryEscape(address)
 
 	requestUrl := fmt.Sprintf(
-		"%s/search?q=%s&format=json&addressdetails=1",
+		"%s/search?q=%s&format=json",
 		NORMATIM_URL, escaped,
 	)
 
