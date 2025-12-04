@@ -272,8 +272,6 @@ services:
       options:
         gelf-address: "udp://localhost:12201"
         tag: "igaku-visit-service"
-    profiles:
-      - disabled
 
   visit-db:
     container_name: igaku-visit-db
@@ -294,8 +292,6 @@ services:
       interval: 2s
       timeout: 2s
       retries: 3
-    profiles:
-      - disabled
 
   geo:
     container_name: igaku-geo
