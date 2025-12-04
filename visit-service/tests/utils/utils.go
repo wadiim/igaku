@@ -56,7 +56,7 @@ func SetupTestServices(
 			"nginx",
 			wait.NewHTTPStrategy("/geo/health").
 				WithPort("4000/tcp").
-				WithStartupTimeout(200*time.Second).
+				WithStartupTimeout(300*time.Second).
 				WithPollInterval(4*time.Second),
 		).
 		Up(ctx, compose.Wait(true))
