@@ -73,7 +73,7 @@ func TestGeoClient_ReverseGeocode_Success(t *testing.T) {
 	lat := "35.6656280"
 	lon := "139.7016220"
 	expectedLocation := &dtos.Location{
-		ID:   242474988,
+		ID:   153108796,
 		Lat:  "35.6656280",
 		Lon:  "139.7016220",
 		Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
@@ -81,8 +81,7 @@ func TestGeoClient_ReverseGeocode_Success(t *testing.T) {
 
 	location, err := geoClient.ReverseGeocode(lat, lon)
 	require.NoError(t, err)
-	// NOTE: The returned ID is different each time for some reason.
-	// assert.Equal(t, expectedLocation.ID, location.ID)
+	assert.Equal(t, expectedLocation.ID, location.ID)
 	assert.Equal(t, expectedLocation.Lat, location.Lat)
 	assert.Equal(t, expectedLocation.Lon, location.Lon)
 	assert.Equal(t, expectedLocation.Name, location.Name)

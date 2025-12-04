@@ -34,7 +34,7 @@ func TestGeoController_Search_Success(t *testing.T) {
 	address := "fire-dori-st"
 	expectedLocations := []dtos.Location{
 		{
-			ID:   243772084,
+			ID:   153108796,
 			Lat:  "35.6656280",
 			Lon:  "139.7016220",
 			Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
@@ -70,13 +70,13 @@ func TestGeoController_Search_MultipleResults(t *testing.T) {
 	address := "new-york"
 	expectedLocations := []dtos.Location{
 		{
-			ID:   423955799,
+			ID:   175905,
 			Lat:  "40.7127281",
 			Lon:  "-74.0060152",
 			Name: "City of New York, New York, United States",
 		},
 		{
-			ID:   326302990,
+			ID:   61320,
 			Lat:  "43.1561681",
 			Lon:  "-75.8449946",
 			Name: "New York, United States",

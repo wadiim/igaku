@@ -93,7 +93,7 @@ const docTemplate = `{
                 "display_name",
                 "lat",
                 "lon",
-                "place_id"
+                "osm_id"
             ],
             "properties": {
                 "display_name": {
@@ -108,9 +108,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "-73.9855319"
                 },
-                "place_id": {
+                "osm_id": {
                     "type": "integer",
-                    "example": 331711420
+                    "example": 8398124
                 }
             }
         }

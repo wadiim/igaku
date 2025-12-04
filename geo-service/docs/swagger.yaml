@@ -16,14 +16,14 @@ definitions:
       lon:
         example: "-73.9855319"
         type: string
-      place_id:
-        example: 331711420
+      osm_id:
+        example: 8398124
         type: integer
     required:
     - display_name
     - lat
     - lon
-    - place_id
+    - osm_id
     type: object
 host: localhost:4000
 info:
