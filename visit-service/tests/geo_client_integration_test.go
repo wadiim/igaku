@@ -5,7 +5,12 @@ package tests
 import (
 	"context"
 	"log"
+	"fmt"
+	"net"
+	"net/url"
+	"net/http"
 	"net/http/httptest"
+	"encoding/json"
 	"os"
 	"testing"
 	"time"
@@ -21,35 +26,49 @@ import (
 var mockNominatim *httptest.Server
 
 func TestMain(m *testing.M) {
-	// mockNominatim = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 	lat := r.URL.Query().Get("lat")
-	// 	lon := r.URL.Query().Get("lon")
+	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lat := r.URL.Query().Get("lat")
+		lon := r.URL.Query().Get("lon")
 
-	// 	if lat == "35.6656280" && lon == "139.7016220" {
-	// 		w.Header().Set("Content-Type", "application/json")
-	// 		json.NewEncoder(w).Encode(dtos.Location{
-	// 			ID:   243772084,
-	// 			Lat:  "35.6656280",
-	// 			Lon:  "139.7016220",
-	// 			Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
-	// 		})
-	// 	} else {
-	// 		http.NotFound(w, r)
-	// 	}
-	// }))
-	// defer mockNominatim.Close()
+		if lat == "35.6656280" && lon == "139.7016220" {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(dtos.Location{
+				ID:   153108796,
+				Lat:  "35.6656280",
+				Lon:  "139.7016220",
+				Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
+			})
+		} else {
+			http.NotFound(w, r)
+		}
+	}))
+
+	l, err := net.Listen("tcp", "0.0.0.0:0")
+	if err != nil {
+		log.Fatalf("failed to create listener: %v", err)
+	}
+
+	server.Listener = l
+	server.Start()
+	mockNominatim = server
+	defer mockNominatim.Close()
 
 	ctx, cancelCtx := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancelCtx()
 
-	// TODO: Fix Nominatim API mocking.
-	// NOTE: The commented code does not work probably because the
-	//       `geo` service cannot access the mocked API.
-	// cleanup, err := testUtils.SetupTestServices(ctx, mockNominatim.URL)
-	cleanup, err := testUtils.SetupTestServices(
-		ctx,
-		"https://nominatim.openstreetmap.org",
-	)
+	u, err := url.Parse(mockNominatim.URL)
+	if err != nil {
+		log.Fatalf("Failed to parse URL: %v", err)
+	}
+	_, port, err := net.SplitHostPort(u.Host)
+	if err != nil {
+		log.Fatalf("Failed to split URL: %v", err)
+	}
+	mockUrl := fmt.Sprintf("http://host.docker.internal:%s", port)
+
+	log.Printf("mockUrl: %s", mockUrl)
+
+	cleanup, err := testUtils.SetupTestServices(ctx, mockUrl)
 	if err != nil {
 		log.Fatalf("Failed to setup test environment: %v", err)
 	}

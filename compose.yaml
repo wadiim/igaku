@@ -315,6 +315,8 @@ services:
       - go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       rabbitmq:
         condition: service_healthy
