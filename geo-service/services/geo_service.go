@@ -55,8 +55,9 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 
-	if err != nil || res.StatusCode != 200 {
-		if res.StatusCode == 400 {
+	if err != nil || (res != nil && res.StatusCode != 200) {
+		log.Printf("Failed to connect to external API: %v\n", err)
+		if res != nil && res.StatusCode == 400 {
 			return nil, &errors.InvalidAddressError{}
 		}
 		return nil, &errors.RequestError{
@@ -104,8 +105,9 @@ func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
 	client := &http.Client{}
 	res, err := client.Do(req)
 
-	if err != nil || res.StatusCode != 200 {
-		if res.StatusCode == 400 {
+	if err != nil || (res != nil && res.StatusCode != 200) {
+		log.Printf("Failed to connect to external API: %v\n", err)
+		if res != nil && res.StatusCode == 400 {
 			return nil, &errors.InvalidAddressError{}
 		}
 		return nil, &errors.RequestError{
