@@ -5,6 +5,7 @@ import (
 
 	"errors"
 	"net/http"
+	"strconv"
 
 	"igaku/med-service/services"
 	commonsDtos "igaku/commons/dtos"
@@ -19,10 +20,28 @@ func NewDiseaseController(service services.DiseaseService) *DiseaseController {
 	return &DiseaseController{service: service}
 }
 
-func (ctrl *DiseaseController) GetByName(c *gin.Context) {
+func (ctrl *DiseaseController) GetBySubstring(c *gin.Context) {
 	name := c.Param("name")
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("pageSize", "10")
 
-	diseases, err := ctrl.service.GetByName(name)
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid page parameter. Must be a positive integer.",
+		})
+		return
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid pageSize parameter. Must be a positive integer.",
+		})
+		return
+	}
+
+	diseases, err := ctrl.service.GetBySubstring(name, page, pageSize)
 	if err != nil {
 		if errors.Is(err, &igakuErrors.DiseaseNotFoundError{}) {
 			c.JSON(http.StatusNotFound, commonsDtos.ErrorResponse{
@@ -42,7 +61,10 @@ func (ctrl *DiseaseController) GetByName(c *gin.Context) {
 func (ctrl *DiseaseController) RegisterRoutes(router *gin.Engine) {
 	routes := router.Group("/med/disease")
 	{
-		routes.GET("/:name", ctrl.GetByName)
+		routes.GET(
+			"/:name",
+			ctrl.GetBySubstring,
+		)
 	}
 }
 

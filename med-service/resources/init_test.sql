@@ -32,21 +32,21 @@ VALUES
 ),
 (
     'ebb58b3c-4356-4564-bd01-ddd495927025',
-    'D002640',
-    'Chiari-Frommel Syndrome'
+    'D011014',
+    'Pneumonia'
 ),
 (
     'ff99edf6-b4c3-4134-9805-61defafa0b62',
-    'D005879',
-    'Tourette Syndrome'
+    'D011002',
+    'Pleuropneumonia'
 ),
 (
     '0d8209f8-a04d-493d-a162-50878a8ee5c0',
-    'D006623',
-    'von Hippel-Lindau Disease'
+    'D018549',
+    'Cryptogenic Organizing Pneumonia'
 ),
 (
     '8307b49d-5856-4a04-a2aa-f089b8076420',
-    'D006816',
-    'Huntington Disease'
+    'D011017',
+    'Pneumonia, Lipid'
 );
