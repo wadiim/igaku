@@ -3,11 +3,13 @@ package servers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 
 	"igaku/commons/dtos"
 	commonsErrors "igaku/commons/errors"
+	igakuErrors "igaku/geo-service/errors"
 	"igaku/geo-service/services"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -105,11 +107,19 @@ func (s *RabbitMQServer) startReverseGeocodeListener() error {
 
 			location, err := s.service.Reverse(req.Lat, req.Lon)
 			if err != nil {
-				s.sendErrorResponse(
-					d,
-					"INTERNAL",
-					"Failed to perform reverse geocoding",
-				)
+				if errors.Is(err, &igakuErrors.TimeoutError{}) {
+					s.sendErrorResponse(
+						d,
+						"TIMEOUT",
+						err.Error(),
+					)
+				} else {
+					s.sendErrorResponse(
+						d,
+						"INTERNAL",
+						"Failed to perform reverse geocoding",
+					)
+				}
 				continue
 			}
 

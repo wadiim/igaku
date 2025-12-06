@@ -67,6 +67,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/dtos.ErrorResponse"
                         }
                     },
+                    "408": {
+                        "description": "Request Timeout",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {

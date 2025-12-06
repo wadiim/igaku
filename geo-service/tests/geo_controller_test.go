@@ -130,3 +130,29 @@ func TestGeoController_Search_InvalidAddress(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 	mockService.AssertExpectations(t)
 }
+
+func TestGeoController_Search_Timeout(t *testing.T) {
+	mockService := new(mocks.GeoService)
+	router := setupGeoRouter(t, mockService)
+
+	address := "new-york"
+	mockService.
+		On("Search", address).
+		Return(nil, &errors.TimeoutError{}).
+		Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/geo/search/%s", address),
+		nil,
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusRequestTimeout, rec.Code)
+	mockService.AssertExpectations(t)
+}

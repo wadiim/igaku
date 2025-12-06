@@ -118,7 +118,7 @@ func (c *geoClient) call(routingKey string, body []byte) ([]byte, error) {
 		return nil, &commonsErrors.MessageBrokerError{}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	select {
@@ -163,6 +163,9 @@ func (c *geoClient) ReverseGeocode(lat, lon string) (*dtos.Location, error) {
 	}
 
 	if rpcResp.Error != nil {
+		if rpcResp.Error.Code == "TIMEOUT" {
+			return nil, fmt.Errorf(rpcResp.Error.Message)
+		}
 		errmsg := fmt.Sprintf(
 			"Geo service internal error: %s",
 			rpcResp.Error.Message,

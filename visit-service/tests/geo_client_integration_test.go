@@ -38,6 +38,9 @@ func TestMain(m *testing.M) {
 				Lon:  "139.7016220",
 				Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
 			})
+		} else if lat == "0.0" && lon == "0.0" {
+			time.Sleep(8 * time.Second)
+			w.WriteHeader(http.StatusOK)
 		} else {
 			http.NotFound(w, r)
 		}
@@ -104,6 +107,21 @@ func TestGeoClient_ReverseGeocode_Success(t *testing.T) {
 	assert.Equal(t, expectedLocation.Lat, location.Lat)
 	assert.Equal(t, expectedLocation.Lon, location.Lon)
 	assert.Equal(t, expectedLocation.Name, location.Name)
+}
+
+func TestGeoClient_ReverseGeocode_Timeout(t *testing.T) {
+	url := "amqp://rabbit:tibbar@localhost:5672/"
+
+	geoClient, err := clients.NewGeoClient(url)
+	require.NoError(t, err)
+	defer geoClient.Shutdown()
+
+	lat := "0.0"
+	lon := "0.0"
+
+	_, err = geoClient.ReverseGeocode(lat, lon)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "Request timed out")
 }
 
 // TODO: Add more tests

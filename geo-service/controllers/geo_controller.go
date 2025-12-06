@@ -28,6 +28,7 @@ func NewGeoController(service services.GeoService) *GeoController {
 // @Param	address path string true "Textual description or address"
 // @Success	200 {object} []commonsDtos.Location "Success"
 // @Failure	400 {object} commonsDtos.ErrorResponse "Invalid Request"
+// @Failure	408 {object} commonsDtos.ErrorResponse "Request Timeout"
 // @Failure	500 {object} commonsDtos.ErrorResponse "Internal Server Error"
 // @Router	/geo/search/{address} [get]
 func (ctrl *GeoController) Search(c *gin.Context) {
@@ -37,6 +38,10 @@ func (ctrl *GeoController) Search(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, &igakuErrors.InvalidAddressError{}) {
 			c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+		} else if errors.Is(err, &igakuErrors.TimeoutError{}) {
+			c.JSON(http.StatusRequestTimeout, commonsDtos.ErrorResponse{
 				Message: err.Error(),
 			})
 		} else {

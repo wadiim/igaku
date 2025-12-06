@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 
 	"igaku/commons/dtos"
 	"igaku/geo-service/errors"
@@ -18,7 +20,7 @@ type GeoService interface {
 	Reverse(lat, lon string) (*dtos.Location, error)
 }
 
-type geoService struct{
+type geoService struct {
 	nominatimURL string
 }
 
@@ -52,19 +54,37 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	req.Header.Set("User-Agent", "curl/8.17.0")
 	req.Header.Set("Accept", "*/*")
 
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	req = req.WithContext(ctx)
+
 	client := &http.Client{}
 	res, err := client.Do(req)
 
-	if err != nil || (res != nil && res.StatusCode != 200) {
+	if err != nil {
+		if err, ok := err.(interface{ Timeout() bool }); ok && err.Timeout() {
+			log.Printf("Request to external API timed out: %v\n", err)
+			return nil, &errors.TimeoutError{}
+		}
 		log.Printf("Failed to connect to external API: %v\n", err)
-		if res != nil && res.StatusCode == 400 {
+		return nil, &errors.RequestError{
+			Message: "Failed to perform a lookup",
+		}
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Printf(
+			"Request to external API failed with status code: %d\n",
+			res.StatusCode,
+		)
+		if res.StatusCode == 400 {
 			return nil, &errors.InvalidAddressError{}
 		}
 		return nil, &errors.RequestError{
 			Message: "Failed to perform a lookup",
 		}
 	}
-	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
@@ -102,19 +122,37 @@ func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
 	req.Header.Set("User-Agent", "curl/8.17.0")
 	req.Header.Set("Accept", "*/*")
 
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	req = req.WithContext(ctx)
+
 	client := &http.Client{}
 	res, err := client.Do(req)
 
-	if err != nil || (res != nil && res.StatusCode != 200) {
+	if err != nil {
+		if err, ok := err.(interface{ Timeout() bool }); ok && err.Timeout() {
+			log.Printf("Request to external API timed out: %v\n", err)
+			return nil, &errors.TimeoutError{}
+		}
 		log.Printf("Failed to connect to external API: %v\n", err)
-		if res != nil && res.StatusCode == 400 {
+		return nil, &errors.RequestError{
+			Message: "Failed to perform a lookup",
+		}
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Printf(
+			"Request to external API failed with status code: %d\n",
+			res.StatusCode,
+		)
+		if res.StatusCode == 400 {
 			return nil, &errors.InvalidAddressError{}
 		}
 		return nil, &errors.RequestError{
 			Message: "Failed to perform a lookup",
 		}
 	}
-	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 	"os"
 	"log"
 
+	"igaku/visit-service/clients"
 	"igaku/visit-service/controllers"
 	"igaku/visit-service/docs"
 	"igaku/visit-service/repositories"
