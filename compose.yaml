@@ -131,8 +131,8 @@ services:
     volumes:
       - ./user-service:/app/user-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -186,8 +186,8 @@ services:
     volumes:
       - ./auth-service:/app/auth-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -219,8 +219,8 @@ services:
     volumes:
       - ./mail-service:/app/mail-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -258,8 +258,8 @@ services:
     volumes:
       - ./visit-service:/app/visit-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -314,8 +314,8 @@ services:
     volumes:
       - ./geo-service:/app/geo-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     extra_hosts:
@@ -380,10 +380,6 @@ networks:
       com.docker.network.bridge.name: "igaku"
 
 volumes:
-  go-mod-cache:
-    name: igaku-global-go-mod-cache
-  go-build-cache:
-    name: igaku-global-go-build-cache
   rabbitmq_data:
   rabbitmq_logs:
   esdata:
