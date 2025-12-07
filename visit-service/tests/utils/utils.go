@@ -46,6 +46,7 @@ func SetupTestServices(
 		"GRAFANA_TOKEN":	"",
 		"GRAFANA_URL":		"",
 		"NOMINATIM_URL":	nominatimURL,
+		"NOMINATIM_TIMEOUT":	"2",
 	}
 
 	err = stack.

@@ -309,6 +309,7 @@ services:
     environment:
       - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
       - NOMINATIM_URL=${NOMINATIM_URL}
+      - NOMINATIM_TIMEOUT=${NOMINATIM_TIMEOUT}
     expose:
       - 8080
     volumes:

@@ -39,7 +39,7 @@ func TestMain(m *testing.M) {
 				Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
 			})
 		} else if lat == "0.0" && lon == "0.0" {
-			time.Sleep(8 * time.Second)
+			time.Sleep(4 * time.Second)
 			w.WriteHeader(http.StatusOK)
 		} else {
 			http.NotFound(w, r)

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"time"
 
 	"igaku/commons/dtos"
@@ -22,6 +23,7 @@ type GeoService interface {
 
 type geoService struct {
 	nominatimURL string
+	nominatimTimeout time.Duration
 }
 
 func NewGeoService() GeoService {
@@ -30,8 +32,15 @@ func NewGeoService() GeoService {
 		nominatimURL = "https://nominatim.openstreetmap.org"
 	}
 
+	t, err := strconv.Atoi(os.Getenv("NOMINATIM_TIMEOUT"))
+	if err != nil || t <= 0 {
+		t = 10
+	}
+	timeout := time.Duration(t) * time.Second
+
 	return &geoService{
 		nominatimURL: nominatimURL,
+		nominatimTimeout: timeout,
 	}
 }
 
@@ -54,7 +63,9 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	req.Header.Set("User-Agent", "curl/8.17.0")
 	req.Header.Set("Accept", "*/*")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(
+		context.Background(), s.nominatimTimeout,
+	)
 	defer cancel()
 	req = req.WithContext(ctx)
 
@@ -122,7 +133,9 @@ func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
 	req.Header.Set("User-Agent", "curl/8.17.0")
 	req.Header.Set("Accept", "*/*")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(
+		context.Background(), s.nominatimTimeout,
+	)
 	defer cancel()
 	req = req.WithContext(ctx)
 
