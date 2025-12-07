@@ -21,9 +21,10 @@ func NewGeoController(service services.GeoService) *GeoController {
 	}
 }
 
-// Search	returns a list of geographical locations corresponding to the given address.
+// Search returns a list of geographical locations corresponding to the given address.
 // @Summary	Lookup a location from address
 // @Description	Performs geocoding, i.e. conversion of the given textual description or addres into geographic coordinates.
+// @Tags	Geolocation
 // @Produce	json
 // @Param	address path string true "Textual description or address"
 // @Success	200 {object} []commonsDtos.Location "Success"

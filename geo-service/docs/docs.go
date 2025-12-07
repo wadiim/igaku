@@ -41,6 +41,9 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "Geolocation"
+                ],
                 "summary": "Lookup a location from address",
                 "parameters": [
                     {

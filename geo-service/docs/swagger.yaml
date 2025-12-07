@@ -76,4 +76,6 @@ paths:
           schema:
             $ref: '#/definitions/dtos.ErrorResponse'
       summary: Lookup a location from address
+      tags:
+      - Geolocation
 swagger: "2.0"
