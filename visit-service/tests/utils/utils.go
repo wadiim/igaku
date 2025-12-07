@@ -69,7 +69,6 @@ func SetupTestServices(
 			context.Background(),
 			compose.RemoveOrphans(true),
 			compose.RemoveVolumes(true),
-			compose.RemoveImagesLocal,
 		)
 		if err != nil {
 			log.Printf("Failed to stop stack: %w", err)
