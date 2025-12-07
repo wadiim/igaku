@@ -22,6 +22,21 @@ func NewDiseaseController(service services.DiseaseService) *DiseaseController {
 	return &DiseaseController{service: service}
 }
 
+// GetBySubstring retrieves the list of diseases that match provided substring
+// @Summary	List diseases that match provided substring (Doctor)
+// @Description	Retrieves a paginated list of diseases that match provided substring. Requires Doctor privileges.
+// @Tags	Diseases
+// @Produce	json
+// @Param	name path string false "Disease name substring"
+// @Param	page query int false "Page number (default: 1)" minimum(1)
+// @Param	pageSize query int false "Number of items per page (default: 10)" minimum(1) maximum(100)
+// @Success	200  {object}  dtos.PaginatedResponse{data=[]dtos.DiseaseDetails} "Successfully retrieved list of diseases"
+// @Failure	400  {object}  dtos.ErrorResponse  "Bad Request - Invalid query parameters (name, page, pageSize)"
+// @Failure	401  {object}  dtos.ErrorResponse  "Unauthorized - Invalid or missing token"
+// @Failure	403  {object}  dtos.ErrorResponse  "Forbidden - User does not have Doctor role"
+// @Failure	500  {object}  dtos.ErrorResponse  "Internal Server Error - Failed to retrieve diseases"
+// @Security	BearerAuth
+// @Router	/med/disease/{name} [get]
 func (ctrl *DiseaseController) GetBySubstring(c *gin.Context) {
 	name := c.Param("name")
 	pageStr := c.DefaultQuery("page", "1")

@@ -20,6 +20,10 @@ import (
 // @version		0.0.1
 // @host		localhost:4000
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 func main() {
 	rxNormURL := "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses?classTypes=DISEASE"
 	api := utils.RxNormAPI{rxNormURL}
@@ -33,11 +37,6 @@ func main() {
 
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
-
-	router.GET(
-		"/med/swagger/*any",
-		ginSwagger.WrapHandler(swaggerFiles.Handler),
-	)
 
 	actuatorHandler := actuator.GetActuatorHandler(configs.ActuatorConfig)
 	ginActuatorHandler := func(ctx *gin.Context) {
@@ -53,6 +52,11 @@ func main() {
 	diseaseService := services.NewDiseaseService(diseaseRepo)
 	diseaseController := controllers.NewDiseaseController(diseaseService)
 	diseaseController.RegisterRoutes(router)
+
+	router.GET(
+		"/med/swagger/*any",
+		ginSwagger.WrapHandler(swaggerFiles.Handler),
+	)
 
 	router.Run()
 
