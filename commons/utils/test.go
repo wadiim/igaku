@@ -14,12 +14,13 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
-
-	"igaku/user-service/utils"
 )
 
-// TODO: Move to `commons`
-func SetupTestDatabase(ctx context.Context, t *testing.T) (db *gorm.DB, cleanup func()) {
+type schemaMigrator func(*gorm.DB) error
+
+func SetupTestDatabase(
+	ctx context.Context, t *testing.T, migrateSchema schemaMigrator,
+) (db *gorm.DB, cleanup func()) {
 	t.Helper()
 
 	// Configure the PostgreSQL container.
@@ -50,7 +51,7 @@ func SetupTestDatabase(ctx context.Context, t *testing.T) (db *gorm.DB, cleanup 
 	})
 	require.NoError(t, err, "Failed to connect to test database with GORM")
 
-	err = utils.MigrateSchema(db)
+	err = migrateSchema(db)
 	require.NoError(t, err, "Failed to migrate the database schema")
 
 	// Read and execute the initialization script.

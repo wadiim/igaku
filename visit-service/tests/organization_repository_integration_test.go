@@ -11,16 +11,19 @@ import (
 	"errors"
 	"testing"
 
-	igakuErrors "igaku/visit-service/errors"
 	"igaku/visit-service/repositories"
-	testUtils "igaku/visit-service/tests/utils"
+	"igaku/visit-service/utils"
+	igakuErrors "igaku/visit-service/errors"
+	testUtils "igaku/commons/utils"
 )
 
 func TestGormOrganizationRepository(t *testing.T) {
 	t.Run("FindByID_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		db, cleanup := testUtils.SetupTestDatabase(
+			ctx, t, utils.MigrateSchema,
+		)
 		defer cleanup()
 
 		repo := repositories.NewGormOrganizationRepository(db)
@@ -50,7 +53,9 @@ func TestGormOrganizationRepository(t *testing.T) {
 	t.Run("FindByID_NotFound", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		db, cleanup := testUtils.SetupTestDatabase(
+			ctx, t, utils.MigrateSchema,
+		)
 		defer cleanup()
 
 		repo := repositories.NewGormOrganizationRepository(db)

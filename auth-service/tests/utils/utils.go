@@ -35,6 +35,7 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		"GRAFANA_TOKEN":		"",
 		"GRAFANA_URL":			"",
 		"NOMINATIM_URL":		"",
+		"NOMINATIM_TIMEOUT":		"",
 
 	}
 
