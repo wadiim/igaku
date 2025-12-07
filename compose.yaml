@@ -115,6 +115,7 @@ services:
 
   user:
     image: cosmtrek/air
+    container_name: igaku-user
     working_dir: /app
     command: ["-c", "user-service/air.user.toml"]
     env_file:
@@ -152,8 +153,8 @@ services:
         tag: "igaku-user-service"
 
   user-db:
-    container_name: igaku-user-db
     image: postgres
+    container_name: igaku-user-db
     restart: always
     env_file:
       - .env
@@ -173,6 +174,7 @@ services:
 
   auth:
     image: cosmtrek/air
+    container_name: igaku-auth
     working_dir: /app
     command: ["-c", "auth-service/air.auth.toml"]
     environment:
@@ -205,6 +207,7 @@ services:
 
   mail:
     image: cosmtrek/air
+    container_name: igaku-mail
     working_dir: /app
     command: ["-c", "mail-service/air.mail.toml"]
     environment:
@@ -238,8 +241,8 @@ services:
       - mail
 
   visit:
-    container_name: igaku-visit
     image: cosmtrek/air
+    container_name: igaku-visit
     working_dir: /app
     command: ["-c", "visit-service/air.visit.toml"]
     env_file:
@@ -277,8 +280,8 @@ services:
         tag: "igaku-visit-service"
 
   visit-db:
-    container_name: igaku-visit-db
     image: postgres
+    container_name: igaku-visit-db
     restart: always
     env_file:
       - .env
@@ -297,8 +300,8 @@ services:
       retries: 3
 
   geo:
-    container_name: igaku-geo
     image: cosmtrek/air
+    container_name: igaku-geo
     working_dir: /app
     command: ["-c", "geo-service/air.geo.toml"]
     env_file:
@@ -371,6 +374,7 @@ services:
 
 networks:
   igaku-network:
+    name: igaku-network
     driver: bridge
     driver_opts:
       com.docker.network.bridge.name: "igaku"
