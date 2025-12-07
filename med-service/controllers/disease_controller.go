@@ -7,8 +7,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"igaku/med-service/middleware"
 	"igaku/med-service/services"
 	commonsDtos "igaku/commons/dtos"
+	commonModels "igaku/commons/models"
 	igakuErrors "igaku/med-service/errors"
 )
 
@@ -60,9 +62,11 @@ func (ctrl *DiseaseController) GetBySubstring(c *gin.Context) {
 
 func (ctrl *DiseaseController) RegisterRoutes(router *gin.Engine) {
 	routes := router.Group("/med/disease")
+	routes.Use(middleware.Authenticate())
 	{
 		routes.GET(
 			"/:name",
+			middleware.Authorize(commonModels.Doctor),
 			ctrl.GetBySubstring,
 		)
 	}

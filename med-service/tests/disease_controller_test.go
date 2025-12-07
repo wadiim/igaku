@@ -13,9 +13,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	commonsDtos "igaku/commons/dtos"
 	commonsErrors "igaku/commons/errors"
+	commonsUtils "igaku/commons/utils"
 	"igaku/commons/models"
 	"igaku/med-service/controllers"
 	"igaku/med-service/dtos"
@@ -87,6 +89,233 @@ func unpackPaginatedResponse(t *testing.T, body *bytes.Buffer) (
 	return paginatedResponse, diseasesResponse
 }
 
+func getDoctorToken(t *testing.T) string {
+	admin := &models.User{
+		ID: uuid.New(),
+		Username: "ghouse",
+		Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+		Role: models.Doctor,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		admin,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	return token
+}
+
+func TestDiseaseController_GetBySubstring_NoToken(t *testing.T) {
+	mockRepo := new(MockDiseaseRepository)
+	router := setupRouter(mockRepo)
+
+	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Authorization header required"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "FindBySubstring", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+func TestDiseaseController_GetBySubstring_InvalidTokenFormat(t *testing.T) {
+	mockRepo := new(MockDiseaseRepository)
+	router := setupRouter(mockRepo)
+
+	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "INVALID.TOKEN")
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Unauthorized"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "FindBySubstring", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestDiseaseController_GetBySubstring_ExpiredToken(t *testing.T) {
+	mockRepo := new(MockDiseaseRepository)
+	router := setupRouter(mockRepo)
+
+	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := models.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: models.Doctor,
+	}
+
+	issuedAt, err := time.Parse(time.DateTime, "1998-06-07 08:00:00")
+	require.NoError(t, err)
+	expiresAt, err := time.Parse(time.DateTime, "1998-06-07 09:00:00")
+	require.NoError(t, err)
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		issuedAt,
+		expiresAt,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Token has expired"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "FindBySubstring", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestDiseaseController_GetBySubstring_UnauthorizedPatient(t *testing.T) {
+	mockRepo := new(MockDiseaseRepository)
+	router := setupRouter(mockRepo)
+
+	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := models.User{
+		ID: id,
+		Username: "jdoe",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: models.Patient,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusForbidden, rec.Code,
+		"Expected HTTP status 403 Forbidden",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Insufficient permissions"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "FindBySubstring", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestDiseaseController_GetBySubstring_UnauthorizedAdmin(t *testing.T) {
+	mockRepo := new(MockDiseaseRepository)
+	router := setupRouter(mockRepo)
+
+	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := models.User{
+		ID: id,
+		Username: "lcuddy",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: models.Admin,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusForbidden, rec.Code,
+		"Expected HTTP status 403 Forbidden",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Insufficient permissions"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "FindBySubstring", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
 func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 	mockRepo := new(MockDiseaseRepository)
 	router := setupRouter(mockRepo)
@@ -114,6 +343,8 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s", testName),
 		nil,
 	)
+	token := getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,6 +395,8 @@ func TestDiseaseController_GetBySubstring_WithParam(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
+	token := getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -215,6 +448,8 @@ func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
+	token := getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -248,6 +483,8 @@ func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
+	token = getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -293,6 +530,8 @@ func TestDiseaseController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
+	token := getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -347,6 +586,8 @@ func TestDiseaseController_GetBySubstring_EmptyPage(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
+	token := getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -369,23 +610,27 @@ func TestDiseaseController_GetBySubstring_InvalidPageParam(t *testing.T) {
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
+	token := getDoctorToken(t)
 	req1, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?page=-5", testName),
 		nil,
 	)
+	req1.Header.Set("Authorization", token)
 	require.NoError(t, err)
 	req2, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?page=0", testName),
 		nil,
 	)
+	req2.Header.Set("Authorization", token)
 	require.NoError(t, err)
 	req3, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?page=abc", testName),
 		nil,
 	)
+	req3.Header.Set("Authorization", token)
 	require.NoError(t, err)
 	for i, req := range []*http.Request{req1, req2, req3} {
 		rec := httptest.NewRecorder()
@@ -420,23 +665,27 @@ func TestDiseaseController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
+	token := getDoctorToken(t)
 	req1, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?pageSize=-5", testName),
 		nil,
 	)
+	req1.Header.Set("Authorization", token)
 	require.NoError(t, err)
 	req2, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?pageSize=0", testName),
 		nil,
 	)
+	req2.Header.Set("Authorization", token)
 	require.NoError(t, err)
 	req3, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?pageSize=abc", testName),
 		nil,
 	)
+	req3.Header.Set("Authorization", token)
 	require.NoError(t, err)
 	for i, req := range []*http.Request{req1, req2, req3} {
 		rec := httptest.NewRecorder()
@@ -484,6 +733,8 @@ func TestDiseaseController_GetBySubstring_DiseaseNotFound(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s", testName),
 		nil,
 	)
+	token := getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -519,6 +770,8 @@ func TestDiseaseController_GetBySubstring_RepoError(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s", testName),
 		nil,
 	)
+	token := getDoctorToken(t)
+	req.Header.Set("Authorization", token)
 	if err != nil {
 		t.Fatal(err)
 	}
