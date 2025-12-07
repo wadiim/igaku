@@ -89,7 +89,7 @@ func unpackPaginatedResponse(t *testing.T, body *bytes.Buffer) (
 	return paginatedResponse, diseasesResponse
 }
 
-func getDoctorToken(t *testing.T) string {
+func genDoctorToken(t *testing.T) string {
 	admin := &models.User{
 		ID: uuid.New(),
 		Username: "ghouse",
@@ -321,10 +321,6 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
-	// expectedDiseases := []*models.Disease{
-	// 	{ID: uuid.New(), RxNormID: "D000000", Name: "Lupus Vulgaris"},
-	// 	{ID: uuid.New(), RxNormID: "D000001", Name: "Lupus Nephritis"},
-	// }
 	count := 9
 	expectedDiseases := make([]*models.Disease, count)
 	for i := range count {
@@ -343,11 +339,9 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s", testName),
 		nil,
 	)
-	token := getDoctorToken(t)
-	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	req.Header.Set("Authorization", genDoctorToken(t))
+
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -395,11 +389,9 @@ func TestDiseaseController_GetBySubstring_WithParam(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
-	token := getDoctorToken(t)
-	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	req.Header.Set("Authorization", genDoctorToken(t))
+
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -443,16 +435,15 @@ func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 	mockRepo.On("FindBySubstring", testName, 0, pageSize).Return(expectedDiseases[0:pageSize], nil).Once()
 	mockRepo.On("CountBySubstring", testName).Return(int64(count), nil).Once()
 
+	token := genDoctorToken(t)
 	req, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
-	token := getDoctorToken(t)
+	require.NoError(t, err)
 	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -483,11 +474,9 @@ func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
-	token = getDoctorToken(t)
+	require.NoError(t, err)
 	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	rec = httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -530,11 +519,9 @@ func TestDiseaseController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
-	token := getDoctorToken(t)
-	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	req.Header.Set("Authorization", genDoctorToken(t))
+
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -586,11 +573,9 @@ func TestDiseaseController_GetBySubstring_EmptyPage(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
 		nil,
 	)
-	token := getDoctorToken(t)
-	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	req.Header.Set("Authorization", genDoctorToken(t))
+
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -610,7 +595,7 @@ func TestDiseaseController_GetBySubstring_InvalidPageParam(t *testing.T) {
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
-	token := getDoctorToken(t)
+	token := genDoctorToken(t)
 	req1, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?page=-5", testName),
@@ -665,7 +650,7 @@ func TestDiseaseController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
-	token := getDoctorToken(t)
+	token := genDoctorToken(t)
 	req1, err := http.NewRequest(
 		http.MethodGet,
 		fmt.Sprintf("/med/disease/%s?pageSize=-5", testName),
@@ -733,11 +718,9 @@ func TestDiseaseController_GetBySubstring_DiseaseNotFound(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s", testName),
 		nil,
 	)
-	token := getDoctorToken(t)
-	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	req.Header.Set("Authorization", genDoctorToken(t))
+
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
@@ -770,11 +753,9 @@ func TestDiseaseController_GetBySubstring_RepoError(t *testing.T) {
 		fmt.Sprintf("/med/disease/%s", testName),
 		nil,
 	)
-	token := getDoctorToken(t)
-	req.Header.Set("Authorization", token)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	req.Header.Set("Authorization", genDoctorToken(t))
+
 	rec := httptest.NewRecorder()
 	router.ServeHTTP(rec, req)
 
