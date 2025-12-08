@@ -55,7 +55,7 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		log.Printf("Failed to create request: %v\n", err)
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to create request",
 		}
 	}
@@ -78,7 +78,7 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 			return nil, &errors.TimeoutError{}
 		}
 		log.Printf("Failed to connect to external API: %v\n", err)
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to perform a lookup",
 		}
 	}
@@ -92,7 +92,7 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 		if res.StatusCode == 400 {
 			return nil, &errors.InvalidAddressError{}
 		}
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to perform a lookup",
 		}
 	}
@@ -100,7 +100,7 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Printf("Failed to read response body: %v\n", err)
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to read response body",
 		}
 	}
@@ -108,7 +108,7 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 	var locations []dtos.Location
 	if err := json.Unmarshal(body, &locations); err != nil {
 		log.Printf("Failed to parse JSON: %v\n", err)
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to parse external API response",
 		}
 	}
@@ -125,7 +125,7 @@ func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
 	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		log.Printf("Failed to create request: %v\n", err)
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to create request",
 		}
 	}
@@ -148,11 +148,35 @@ func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
 			return nil, &errors.TimeoutError{}
 		}
 		log.Printf("Failed to connect to external API: %v\n", err)
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to perform a lookup",
 		}
 	}
 	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("Failed to read response body: %v\n", err)
+		return nil, &errors.ExternalApiRequestError{
+			Message: "Failed to read response body",
+		}
+	}
+
+	var errMap map[string]interface{}
+	if json.Unmarshal(body, &errMap) == nil {
+		if errBody, ok := errMap["error"].(map[string]interface{}); ok {
+			if val, ok := errBody["message"].(string); ok {
+				msg := fmt.Sprintf("%v", val)
+				ret := &errors.ExternalApiRequestError{
+					Message: msg,
+				}
+				return nil, ret
+			}
+		} else if val, ok := errMap["error"].(string); ok {
+			msg := fmt.Sprintf("%v", val)
+			return nil, &errors.ExternalApiRequestError{Message: msg}
+		}
+	}
 
 	if res.StatusCode != 200 {
 		log.Printf(
@@ -162,23 +186,15 @@ func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
 		if res.StatusCode == 400 {
 			return nil, &errors.InvalidAddressError{}
 		}
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to perform a lookup",
-		}
-	}
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		log.Printf("Failed to read response body: %v\n", err)
-		return nil, &errors.RequestError{
-			Message: "Failed to read response body",
 		}
 	}
 
 	var location dtos.Location
 	if err := json.Unmarshal(body, &location); err != nil {
 		log.Printf("Failed to parse JSON: %v\n", err)
-		return nil, &errors.RequestError{
+		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to parse external API response",
 		}
 	}

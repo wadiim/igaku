@@ -4,14 +4,15 @@ package tests
 
 import (
 	"context"
-	"log"
+	"encoding/json"
 	"fmt"
+	"log"
 	"net"
-	"net/url"
 	"net/http"
 	"net/http/httptest"
-	"encoding/json"
+	"net/url"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -41,6 +42,13 @@ func TestMain(m *testing.M) {
 		} else if lat == "0.0" && lon == "0.0" {
 			time.Sleep(4 * time.Second)
 			w.WriteHeader(http.StatusOK)
+		} else if lat == "foo" && lon == "bar" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write([]byte("{\"error\":{\"code\":400,\"message\":\"Parameter 'lon' must be a number.\"}}"))
+		} else if lat == "90" && lon == "90" {
+			w.Header().Set("Content-Type", "application/json")
+			w.Write([]byte("{\"error\":\"Unable to geocode\"}"))
 		} else {
 			http.NotFound(w, r)
 		}
@@ -121,7 +129,35 @@ func TestGeoClient_ReverseGeocode_Timeout(t *testing.T) {
 
 	_, err = geoClient.ReverseGeocode(lat, lon)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "Request timed out")
+	assert.Contains(t, strings.ToLower(err.Error()), "request timed out")
 }
 
-// TODO: Add more tests
+func TestGeoClient_ReverseGeocode_NonGeocodableLocation(t *testing.T) {
+	url := "amqp://rabbit:tibbar@localhost:5672/"
+
+	geoClient, err := clients.NewGeoClient(url)
+	require.NoError(t, err)
+	defer geoClient.Shutdown()
+
+	lat := "90"
+	lon := "90"
+
+	_, err = geoClient.ReverseGeocode(lat, lon)
+	require.Error(t, err)
+	assert.Contains(t, strings.ToLower(err.Error()), "unable to geocode")
+}
+
+func TestGeoClient_ReverseGeocode_InvalidParams(t *testing.T) {
+	url := "amqp://rabbit:tibbar@localhost:5672/"
+
+	geoClient, err := clients.NewGeoClient(url)
+	require.NoError(t, err)
+	defer geoClient.Shutdown()
+
+	lat := "foo"
+	lon := "bar"
+
+	_, err = geoClient.ReverseGeocode(lat, lon)
+	require.Error(t, err)
+	assert.Contains(t, strings.ToLower(err.Error()), "must be a number")
+}

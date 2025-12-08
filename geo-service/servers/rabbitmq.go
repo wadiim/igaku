@@ -106,11 +106,19 @@ func (s *RabbitMQServer) startReverseGeocodeListener() error {
 			}
 
 			location, err := s.service.Reverse(req.Lat, req.Lon)
+
+			var externErr *igakuErrors.ExternalApiRequestError
 			if err != nil {
 				if errors.Is(err, &igakuErrors.TimeoutError{}) {
 					s.sendErrorResponse(
 						d,
 						"TIMEOUT",
+						err.Error(),
+					)
+				} else if errors.As(err, &externErr) {
+					s.sendErrorResponse(
+						d,
+						"EXTERNAL",
 						err.Error(),
 					)
 				} else {

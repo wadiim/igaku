@@ -163,7 +163,7 @@ func (c *geoClient) ReverseGeocode(lat, lon string) (*dtos.Location, error) {
 	}
 
 	if rpcResp.Error != nil {
-		if rpcResp.Error.Code == "TIMEOUT" {
+		if rpcResp.Error.Code == "TIMEOUT" || rpcResp.Error.Code == "EXTERNAL" {
 			return nil, fmt.Errorf(rpcResp.Error.Message)
 		}
 		errmsg := fmt.Sprintf(
