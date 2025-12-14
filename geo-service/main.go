@@ -25,7 +25,12 @@ func main() {
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
-	geoService := services.NewGeoService()
+	nominatimURL := os.Getenv("NOMINATIM_URL")
+	if nominatimURL == "" {
+		nominatimURL = "https://nominatim.openstreetmap.org"
+	}
+
+	geoService := services.NewGeoService(nominatimURL)
 	geoController := controllers.NewGeoController(geoService)
 	geoController.RegisterRoutes(router)
 

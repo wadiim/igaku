@@ -12,13 +12,14 @@ import (
 	"strconv"
 	"time"
 
-	"igaku/commons/dtos"
+	"igaku/geo-service/dtos"
 	"igaku/geo-service/errors"
+	commonDtos "igaku/commons/dtos"
 )
 
 type GeoService interface {
-	Search(address string) ([]dtos.Location, error)
-	Reverse(lat, lon string) (*dtos.Location, error)
+	Search(address string) ([]commonDtos.Location, error)
+	Reverse(lat, lon string) (*commonDtos.Location, error)
 }
 
 type geoService struct {
@@ -26,12 +27,7 @@ type geoService struct {
 	nominatimTimeout time.Duration
 }
 
-func NewGeoService() GeoService {
-	nominatimURL := os.Getenv("NOMINATIM_URL")
-	if nominatimURL == "" {
-		nominatimURL = "https://nominatim.openstreetmap.org"
-	}
-
+func NewGeoService(nominatimURL string) GeoService {
 	t, err := strconv.Atoi(os.Getenv("NOMINATIM_TIMEOUT"))
 	if err != nil || t <= 0 {
 		t = 10
@@ -44,7 +40,7 @@ func NewGeoService() GeoService {
 	}
 }
 
-func (s *geoService) Search(address string) ([]dtos.Location, error) {
+func (s *geoService) Search(address string) ([]commonDtos.Location, error) {
 	escaped := url.QueryEscape(address)
 
 	requestUrl := fmt.Sprintf(
@@ -105,18 +101,25 @@ func (s *geoService) Search(address string) ([]dtos.Location, error) {
 		}
 	}
 
-	var locations []dtos.Location
-	if err := json.Unmarshal(body, &locations); err != nil {
+	var allLocations []dtos.LocationWithType
+	if err := json.Unmarshal(body, &allLocations); err != nil {
 		log.Printf("Failed to parse JSON: %v\n", err)
 		return nil, &errors.ExternalApiRequestError{
 			Message: "Failed to parse external API response",
 		}
 	}
 
+	var locations []commonDtos.Location
+	for _, loc := range allLocations {
+		if loc.Type != "relation" {
+			locations = append(locations, loc.StripType())
+		}
+	}
+
 	return locations, nil
 }
 
-func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
+func (s *geoService) Reverse(lat, lon string) (*commonDtos.Location, error) {
 	requestUrl := fmt.Sprintf(
 		"%s/reverse?lat=%s&lon=%s&format=json",
 		s.nominatimURL, lat, lon,
@@ -191,7 +194,7 @@ func (s *geoService) Reverse(lat, lon string) (*dtos.Location, error) {
 		}
 	}
 
-	var location dtos.Location
+	var location commonDtos.Location
 	if err := json.Unmarshal(body, &location); err != nil {
 		log.Printf("Failed to parse JSON: %v\n", err)
 		return nil, &errors.ExternalApiRequestError{

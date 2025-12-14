@@ -67,19 +67,19 @@ func TestGeoController_Search_MultipleResults(t *testing.T) {
 	mockService := new(mocks.GeoService)
 	router := setupGeoRouter(t, mockService)
 
-	address := "new-york"
+	address := "komaba-dori,shibuya"
 	expectedLocations := []dtos.Location{
 		{
-			ID:   175905,
-			Lat:  "40.7127281",
-			Lon:  "-74.0060152",
-			Name: "City of New York, New York, United States",
+			ID:   317021100,
+			Lat:  "35.6612694",
+			Lon:  "139.6789942",
+			Name: "場通り, 駒場四丁目, 駒場, 目黒区, 東京都, 153-8505, 日本",
 		},
 		{
-			ID:   61320,
-			Lat:  "43.1561681",
-			Lon:  "-75.8449946",
-			Name: "New York, United States",
+			ID:   245075052,
+			Lat:  "35.6615044",
+			Lon:  "139.6814635",
+			Name: "場通り, 駒場三丁目, 駒場, 目黒区, 東京都, 153-0041, 日本",
 		},
 	}
 	mockService.On("Search", address).Return(expectedLocations, nil)
@@ -135,7 +135,7 @@ func TestGeoController_Search_Timeout(t *testing.T) {
 	mockService := new(mocks.GeoService)
 	router := setupGeoRouter(t, mockService)
 
-	address := "new-york"
+	address := "sakura-dori,shibuya"
 	mockService.
 		On("Search", address).
 		Return(nil, &errors.TimeoutError{}).
