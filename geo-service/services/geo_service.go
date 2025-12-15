@@ -20,6 +20,7 @@ import (
 type GeoService interface {
 	Search(address string) ([]commonDtos.Location, error)
 	Reverse(lat, lon string) (*commonDtos.Location, error)
+	Lookup(id int64) (*commonDtos.Location, error)
 }
 
 type geoService struct {
@@ -203,4 +204,74 @@ func (s *geoService) Reverse(lat, lon string) (*commonDtos.Location, error) {
 	}
 
 	return &location, nil
+}
+
+func (s *geoService) Lookup(id int64) (*commonDtos.Location, error) {
+	requestUrl := fmt.Sprintf(
+		"%s/lookup?osm_ids=N%d,W%d&format=json",
+		s.nominatimURL, id, id,
+	)
+
+	req, err := http.NewRequest("GET", requestUrl, nil)
+	if err != nil {
+		log.Printf("Failed to create request: %v\n", err)
+		return nil, &errors.ExternalApiRequestError{
+			Message: "Failed to create request",
+		}
+	}
+
+	req.Header.Set("User-Agent", "curl/8.17.0")
+	req.Header.Set("Accept", "*/*")
+
+	ctx, cancel := context.WithTimeout(
+		context.Background(), s.nominatimTimeout,
+	)
+	defer cancel()
+	req = req.WithContext(ctx)
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+
+	if err != nil {
+		if err, ok := err.(interface{ Timeout() bool }); ok && err.Timeout() {
+			log.Printf("Request to external API timed out: %v\n", err)
+			return nil, &errors.TimeoutError{}
+		}
+		log.Printf("Failed to connect to external API: %v\n", err)
+		return nil, &errors.ExternalApiRequestError{
+			Message: "Failed to perform a lookup",
+		}
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Printf(
+			"Request to external API failed with status code: %d\n",
+			res.StatusCode,
+		)
+		return nil, &errors.ExternalApiRequestError{
+			Message: "Failed to perform a lookup",
+		}
+	}
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Printf("Failed to read response body: %v\n", err)
+		return nil, &errors.ExternalApiRequestError{
+			Message: "Failed to read response body",
+		}
+	}
+
+	var locations []commonDtos.Location
+	if err := json.Unmarshal(body, &locations); err != nil {
+		log.Printf("Failed to parse JSON: %v\n", err)
+		return nil, &errors.ExternalApiRequestError{
+			Message: "Failed to parse external API response",
+		}
+	}
+
+	if len(locations) <= 0 {
+		return nil, nil
+	}
+	return &locations[0], nil
 }

@@ -24,31 +24,58 @@ import (
 	testUtils "igaku/visit-service/tests/utils"
 )
 
+const amqpURL = "amqp://rabbit:tibbar@localhost:5672/"
+
 var mockNominatim *httptest.Server
+
+var fireDoriLoc = dtos.Location{
+	ID:   153108796,
+	Lat:  "35.6656280",
+	Lon:  "139.7016220",
+	Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
+}
 
 func TestMain(m *testing.M) {
 	server := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		lat := r.URL.Query().Get("lat")
-		lon := r.URL.Query().Get("lon")
+		path := r.URL.Path
 
-		if lat == "35.6656280" && lon == "139.7016220" {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(dtos.Location{
-				ID:   153108796,
-				Lat:  "35.6656280",
-				Lon:  "139.7016220",
-				Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
-			})
-		} else if lat == "0.0" && lon == "0.0" {
-			time.Sleep(4 * time.Second)
-			w.WriteHeader(http.StatusOK)
-		} else if lat == "foo" && lon == "bar" {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("{\"error\":{\"code\":400,\"message\":\"Parameter 'lon' must be a number.\"}}"))
-		} else if lat == "90" && lon == "90" {
-			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte("{\"error\":\"Unable to geocode\"}"))
+		if path == "/reverse" {
+			lat := r.URL.Query().Get("lat")
+			lon := r.URL.Query().Get("lon")
+
+			if lat == fireDoriLoc.Lat && lon == fireDoriLoc.Lon {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode(fireDoriLoc)
+			} else if lat == "0.0" && lon == "0.0" {
+				time.Sleep(4 * time.Second)
+				w.WriteHeader(http.StatusOK)
+			} else if lat == "foo" && lon == "bar" {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("{\"error\":{\"code\":400,\"message\":\"Parameter 'lon' must be a number.\"}}"))
+			} else if lat == "90" && lon == "90" {
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte("{\"error\":\"Unable to geocode\"}"))
+			} else {
+				http.NotFound(w, r)
+			}
+		} else if path == "/lookup" {
+			ids := r.URL.Query().Get("osm_ids")
+
+			if ids == fmt.Sprintf("N%d,W%d", fireDoriLoc.ID, fireDoriLoc.ID) {
+				w.Header().Set("Content-Type", "application/json")
+				json.NewEncoder(w).Encode([]dtos.Location{
+					fireDoriLoc,
+				})
+			} else if ids == "N408,W408" {
+				time.Sleep(4 * time.Second)
+				w.WriteHeader(http.StatusOK)
+			} else if ids == "N0,W0" {
+				w.Header().Set("Content-Type", "application/json")
+				w.Write([]byte("[]"))
+			} else {
+				http.NotFound(w, r)
+			}
 		} else {
 			http.NotFound(w, r)
 		}
@@ -94,21 +121,13 @@ func TestMain(m *testing.M) {
 }
 
 func TestGeoClient_ReverseGeocode_Success(t *testing.T) {
-	url := "amqp://rabbit:tibbar@localhost:5672/"
-
-	geoClient, err := clients.NewGeoClient(url)
+	geoClient, err := clients.NewGeoClient(amqpURL)
 	require.NoError(t, err)
 	defer geoClient.Shutdown()
 
-	lat := "35.6656280"
-	lon := "139.7016220"
-	expectedLocation := &dtos.Location{
-		ID:   153108796,
-		Lat:  "35.6656280",
-		Lon:  "139.7016220",
-		Name: "ファイアー通り, 神南一丁目, 神南, 渋谷区, 東京都, 150-0041, 日本",
-	}
-
+	lat := fireDoriLoc.Lat
+	lon := fireDoriLoc.Lon
+	expectedLocation := &fireDoriLoc
 	location, err := geoClient.ReverseGeocode(lat, lon)
 	require.NoError(t, err)
 	assert.Equal(t, expectedLocation.ID, location.ID)
@@ -118,9 +137,7 @@ func TestGeoClient_ReverseGeocode_Success(t *testing.T) {
 }
 
 func TestGeoClient_ReverseGeocode_Timeout(t *testing.T) {
-	url := "amqp://rabbit:tibbar@localhost:5672/"
-
-	geoClient, err := clients.NewGeoClient(url)
+	geoClient, err := clients.NewGeoClient(amqpURL)
 	require.NoError(t, err)
 	defer geoClient.Shutdown()
 
@@ -133,9 +150,7 @@ func TestGeoClient_ReverseGeocode_Timeout(t *testing.T) {
 }
 
 func TestGeoClient_ReverseGeocode_NonGeocodableLocation(t *testing.T) {
-	url := "amqp://rabbit:tibbar@localhost:5672/"
-
-	geoClient, err := clients.NewGeoClient(url)
+	geoClient, err := clients.NewGeoClient(amqpURL)
 	require.NoError(t, err)
 	defer geoClient.Shutdown()
 
@@ -148,9 +163,7 @@ func TestGeoClient_ReverseGeocode_NonGeocodableLocation(t *testing.T) {
 }
 
 func TestGeoClient_ReverseGeocode_InvalidParams(t *testing.T) {
-	url := "amqp://rabbit:tibbar@localhost:5672/"
-
-	geoClient, err := clients.NewGeoClient(url)
+	geoClient, err := clients.NewGeoClient(amqpURL)
 	require.NoError(t, err)
 	defer geoClient.Shutdown()
 
@@ -160,4 +173,43 @@ func TestGeoClient_ReverseGeocode_InvalidParams(t *testing.T) {
 	_, err = geoClient.ReverseGeocode(lat, lon)
 	require.Error(t, err)
 	assert.Contains(t, strings.ToLower(err.Error()), "must be a number")
+}
+
+func TestGeoClient_LocationLookup_Success(t *testing.T) {
+	geoClient, err := clients.NewGeoClient(amqpURL)
+	require.NoError(t, err)
+	defer geoClient.Shutdown()
+
+	id := fireDoriLoc.ID
+	expectedLocation := &fireDoriLoc
+	location, err := geoClient.LookupLocation(int64(id))
+	require.NoError(t, err)
+	assert.Equal(t, expectedLocation.ID, location.ID)
+	assert.Equal(t, expectedLocation.Lat, location.Lat)
+	assert.Equal(t, expectedLocation.Lon, location.Lon)
+	assert.Equal(t, expectedLocation.Name, location.Name)
+}
+
+func TestGeoClient_LocationLookup_Timeout(t *testing.T) {
+	geoClient, err := clients.NewGeoClient(amqpURL)
+	require.NoError(t, err)
+	defer geoClient.Shutdown()
+
+	id := 408
+
+	_, err = geoClient.LookupLocation(int64(id))
+	require.Error(t, err)
+	assert.Contains(t, strings.ToLower(err.Error()), "request timed out")
+}
+
+func TestGeoClient_LocationLookup_NoResult(t *testing.T) {
+	geoClient, err := clients.NewGeoClient(amqpURL)
+	require.NoError(t, err)
+	defer geoClient.Shutdown()
+
+	id := 0
+
+	ret, err := geoClient.LookupLocation(int64(id))
+	require.NoError(t, err)
+	assert.Nil(t, ret)
 }

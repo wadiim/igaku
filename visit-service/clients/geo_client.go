@@ -17,6 +17,7 @@ import (
 
 type GeoClient interface {
 	ReverseGeocode(lat, lon string) (*dtos.Location, error)
+	LookupLocation(id int64) (*dtos.Location, error)
 	Shutdown()
 }
 
@@ -181,5 +182,62 @@ func (c *geoClient) ReverseGeocode(lat, lon string) (*dtos.Location, error) {
 		return nil, &commonsErrors.InternalError{}
 	}
 
+	return &location, nil
+}
+
+func (c *geoClient) LookupLocation(id int64) (*dtos.Location, error) {
+	req := dtos.LocationLookupRequest{ID: id}
+	reqBytes, err := json.Marshal(req)
+	if err != nil {
+		log.Printf(
+			"Failed to marshal a location lookup request: %v",
+			err,
+		)
+		return nil, &commonsErrors.InternalError{}
+	}
+
+	reply, err := c.call("location_lookup", reqBytes)
+	if err != nil {
+		errmsg := fmt.Sprintf(
+			"[RabbitMQ] Failed to publish request for location lookup: %v",
+			err,
+		)
+		log.Println(errmsg)
+		return nil, &commonsErrors.InternalError{}
+	}
+
+	var rpcResp dtos.RPCResponse
+	if err := json.Unmarshal(reply, &rpcResp); err != nil {
+		errmsg := fmt.Sprintf(
+			"[RabbitMQ] Failed to unmarshal RPC response: %v",
+			err,
+		)
+		log.Println(errmsg)
+		return nil, &commonsErrors.InternalError{}
+	}
+
+	if rpcResp.Error != nil {
+		if rpcResp.Error.Code == "NO_RESULT" {
+			return nil, nil
+		}
+		if rpcResp.Error.Code == "TIMEOUT" || rpcResp.Error.Code == "EXTERNAL" {
+			return nil, fmt.Errorf(rpcResp.Error.Message)
+		}
+		errmsg := fmt.Sprintf(
+			"Geo service internal error: %s",
+			rpcResp.Error.Message,
+		)
+		log.Println(errmsg)
+		return nil, &commonsErrors.InternalError{}
+	}
+
+	var location dtos.Location
+	if err := json.Unmarshal(rpcResp.Data, &location); err != nil {
+		errmsg := fmt.Sprintf(
+			"Failed to unmarshal a location: %v", err,
+		)
+		log.Println(errmsg)
+		return nil, &commonsErrors.InternalError{}
+	}
 	return &location, nil
 }

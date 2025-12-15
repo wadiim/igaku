@@ -28,3 +28,13 @@ func (m *GeoService) Reverse(
 	}
 	return args.Get(0).(*dtos.Location), nil
 }
+
+func (m *GeoService) Lookup(
+	id int64,
+) (*dtos.Location, error) {
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Get(1).(error)
+	}
+	return args.Get(0).(*dtos.Location), nil
+}
