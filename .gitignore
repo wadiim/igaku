@@ -1,4 +1,5 @@
 .env
+.cache
 *.log
 tmp/
 reports/

@@ -115,6 +115,7 @@ services:
 
   user:
     image: cosmtrek/air
+    container_name: igaku-user
     working_dir: /app
     command: ["-c", "user-service/air.user.toml"]
     env_file:
@@ -130,8 +131,8 @@ services:
     volumes:
       - ./user-service:/app/user-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -152,8 +153,8 @@ services:
         tag: "igaku-user-service"
 
   user-db:
-    container_name: igaku-user-db
     image: postgres
+    container_name: igaku-user-db
     restart: always
     env_file:
       - .env
@@ -173,6 +174,7 @@ services:
 
   auth:
     image: cosmtrek/air
+    container_name: igaku-auth
     working_dir: /app
     command: ["-c", "auth-service/air.auth.toml"]
     environment:
@@ -184,8 +186,8 @@ services:
     volumes:
       - ./auth-service:/app/auth-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -205,6 +207,7 @@ services:
 
   mail:
     image: cosmtrek/air
+    container_name: igaku-mail
     working_dir: /app
     command: ["-c", "mail-service/air.mail.toml"]
     environment:
@@ -216,8 +219,8 @@ services:
     volumes:
       - ./mail-service:/app/mail-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -238,8 +241,8 @@ services:
       - mail
 
   visit:
-    container_name: igaku-visit
     image: cosmtrek/air
+    container_name: igaku-visit
     working_dir: /app
     command: ["-c", "visit-service/air.visit.toml"]
     env_file:
@@ -249,17 +252,20 @@ services:
       - POSTGRES_DB=${VISIT_DB_NAME}
       - POSTGRES_USER=${VISIT_DB_USER}
       - POSTGRES_PASSWORD=${VISIT_DB_PASSWORD}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
     expose:
       - 8080
     volumes:
       - ./visit-service:/app/visit-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
       visit-db:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
       logstash:
         condition: service_healthy
@@ -272,12 +278,10 @@ services:
       options:
         gelf-address: "udp://localhost:12201"
         tag: "igaku-visit-service"
-    profiles:
-      - disabled
 
   visit-db:
-    container_name: igaku-visit-db
     image: postgres
+    container_name: igaku-visit-db
     restart: always
     env_file:
       - .env
@@ -294,8 +298,43 @@ services:
       interval: 2s
       timeout: 2s
       retries: 3
-    profiles:
-      - disabled
+
+  geo:
+    image: cosmtrek/air
+    container_name: igaku-geo
+    working_dir: /app
+    command: ["-c", "geo-service/air.geo.toml"]
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
+      - NOMINATIM_URL=${NOMINATIM_URL}
+      - NOMINATIM_TIMEOUT=${NOMINATIM_TIMEOUT}
+    expose:
+      - 8080
+    volumes:
+      - ./geo-service:/app/geo-service
+      - ./commons:/app/commons
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
+    networks:
+      - igaku-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+        required: false
+      vector:
+        condition: service_healthy
+        required: false
+    logging:
+      driver: "gelf"
+      options:
+        gelf-address: "udp://localhost:12201"
+        tag: "igaku-visit-service"
 
   swagger-ui:
     image: swaggerapi/swagger-ui
@@ -336,15 +375,12 @@ services:
 
 networks:
   igaku-network:
+    name: igaku-network
     driver: bridge
     driver_opts:
       com.docker.network.bridge.name: "igaku"
 
 volumes:
-  go-mod-cache:
-    name: igaku-global-go-mod-cache
-  go-build-cache:
-    name: igaku-global-go-build-cache
   rabbitmq_data:
   rabbitmq_logs:
   esdata:

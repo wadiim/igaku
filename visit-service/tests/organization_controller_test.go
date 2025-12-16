@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"igaku/commons/dtos"
 	"igaku/visit-service/controllers"
 	"igaku/visit-service/errors"
 	"igaku/visit-service/models"
@@ -54,7 +55,12 @@ func TestOrganizationController_GetByID_Success(t *testing.T) {
 	expectedOrg := &models.Organization{
 		ID: testOrgID,
 		Name: "Test Org",
-		Address: "42 Mock St",
+		Location: dtos.Location{
+			ID: 117853077,
+			Lat: "42.3628605",
+			Lon: "-71.0687530",
+			Name: "Massachusetts General Hospital, 55, Fruit Street, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
+		},
 	}
 
 	mockRepo.On("FindByID", testOrgID).Return(expectedOrg, nil).Once()
@@ -78,7 +84,10 @@ func TestOrganizationController_GetByID_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOrg.ID, responseOrg.ID)
 	assert.Equal(t, expectedOrg.Name, responseOrg.Name)
-	assert.Equal(t, expectedOrg.Address, responseOrg.Address)
+	assert.Equal(t, expectedOrg.Location.ID, responseOrg.Location.ID)
+	assert.Equal(t, expectedOrg.Location.Lat, responseOrg.Location.Lat)
+	assert.Equal(t, expectedOrg.Location.Lon, responseOrg.Location.Lon)
+	assert.Equal(t, expectedOrg.Location.Name, responseOrg.Location.Name)
 
 	mockRepo.AssertExpectations(t)
 }

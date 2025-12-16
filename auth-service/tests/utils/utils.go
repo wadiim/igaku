@@ -34,6 +34,8 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		"GRAFANA_USER_ID":		"",
 		"GRAFANA_TOKEN":		"",
 		"GRAFANA_URL":			"",
+		"NOMINATIM_URL":		"",
+		"NOMINATIM_TIMEOUT":		"",
 
 	}
 
@@ -45,7 +47,7 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 			"nginx",
 			wait.NewHTTPStrategy("/user/health").
 				WithPort("4000/tcp").
-				WithStartupTimeout(200*time.Second).
+				WithStartupTimeout(300*time.Second).
 				WithPollInterval(4*time.Second),
 		).
 		Up(ctx, compose.Wait(true))
@@ -58,7 +60,6 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 			context.Background(),
 			compose.RemoveOrphans(true),
 			compose.RemoveVolumes(true),
-			compose.RemoveImagesLocal,
 		)
 		if err != nil {
 			log.Printf("Failed to stop stack: %w", err)

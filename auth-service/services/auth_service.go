@@ -42,7 +42,7 @@ func NewAuthService(
 		log.Printf(
 			"Failed to parse token duration: %w", err,
 		)
-		return nil, &igakuErrors.InternalError{}
+		return nil, &commonsErrors.InternalError{}
 	}
 	return &authService{
 		userClient: userClient,
@@ -56,7 +56,7 @@ func (s *authService) Login(creds dtos.LoginCredentials) (string, error) {
 	usr, err := s.userClient.FindByUsername(creds.Username)
 
 	if err != nil {
-		if errors.Is(err, &igakuErrors.InternalError{}) {
+		if errors.Is(err, &commonsErrors.InternalError{}) {
 			return "", err
 		} else {
 			return "", &igakuErrors.InvalidUsernameOrPasswordError{}
@@ -82,7 +82,7 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 	_, err := s.userClient.FindByUsername(fields.Username)
 
 	if err == nil {
-		if errors.Is(err, &igakuErrors.InternalError{}) {
+		if errors.Is(err, &commonsErrors.InternalError{}) {
 			return "", err
 		} else {
 			return "", &commonsErrors.UsernameAlreadyTakenError{

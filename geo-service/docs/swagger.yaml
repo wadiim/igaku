@@ -1,0 +1,82 @@
+definitions:
+  dtos.ErrorResponse:
+    properties:
+      error:
+        example: Specific error message
+        type: string
+    type: object
+  dtos.Location:
+    properties:
+      display_name:
+        example: 135, Pilkington Avenue, Maney, Sutton Coldfield, Birmingham, West
+          Midlands, England, B72 1LH, United Kingdom
+        type: string
+      lat:
+        example: "52.5487921"
+        type: string
+      lon:
+        example: "-1.8164308"
+        type: string
+      osm_id:
+        example: 90394480
+        type: integer
+    required:
+    - display_name
+    - lat
+    - lon
+    - osm_id
+    type: object
+host: localhost:4000
+info:
+  contact: {}
+  title: Igaku Geo API
+  version: 0.0.1
+paths:
+  /geo/health:
+    get:
+      description: Returns an OK message
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Check health
+      tags:
+      - Health
+  /geo/search/{address}:
+    get:
+      description: Performs geocoding, i.e. conversion of the given textual description
+        or addres into geographic coordinates.
+      parameters:
+      - description: Textual description or address
+        in: path
+        name: address
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success
+          schema:
+            items:
+              $ref: '#/definitions/dtos.Location'
+            type: array
+        "400":
+          description: Invalid Request
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "408":
+          description: Request Timeout
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      summary: Lookup a location from address
+      tags:
+      - Geolocation
+swagger: "2.0"
