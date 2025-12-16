@@ -41,12 +41,26 @@ func TestGormOrganizationRepository(t *testing.T) {
 			t, targetID, org.ID, "Expected organization ID to match",
 		)
 		assert.Equal(
-			t, "The Lowell General Hospital", org.Name,
+			t, "Massachusetts General Hospital", org.Name,
 			"Expected organization name to match",
 		)
 		assert.Equal(
-			t, "295 Varnum Ave", org.Address,
-			"Expected organization address to match",
+			t, int64(117853077), org.Location.ID,
+			"Expected organiztion's location ID to match",
+		)
+		assert.Equal(
+			t, "42.3628605", org.Location.Lat,
+			"Expected organiztion's location latitude to match",
+		)
+		assert.Equal(
+			t, "-71.0687530", org.Location.Lon,
+			"Expected organiztion's location longitude to match",
+		)
+		assert.Equal(
+			t,
+			"Massachusetts General Hospital, 55, Fruit Street, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
+			org.Location.Name,
+			"Expected organiztion's location name to match",
 		)
 	})
 

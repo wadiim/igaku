@@ -99,19 +99,19 @@
             "properties": {
                 "display_name": {
                     "type": "string",
-                    "example": "Manhattan, New York County, City of New York, New York, United States"
+                    "example": "135, Pilkington Avenue, Maney, Sutton Coldfield, Birmingham, West Midlands, England, B72 1LH, United Kingdom"
                 },
                 "lat": {
                     "type": "string",
-                    "example": "40.7579554"
+                    "example": "52.5487921"
                 },
                 "lon": {
                     "type": "string",
-                    "example": "-73.9855319"
+                    "example": "-1.8164308"
                 },
                 "osm_id": {
                     "type": "integer",
-                    "example": 8398124
+                    "example": 90394480
                 }
             }
         }
