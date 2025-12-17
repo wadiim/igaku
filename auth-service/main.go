@@ -39,6 +39,12 @@ func main() {
 	}
 	defer mailClient.Shutdown()
 
+	patientClient, err := clients.NewPatientClient(amqpURI)
+	if err != nil {
+		log.Fatalf("Failed to create a patient client: %v", err)
+	}
+	defer patientClient.Shutdown()
+
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
@@ -53,7 +59,7 @@ func main() {
 	}
 
 	authService, err := services.NewAuthService(
-		userClient, mailClient,
+		userClient, mailClient, patientClient,
 		tokenDurationInHours, os.Getenv("SMTP_FROM"),
 	)
 	if err != nil {

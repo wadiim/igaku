@@ -50,3 +50,14 @@ VALUES
     'D011017',
     'Pneumonia, Lipid'
 );
+
+INSERT INTO patient_records (id, national_id)
+VALUES
+(
+    '0b6f13da-efb9-4221-9e89-e2729ae90030',
+    '12345123451'
+),
+(
+    'c2aa753e-ce76-43db-b855-399d1955ad66',
+    '12345654321'
+);

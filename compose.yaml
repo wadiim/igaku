@@ -35,6 +35,8 @@ services:
         required: false
       user:
         condition: service_started
+      med:
+        condition: service_started
 
   rabbitmq:
     image: rabbitmq:management
@@ -130,8 +132,8 @@ services:
     volumes:
       - ./user-service:/app/user-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -184,8 +186,8 @@ services:
     volumes:
       - ./auth-service:/app/auth-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -254,8 +256,8 @@ services:
     volumes:
       - ./visit-service:/app/visit-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -309,13 +311,14 @@ services:
       - POSTGRES_DB=${MED_DB_NAME}
       - POSTGRES_USER=${MED_DB_USER}
       - POSTGRES_PASSWORD=${MED_DB_PASSWORD}
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672/
     expose:
       - 8080
     volumes:
       - ./med-service:/app/med-service
       - ./commons:/app/commons
-      - go-mod-cache:/go/pkg/mod
-      - go-build-cache:/root/.cache/go-build
+      - ./.cache/go-mod-cache:/go/pkg/mod
+      - ./.cache/go-build-cache:/root/.cache/go-build
     networks:
       - igaku-network
     depends_on:
@@ -332,8 +335,6 @@ services:
       options:
         gelf-address: "udp://localhost:12201"
         tag: "igaku-med-service"
-    profiles:
-      - disabled
 
   med-db:
     container_name: igaku-med-db
@@ -401,10 +402,6 @@ networks:
       com.docker.network.bridge.name: "igaku"
 
 volumes:
-  go-mod-cache:
-    name: igaku-global-go-mod-cache
-  go-build-cache:
-    name: igaku-global-go-build-cache
   rabbitmq_data:
   rabbitmq_logs:
   esdata:

@@ -10,13 +10,16 @@ import (
 	"os"
 	"time"
 
-	models "igaku/commons/models"
+	"igaku/commons/models"
 	commonsErrors "igaku/commons/errors"
+	commonsUtils "igaku/commons/utils"
 )
 
 func MigrateSchema(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&models.Disease{},
+		&models.PatientRecord{},
+		&models.Setting{},
 	)
 	if err != nil {
 		log.Printf("Failed to migrate DB schema: %v", err)
@@ -95,6 +98,12 @@ func InitDatabase(api *RxNormAPI) (*gorm.DB, error) {
 		}
 	} else {
 		log.Printf("Disease table present: fetch skipped")
+	}
+
+	err = commonsUtils.SeedDatabase(db, "./med-service/resources")
+	if err != nil {
+		log.Printf("Failed to seed database: %v", err)
+		return nil, &commonsErrors.DatabaseError{}
 	}
 
 	return db, nil
