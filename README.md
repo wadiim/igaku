@@ -1,19 +1,34 @@
-# Igaku
-
 <p align="center">
   <img src="https://github.com/user-attachments/assets/1859108e-11f0-4f9b-a0a4-0331697153eb" style="width: 32%; height: auto;" />
 </p>
 
+# Igaku
+
+A personalized medicine system written for a class project.
+
 ## Quick Start
 
 ```console
-$ ln -s .env.example .env
+$ cp .env.example .env
 $ docker compose up
 ```
 
 Visit:
-- [Swagger UI](http://localhost:8090/)
+- [Client](http://localhost:8080)
+- [Swagger UI](http://localhost:8090)
 - [RabbitMQ Management UI](http://localhost:15672)
+
+### Default login credentials
+
+All of the predefined users in DEV mode have their passwords set to
+`P@ssw0rd!`. The table below contains sample predefined users. For the full
+list see [`init.sql`](user-service/resources/init.sql).
+
+| Username | Role |
+| :---: | :---: |
+| admin | admin |
+| ghouse | doctor |
+| jdoe | patient |
 
 ## Service Replication
 
