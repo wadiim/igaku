@@ -62,7 +62,7 @@ func (ctrl *DiseaseController) GetBySubstring(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, &igakuErrors.DiseaseNotFoundError{}) {
 			c.JSON(http.StatusNotFound, commonsDtos.ErrorResponse{
-				err.Error(),
+				Message: err.Error(),
 			})
 		} else {
 			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{

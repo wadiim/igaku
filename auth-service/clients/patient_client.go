@@ -156,39 +156,24 @@ func (c *patientClient) AddPatientRecord(record *models.PatientRecord) error {
 	}
 
 	if rpcResp.Error != nil {
-		if rpcResp.Error.Code == "DUPLICATED_PATIENT_ID" {
-			errmsg := fmt.Sprintf(
-				"Failed to add patient: %v",
-				rpcResp.Error.Message,
-			)
-			log.Println(errmsg)
+		switch rpcResp.Error.Code {
+		case "DUPLICATED_PATIENT_ID":
+			log.Printf("Failed to add patient: %v\n", rpcResp.Error.Message)
 			return &commonsErrors.DuplicatedIDError{
 				ID: record.ID,
 			}
-		} else if rpcResp.Error.Code == "DUPLICATED_PATIENT_NATIONAL_ID" {
-			errmsg := fmt.Sprintf(
-				"Failed to add patient: %v",
-				rpcResp.Error.Message,
-			)
-			log.Println(errmsg)
+		case "DUPLICATED_PATIENT_NATIONAL_ID":
+			log.Printf("Failed to add patient: %v\n", rpcResp.Error.Message)
 			return &commonsErrors.DuplicatedNationalIDError{
 				NationalID: record.NationalID,
 			}
-		} else if rpcResp.Error.Code == "INVALID_PATIENT_NATIONAL_ID" {
-			errmsg := fmt.Sprintf(
-				"Failed to add patient: %v",
-				rpcResp.Error.Message,
-			)
-			log.Println(errmsg)
+		case "INVALID_PATIENT_NATIONAL_ID":
+			log.Printf("Failed to add patient: %v\n", rpcResp.Error.Message)
 			return &commonsErrors.InvalidNationalIDError{
 				NationalID: record.NationalID,
 			}
-		} else {
-			errmsg := fmt.Sprintf(
-				"Failed to add patient: %v",
-				rpcResp.Error.Message,
-			)
-			log.Println(errmsg)
+		default:
+			log.Printf("Failed to add patient: %v\n", rpcResp.Error.Message)
 			return &errors.InternalError{}
 		}
 	}
@@ -223,30 +208,19 @@ func (c *patientClient) ValidateUniquePatient(record *models.PatientRecord) erro
 	}
 	
 	if rpcResp.Error != nil {
-		if rpcResp.Error.Code == "DUPLICATED_PATIENT_ID" {
-			errmsg := fmt.Sprintf(
-				"Failed to validate patient: %v",
-				rpcResp.Error.Message,
-			)
-			log.Println(errmsg)
+		switch rpcResp.Error.Code {
+		case "DUPLICATED_PATIENT_ID":
+			log.Printf("Failed to validate patient: %v\n", rpcResp.Error.Message)
 			return &commonsErrors.DuplicatedIDError{
 				ID: record.ID,
 			}
-		} else if rpcResp.Error.Code == "DUPLICATED_PATIENT_NATIONAL_ID" {
-			errmsg := fmt.Sprintf(
-				"Failed to validate patient: %v",
-				rpcResp.Error.Message,
-			)
-			log.Println(errmsg)
+		case "DUPLICATED_PATIENT_NATIONAL_ID":
+			log.Printf("Failed to validate patient: %v\n", rpcResp.Error.Message)
 			return &commonsErrors.DuplicatedNationalIDError{
 				NationalID: record.NationalID,
 			}
-		} else {
-			errmsg := fmt.Sprintf(
-				"Failed to validate patient: %v",
-				rpcResp.Error.Message,
-			)
-			log.Println(errmsg)
+		default:
+			log.Printf("Failed to validate patient: %v\n", rpcResp.Error.Message)
 			return &errors.InternalError{}
 		}
 	}
