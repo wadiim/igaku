@@ -23,43 +23,10 @@ import (
 	"igaku/med-service/dtos"
 	"igaku/med-service/errors"
 	"igaku/med-service/services"
+	"igaku/med-service/tests/mocks"
 )
 
-type MockDiseaseRepository struct {
-	mock.Mock
-}
-
-func (m *MockDiseaseRepository) FindBySubstring(
-	name string,
-	offset int,
-	limit int,
-) ([]*models.Disease, error) {
-	args := m.Called(name, offset, limit)
-
-	var r0 []*models.Disease
-	if args.Get(0) != nil {
-		r0 = args.Get(0).([]*models.Disease)
-	}
-
-	r1 := args.Error(1)
-
-	return r0, r1
-}
-
-func (m *MockDiseaseRepository) CountBySubstring(name string) (int64, error) {
-	args := m.Called(name)
-
-	var r0 int64
-	if args.Get(0) != nil {
-		r0 = args.Get(0).(int64)
-	}
-
-	r1 := args.Error(1)
-
-	return r0, r1
-}
-
-func setupRouter(mockRepo *MockDiseaseRepository) *gin.Engine {
+func setupRouter(mockRepo *mocks.MockDiseaseRepository) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	diseaseService := services.NewDiseaseService(mockRepo)
@@ -108,7 +75,7 @@ func genDoctorToken(t *testing.T) string {
 }
 
 func TestDiseaseController_GetBySubstring_NoToken(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
@@ -137,7 +104,7 @@ func TestDiseaseController_GetBySubstring_NoToken(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 func TestDiseaseController_GetBySubstring_InvalidTokenFormat(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
@@ -169,7 +136,7 @@ func TestDiseaseController_GetBySubstring_InvalidTokenFormat(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_ExpiredToken(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
@@ -221,7 +188,7 @@ func TestDiseaseController_GetBySubstring_ExpiredToken(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_UnauthorizedPatient(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
@@ -269,7 +236,7 @@ func TestDiseaseController_GetBySubstring_UnauthorizedPatient(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_UnauthorizedAdmin(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	req, err := http.NewRequest(http.MethodGet, "/med/disease/test", nil)
@@ -317,7 +284,7 @@ func TestDiseaseController_GetBySubstring_UnauthorizedAdmin(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
@@ -364,7 +331,7 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_WithParam(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
@@ -414,7 +381,7 @@ func TestDiseaseController_GetBySubstring_WithParam(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
@@ -493,7 +460,7 @@ func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
@@ -545,7 +512,7 @@ func TestDiseaseController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_EmptyPage(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
@@ -591,7 +558,7 @@ func TestDiseaseController_GetBySubstring_EmptyPage(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_InvalidPageParam(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
@@ -646,7 +613,7 @@ func TestDiseaseController_GetBySubstring_InvalidPageParam(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
@@ -701,7 +668,7 @@ func TestDiseaseController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_DiseaseNotFound(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Wilson"
@@ -736,7 +703,7 @@ func TestDiseaseController_GetBySubstring_DiseaseNotFound(t *testing.T) {
 }
 
 func TestDiseaseController_GetBySubstring_RepoError(t *testing.T) {
-	mockRepo := new(MockDiseaseRepository)
+	mockRepo := new(mocks.MockDiseaseRepository)
 	router := setupRouter(mockRepo)
 
 	testName := "Test"

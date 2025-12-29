@@ -14,6 +14,7 @@ import (
 type PatientRepository interface {
 	AddPatient(record *models.PatientRecord) error
 	FindByID(id uuid.UUID) (*models.PatientRecord, error)
+	FindByNationalID(nationalID string) (*models.PatientRecord, error)
 	ValidateUniquePatient(record *models.PatientRecord) error
 }
 
@@ -28,6 +29,17 @@ func NewGormPatientRepository(db *gorm.DB) PatientRepository {
 func (r *gormPatientRepository) FindByID(id uuid.UUID) (*models.PatientRecord, error) {
 	var record models.PatientRecord
 	err := r.db.First(&record, id).Error
+	if err != nil {
+		return nil, &errors.PatientNotFoundError{}
+	}
+	return &record, nil
+}
+
+func (r *gormPatientRepository) FindByNationalID(
+	nationalID string,
+) (*models.PatientRecord, error) {
+	var record models.PatientRecord
+	err := r.db.Where(&models.PatientRecord{NationalID: nationalID}).First(&record).Error
 	if err != nil {
 		return nil, &errors.PatientNotFoundError{}
 	}

@@ -15,6 +15,7 @@ import (
 
 	// "igaku/med-service/controllers"
 	// "igaku/med-service/docs"
+	"igaku/med-service/clients"
 	"igaku/med-service/repositories"
 	"igaku/med-service/services"
 	"igaku/med-service/utils"
@@ -38,13 +39,20 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
+	amqpURI := os.Getenv("RABBITMQ_URL")
+
+	userClient, err := clients.NewUserClient(amqpURI)
+	if err != nil {
+		log.Fatalf("Failed to create a user client: %v", err)
+	}
+	defer userClient.Shutdown()
+
 	diseaseRepo := repositories.NewGormDiseaseRepository(db)
 	diseaseService := services.NewDiseaseService(diseaseRepo)
 
 	patientRepo := repositories.NewGormPatientRepository(db)
-	patientService := services.NewPatientService(patientRepo)
+	patientService := services.NewPatientService(userClient, patientRepo)
 
-	amqpURI := os.Getenv("RABBITMQ_URL")
 	rbServer, err := servers.NewRabbitMQServer(amqpURI, patientService)
 	failOnError(err, "[RabbitMQ] Failed to initialize server")
 	defer rbServer.Shutdown()
@@ -52,7 +60,7 @@ func main() {
 	err = rbServer.Start()
 	failOnError(err, "[RabbitMQ] Failed to start listeners")
 
-	apiServer := servers.NewApiServer(diseaseService)
+	apiServer := servers.NewApiServer(diseaseService, patientService)
 	apiServer.Start()
 
 	quit := make(chan os.Signal, 1)

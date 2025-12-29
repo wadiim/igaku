@@ -121,6 +121,64 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/med/patient/{national_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves username, email and national ID of patient. Requires Doctor privileges.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Patient"
+                ],
+                "summary": "Retrieve data of patient with given national ID (Doctor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "National ID",
+                        "name": "national_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved patient data",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PatientDetails"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid path parameter (national_id)",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User does not have Doctor role",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error - Failed to retrieve patient data",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -170,6 +228,28 @@ const docTemplate = `{
                 },
                 "total_pages": {
                     "type": "integer"
+                }
+            }
+        },
+        "dtos.PatientDetails": {
+            "type": "object",
+            "required": [
+                "email",
+                "national_id",
+                "username"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "jdoe@mail.com"
+                },
+                "national_id": {
+                    "type": "string",
+                    "example": "44051401458"
+                },
+                "username": {
+                    "type": "string",
+                    "example": "jdoe"
                 }
             }
         }

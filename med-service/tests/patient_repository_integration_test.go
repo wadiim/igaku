@@ -67,6 +67,51 @@ func TestGormPatientRepository(t *testing.T) {
 			"Expected patient to be nil when not found",
 		)
 	})
+	t.Run("FindByNationalID_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormPatientRepository(db)
+
+		targetID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+		require.NoError(t, err, "Failed to parse patient UUID")
+		targetNationalID := "12345123451"
+
+		patient, err := repo.FindByNationalID(targetNationalID)
+
+		assert.NoError(t, err, "Expected no error finding patient")
+		assert.NotNil(t, patient, "Expected patient to be found")
+		assert.Equal(
+			t, targetID, patient.ID, "Expected patient ID to match",
+		)
+		assert.Equal(
+			t, targetNationalID, patient.NationalID, "Expected patient NationalID to match",
+		)
+	})
+	t.Run("FindByNationalID_NotFound", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormPatientRepository(db)
+
+		targetNationalID := "44051401458"
+
+		patient, err := repo.FindByNationalID(targetNationalID)
+
+		assert.Error(t, err, "Expected an error when finding non-existent patient")
+		assert.True(
+			t, errors.Is(err, &medErrors.PatientNotFoundError{}),
+			"Expected PatientNotFoundError",
+		)
+		assert.Nil(
+			t, patient,
+			"Expected patient to be nil when not found",
+		)
+	})
 	t.Run("ValidateUniquePatient_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()

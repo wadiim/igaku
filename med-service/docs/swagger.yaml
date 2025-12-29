@@ -33,6 +33,22 @@ definitions:
       total_pages:
         type: integer
     type: object
+  dtos.PatientDetails:
+    properties:
+      email:
+        example: jdoe@mail.com
+        type: string
+      national_id:
+        example: "44051401458"
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - email
+    - national_id
+    - username
+    type: object
 host: localhost:4000
 info:
   contact: {}
@@ -107,6 +123,44 @@ paths:
       summary: Check health
       tags:
       - Health
+  /med/patient/{national_id}:
+    get:
+      description: Retrieves username, email and national ID of patient. Requires
+        Doctor privileges.
+      parameters:
+      - description: National ID
+        in: path
+        name: national_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved patient data
+          schema:
+            $ref: '#/definitions/dtos.PatientDetails'
+        "400":
+          description: Bad Request - Invalid path parameter (national_id)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to retrieve patient data
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Retrieve data of patient with given national ID (Doctor)
+      tags:
+      - Patient
 securityDefinitions:
   BearerAuth:
     in: header
