@@ -77,6 +77,9 @@ function Navbar() {
           `}
         >
           <li>
+            <NavLink to="/prescribe">Prescribe</NavLink>
+          </li>
+          <li>
             <NavLink to="/profile">Profile</NavLink>
           </li>
         </ul>

@@ -6,6 +6,7 @@ import Login from './login.tsx'
 import Root from './root.tsx'
 import NotFoundPage from './not-found-page.tsx'
 import Register from './register.tsx'
+import Prescribe from './prescribe.tsx'
 
 import { BrowserRouter, Routes, Route } from 'react-router'
 import { StrictMode, useEffect } from 'react'
@@ -17,12 +18,14 @@ function App() {
     hideSplashScreen();
   });
 
+  // TODO: Find better name than *Prescribe*
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Root />}>
           <Route index element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/prescribe" element={<Prescribe />} />
         </Route>
         <Route path="auth" element={<Auth />}>
           <Route path="login" element={<Login />} />
