@@ -1,11 +1,6 @@
 package main
 
 import (
-	// "github.com/gin-gonic/gin"
-	// swaggerFiles "github.com/swaggo/files"
-	// ginSwagger "github.com/swaggo/gin-swagger"
-	// actuator "github.com/sinhashubham95/go-actuator"
-
 	"context"
 	"log"
 	"os"
@@ -13,14 +8,11 @@ import (
 	"syscall"
 	"time"
 
-	// "igaku/med-service/controllers"
-	// "igaku/med-service/docs"
 	"igaku/med-service/clients"
 	"igaku/med-service/repositories"
 	"igaku/med-service/services"
 	"igaku/med-service/utils"
 	"igaku/med-service/servers"
-	// configs "igaku/commons/configs"
 )
 
 // @title		Igaku Med API
@@ -32,9 +24,8 @@ import (
 // @name Authorization
 
 func main() {
-	rxNormURL := "https://rxnav.nlm.nih.gov/REST/rxclass/allClasses?classTypes=DISEASE"
-	rxAPI := utils.RxNormAPI{URL: rxNormURL}
-	db, err := utils.InitDatabase(&rxAPI)
+	rxNormAPI := utils.NewRxNormAPI()
+	db, err := utils.InitDatabase(rxNormAPI)
 	if err != nil {
 		log.Fatalf("%v", err)
 	}

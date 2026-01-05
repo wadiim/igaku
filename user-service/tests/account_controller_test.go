@@ -566,7 +566,7 @@ func TestAccountController_ListAccounts_DefaultParams(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response dtos.PaginatedResponse
+	var response commonsDtos.PaginatedResponse
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -641,7 +641,7 @@ func TestAccountController_ListAccounts_WithParams(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response dtos.PaginatedResponse
+	var response commonsDtos.PaginatedResponse
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -707,7 +707,7 @@ func TestAccountController_ListAccounts_PageGreaterThanItemCount(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response dtos.PaginatedResponse
+	var response commonsDtos.PaginatedResponse
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
 
@@ -752,7 +752,7 @@ func TestAccountController_ListAccounts_EmptyList(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response dtos.PaginatedResponse
+	var response commonsDtos.PaginatedResponse
 	err = json.Unmarshal(w.Body.Bytes(), &response)
 	require.NoError(t, err)
 

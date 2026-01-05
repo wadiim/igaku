@@ -39,10 +39,10 @@ func setupRouter(mockRepo *mocks.MockDiseaseRepository) *gin.Engine {
 }
 
 func unpackPaginatedResponse(t *testing.T, body *bytes.Buffer) (
-	dtos.PaginatedResponse,
+	commonsDtos.PaginatedResponse,
 	[]dtos.DiseaseDetails,
 ) {
-	var paginatedResponse dtos.PaginatedResponse
+	var paginatedResponse commonsDtos.PaginatedResponse
 	err := json.Unmarshal(body.Bytes(), &paginatedResponse)
 	assert.NoError(t, err)
 

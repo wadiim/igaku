@@ -13,14 +13,20 @@ import (
 	errors "igaku/med-service/errors"
 )
 
+const domainURL = "https://rxnav.nlm.nih.gov"
+
 type RxNormAPI struct {
 	URL string
 }
 
-func (api *RxNormAPI) fetchDiseaseData() ([]byte, error) {
-	res, err := http.Get(api.URL)
+func NewRxNormAPI() *RxNormAPI {
+	return &RxNormAPI{URL: domainURL}
+}
+
+func (api *RxNormAPI) fetchFromEndpoint(endpoint string) ([]byte, error) {
+	res, err := http.Get(api.URL + endpoint)
 	if err != nil {
-		log.Printf("Failed to fetch disease data: %v", err)
+		log.Printf("Failed to fetch data from endpoint: %v", err)
 		return nil, &errors.RxNormUnavailableError{}
 	}
 	defer res.Body.Close()
@@ -62,7 +68,8 @@ func (api *RxNormAPI) transformDiseaseData(diseaseData []byte) []models.Disease 
 }
 
 func (api *RxNormAPI) GetAllDiseases(db *gorm.DB) ([]models.Disease){
-	diseaseData, err := api.fetchDiseaseData()
+	endpoint := "/REST/rxclass/allClasses?classTypes=DISEASE"
+	diseaseData, err := api.fetchFromEndpoint(endpoint)
 	if err != nil {
 		log.Printf("%v", err)
 	}

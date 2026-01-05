@@ -30,7 +30,7 @@ func NewDiseaseController(service services.DiseaseService) *DiseaseController {
 // @Param	name path string false "Disease name substring"
 // @Param	page query int false "Page number (default: 1)" minimum(1)
 // @Param	pageSize query int false "Number of items per page (default: 10)" minimum(1) maximum(100)
-// @Success	200  {object}  dtos.PaginatedResponse{data=[]dtos.DiseaseDetails} "Successfully retrieved list of diseases"
+// @Success	200  {object}  commonsDtos.PaginatedResponse{data=[]dtos.DiseaseDetails} "Successfully retrieved list of diseases"
 // @Failure	400  {object}  dtos.ErrorResponse  "Bad Request - Invalid query parameters (name, page, pageSize)"
 // @Failure	401  {object}  dtos.ErrorResponse  "Unauthorized - Invalid or missing token"
 // @Failure	403  {object}  dtos.ErrorResponse  "Forbidden - User does not have Doctor role"

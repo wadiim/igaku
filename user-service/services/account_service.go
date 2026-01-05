@@ -5,6 +5,7 @@ import (
 
 	"math"
 
+	commonsDtos "igaku/commons/dtos"
 	"igaku/user-service/dtos"
 	"igaku/user-service/repositories"
 	"igaku/user-service/utils"
@@ -17,7 +18,7 @@ type AccountService interface {
 		page, pageSize int,
 		orderBy models.UserOrderableField,
 		orderMethod utils.Ordering,
-	) (*dtos.PaginatedResponse, error)
+	) (*commonsDtos.PaginatedResponse, error)
 	GetAccountByUsername(username string) (*models.User, error)
 	Persist(user *models.User) error
 }
@@ -67,7 +68,7 @@ func (s *accountService) ListAccounts(
 	page, pageSize int,
 	orderBy models.UserOrderableField,
 	orderMethod utils.Ordering,
-) (*dtos.PaginatedResponse, error) {
+) (*commonsDtos.PaginatedResponse, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -102,7 +103,7 @@ func (s *accountService) ListAccounts(
 		totalPages = int(math.Ceil(float64(totalCount) / float64(pageSize)))
 	}
 
-	paginatedResponse := &dtos.PaginatedResponse{
+	paginatedResponse := &commonsDtos.PaginatedResponse{
 		Data:       accountDetailsList,
 		Page:       page,
 		PageSize:   pageSize,
