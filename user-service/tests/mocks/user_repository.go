@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"igaku/commons/models"
-	"igaku/user-service/utils"
+	commonsUtils "igaku/commons/utils"
 )
 
 type UserRepository struct {
@@ -40,7 +40,7 @@ func (m *UserRepository) FindByUsername(username string) (*models.User, error) {
 
 func (m *UserRepository) FindAll(
 	offset, limit int,
-	orderBy models.UserOrderableField, orderMethod utils.Ordering,
+	orderBy models.UserOrderableField, orderMethod commonsUtils.Ordering,
 ) ([]models.User, error) {
 	args := m.Called(offset, limit, orderBy, orderMethod)
 

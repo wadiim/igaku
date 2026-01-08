@@ -14,9 +14,9 @@ import (
 	"testing"
 
 	"igaku/user-service/repositories"
-	"igaku/user-service/utils"
 	"igaku/commons/models"
 	igakuErrors "igaku/commons/errors"
+	commonsUtils "igaku/commons/utils"
 	testUtils "igaku/user-service/tests/utils"
 )
 
@@ -157,7 +157,7 @@ func TestGormUserRepository(t *testing.T) {
 
 		userCount := 5
 		list, err := repo.FindAll(
-			0, userCount, models.Username, utils.Asc,
+			0, userCount, models.Username, commonsUtils.Asc,
 		)
 
 		assert.NoError(

@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"igaku/user-service/errors"
-	"igaku/user-service/utils"
 	commonsErrors "igaku/commons/errors"
+	commonsUtils "igaku/commons/utils"
 	"igaku/commons/models"
 )
 
@@ -19,7 +19,7 @@ type UserRepository interface {
 	FindByUsername(username string) (*models.User, error)
 	FindAll(
 		offset, limit int,
-		orderBy models.UserOrderableField, orderMethod utils.Ordering,
+		orderBy models.UserOrderableField, orderMethod commonsUtils.Ordering,
 	) ([]models.User, error)
 	CountAll() (int64, error)
 	Persist(user *models.User) (error)
@@ -53,7 +53,7 @@ func (r *gormUserRepository) FindByUsername(username string) (*models.User, erro
 
 func (r *gormUserRepository) FindAll(
 	offset, limit int,
-	orderBy models.UserOrderableField, orderMethod utils.Ordering,
+	orderBy models.UserOrderableField, orderMethod commonsUtils.Ordering,
 ) ([]models.User, error) {
 	var users []models.User
 	err := r.db.

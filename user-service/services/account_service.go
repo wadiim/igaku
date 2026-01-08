@@ -6,9 +6,9 @@ import (
 	"math"
 
 	commonsDtos "igaku/commons/dtos"
+	commonsUtils "igaku/commons/utils"
 	"igaku/user-service/dtos"
 	"igaku/user-service/repositories"
-	"igaku/user-service/utils"
 	"igaku/commons/models"
 )
 
@@ -17,7 +17,7 @@ type AccountService interface {
 	ListAccounts(
 		page, pageSize int,
 		orderBy models.UserOrderableField,
-		orderMethod utils.Ordering,
+		orderMethod commonsUtils.Ordering,
 	) (*commonsDtos.PaginatedResponse, error)
 	GetAccountByUsername(username string) (*models.User, error)
 	Persist(user *models.User) error
@@ -67,7 +67,7 @@ func (s *accountService) GetAccountDetails(id uuid.UUID) (*dtos.AccountDetails, 
 func (s *accountService) ListAccounts(
 	page, pageSize int,
 	orderBy models.UserOrderableField,
-	orderMethod utils.Ordering,
+	orderMethod commonsUtils.Ordering,
 ) (*commonsDtos.PaginatedResponse, error) {
 	if page < 1 {
 		page = 1

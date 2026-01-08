@@ -19,7 +19,6 @@ import (
 	"igaku/user-service/dtos"
 	"igaku/user-service/services"
 	"igaku/user-service/tests/mocks"
-	"igaku/user-service/utils"
 	"igaku/commons/models"
 	commonsDtos "igaku/commons/dtos"
 	commonsUtils "igaku/commons/utils"
@@ -484,7 +483,7 @@ func TestAccountController_ListAccounts_RepoError_FindAll(t *testing.T) {
 	expectedErrMsg := "Failed to retrieve accounts list"
 
 	mockRepo.On("CountAll").Return(int64(5), nil).Once()
-	mockRepo.On("FindAll", 0, 10, models.ID, utils.Asc).
+	mockRepo.On("FindAll", 0, 10, models.ID, commonsUtils.Asc).
 		Return(nil, repoError).Once()
 
 	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
@@ -555,7 +554,7 @@ func TestAccountController_ListAccounts_DefaultParams(t *testing.T) {
 
 	mockRepo.On("CountAll").Return(totalCount, nil).Once()
 	// The returned list won't probably be sorted by ID, but whatever.
-	mockRepo.On("FindAll", 0, defaultPageSize, models.ID, utils.Asc).
+	mockRepo.On("FindAll", 0, defaultPageSize, models.ID, commonsUtils.Asc).
 		Return(mockUsers[:defaultPageSize], nil).Once()
 
 	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)
@@ -617,7 +616,7 @@ func TestAccountController_ListAccounts_WithParams(t *testing.T) {
 	expectedOffset := 5
 	expectedLimit := pageSize
 	expectedOrderBy := models.Username
-	expectedOrderMethod := utils.Desc
+	expectedOrderMethod := commonsUtils.Desc
 	expectedTotalPages := 3
 
 	mockRepo.On("CountAll").Return(totalCount, nil).Once()
@@ -695,7 +694,7 @@ func TestAccountController_ListAccounts_PageGreaterThanItemCount(t *testing.T) {
 	mockRepo.On("CountAll").Return(totalCount, nil).Once()
 	mockRepo.On(
 		"FindAll",
-		expectedOffset, expectedLimit, models.ID, utils.Asc,
+		expectedOffset, expectedLimit, models.ID, commonsUtils.Asc,
 	).Return([]models.User{}, nil).Once()
 
 	url := fmt.Sprintf("/user/list?page=%d&pageSize=%d", page, pageSize)
@@ -741,7 +740,7 @@ func TestAccountController_ListAccounts_EmptyList(t *testing.T) {
 	mockRepo.On("CountAll").Return(totalCount, nil).Once()
 	mockRepo.On(
 		"FindAll",
-		0, defaultPageSize, models.ID, utils.Asc,
+		0, defaultPageSize, models.ID, commonsUtils.Asc,
 	).Return([]models.User{}, nil).Once()
 
 	req, err := http.NewRequest(http.MethodGet, "/user/list", nil)

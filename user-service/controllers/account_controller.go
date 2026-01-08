@@ -11,9 +11,9 @@ import (
 
 	"igaku/user-service/middleware"
 	"igaku/user-service/services"
-	"igaku/user-service/utils"
 	"igaku/commons/models"
 	commonsDtos "igaku/commons/dtos"
+	commonsUtils "igaku/commons/utils"
 	igakuErrors "igaku/commons/errors"
 )
 
@@ -116,7 +116,7 @@ func (ctrl *AccountController) ListAccounts(c *gin.Context) {
 		return
 	}
 
-	orderMethod, ok := utils.OrderingsMap[strings.ToLower(orderMethodStr)]
+	orderMethod, ok := commonsUtils.OrderingsMap[strings.ToLower(orderMethodStr)]
 	if !ok {
 		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
 			Message: "Invalid orderMethod parameter. Must be `asc` or `desc`",

@@ -13,6 +13,8 @@ import (
 	"igaku/med-service/services"
 	"igaku/med-service/utils"
 	"igaku/med-service/servers"
+	commonsModels "igaku/commons/models"
+	commonsUtils "igaku/commons/utils"
 )
 
 // @title		Igaku Med API
@@ -29,6 +31,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	rxClassAPI := utils.NewRxClassAPI()
+	diseaseID := "D007251"
+	// substances, err := rxClassAPI.GetSubstances(diseaseID)
+	// drugs, err := rxClassAPI.GetDrugsWithSubstances(substances)
+	// log.Printf("%v", drugs)
+	drugService := services.NewDrugService(rxClassAPI)
+	drugService.GetRecommendedDrugs(1, 1, diseaseID, commonsModels.DrugName, commonsUtils.Asc)
 
 	amqpURI := os.Getenv("RABBITMQ_URL")
 
