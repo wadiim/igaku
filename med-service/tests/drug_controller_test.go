@@ -1067,7 +1067,7 @@ func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 	assert.Equal(t, totalPages, paginatedResponse.TotalPages)
 	assert.Equal(t, totalCount, paginatedResponse.TotalCount)
 
-	assert.Equal(t, count, len(drugResponse))
+	assert.Equal(t, pageSize, len(drugResponse))
 	assert.Equal(t, "1115700", drugResponse[0].ID)
 	assert.Equal(t, "Drug0", drugResponse[0].Name)
 	assert.Equal(t, "Substance0", drugResponse[0].Substance)
@@ -1115,8 +1115,9 @@ func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 	err = json.Unmarshal(jsonData, &drugResponse)
 	assert.NoError(t, err)
 
+	expectedCount := 1
 	assert.Equal(t, page, paginatedResponse.Page)
-	assert.Equal(t, count, len(drugResponse))
+	assert.Equal(t, expectedCount, len(drugResponse))
 	assert.Equal(t, "1115705", drugResponse[0].ID)
 	assert.Equal(t, "Drug5", drugResponse[0].Name)
 	assert.Equal(t, "Substance5", drugResponse[0].Substance)

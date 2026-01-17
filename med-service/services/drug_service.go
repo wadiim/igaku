@@ -1,6 +1,7 @@
 package services
 
 import (
+	"log"
 	"math"
 	"sort"
 
@@ -18,6 +19,12 @@ type DrugService interface {
 		orderBy commonsModels.DrugOrderableField,
 		orderMethod commonsUtils.Ordering,
 	) (*commonsDtos.PaginatedResponse, error)
+	// GetDrugsByName(
+	// 	name string,
+	// 	page int, pageSize int,
+	// 	orderBy commonsModels.DrugOrderableField,
+	// 	orderMethod commonsUtils.Ordering,
+	// ) (*commonsDtos.PaginatedResponse, error)
 }
 
 type drugService struct {
@@ -51,6 +58,7 @@ func (s *drugService) GetRecommendedDrugs(
 		if err != nil {
 			continue
 		}
+		log.Printf("%v", d)
 		drugs = append(drugs, d...)
 	}
 
@@ -98,7 +106,11 @@ func (s *drugService) GetRecommendedDrugs(
 		totalPages = int(math.Ceil(float64(totalCount) / float64(pageSize)))
 	}
 
-	drugsDetails := make([]dtos.DrugDetails, len(drugs))
+	drugsDetailsLen := pageSize
+	if len(paged) < pageSize {
+		drugsDetailsLen = len(paged)
+	}
+	drugsDetails := make([]dtos.DrugDetails, drugsDetailsLen)
 	for i, d := range paged {
 		drugsDetails[i] = dtos.DrugDetails{
 			ID: d.ID,

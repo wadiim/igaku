@@ -13,8 +13,8 @@ import (
 	"igaku/med-service/services"
 	"igaku/med-service/utils"
 	"igaku/med-service/servers"
-	commonsModels "igaku/commons/models"
-	commonsUtils "igaku/commons/utils"
+	// commonsModels "igaku/commons/models"
+	// commonsUtils "igaku/commons/utils"
 )
 
 // @title		Igaku Med API
@@ -32,13 +32,11 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	rxClassAPI := utils.NewRxClassAPI()
-	diseaseID := "D007251"
+	// diseaseID := "D007251"
 	// substances, err := rxClassAPI.GetSubstances(diseaseID)
 	// drugs, err := rxClassAPI.GetDrugsWithSubstances(substances)
 	// log.Printf("%v", drugs)
-	drugService := services.NewDrugService(rxClassAPI)
-	drugService.GetRecommendedDrugs(1, 1, diseaseID, commonsModels.DrugName, commonsUtils.Asc)
+	// drugService.GetRecommendedDrugs(1, 1, diseaseID, commonsModels.DrugName, commonsUtils.Asc)
 
 	amqpURI := os.Getenv("RABBITMQ_URL")
 
@@ -54,6 +52,9 @@ func main() {
 	patientRepo := repositories.NewGormPatientRepository(db)
 	patientService := services.NewPatientService(userClient, patientRepo)
 
+	rxClassAPI := utils.NewRxClassAPI()
+	drugService := services.NewDrugService(rxClassAPI)
+
 	rbServer, err := servers.NewRabbitMQServer(amqpURI, patientService)
 	failOnError(err, "[RabbitMQ] Failed to initialize server")
 	defer rbServer.Shutdown()
@@ -61,7 +62,7 @@ func main() {
 	err = rbServer.Start()
 	failOnError(err, "[RabbitMQ] Failed to start listeners")
 
-	apiServer := servers.NewApiServer(diseaseService, patientService)
+	apiServer := servers.NewApiServer(diseaseService, patientService, drugService)
 	apiServer.Start()
 
 	quit := make(chan os.Signal, 1)
