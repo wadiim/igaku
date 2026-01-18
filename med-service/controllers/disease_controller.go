@@ -40,7 +40,7 @@ func NewDiseaseController(service services.DiseaseService) *DiseaseController {
 func (ctrl *DiseaseController) GetBySubstring(c *gin.Context) {
 	name := c.Param("name")
 	pageStr := c.DefaultQuery("page", "1")
-	pageSizeStr := c.DefaultQuery("pageSize", "10")
+	pageSizeStr := c.DefaultQuery("pageSize", "5")
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {

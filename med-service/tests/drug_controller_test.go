@@ -1192,7 +1192,7 @@ func TestDrugController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 	assert.NoError(t, err)
 
 	page := 1
-	pageSize := 10
+	pageSize := 5
 	totalPages := 1
 	totalCount := int64(count)
 	assert.Equal(t, page, paginatedResponse.Page)

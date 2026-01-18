@@ -288,7 +288,7 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 	router := setupRouter(mockRepo)
 
 	testName := "Lupus"
-	count := 9
+	count := 4
 	expectedDiseases := make([]*models.Disease, count)
 	for i := range count {
 		expectedDiseases[i] = &models.Disease{
@@ -298,7 +298,7 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 		}
 	}
 
-	mockRepo.On("FindBySubstring", testName, 0, 10).Return(expectedDiseases, nil).Once()
+	mockRepo.On("FindBySubstring", testName, 0, 5).Return(expectedDiseases, nil).Once()
 	mockRepo.On("CountBySubstring", testName).Return(int64(count), nil).Once()
 
 	req, err := http.NewRequest(
@@ -317,7 +317,7 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 	paginatedResponse, diseasesResponse := unpackPaginatedResponse(t, rec.Body)
 
 	expectedPage := 1
-	expectedPageSize := 10
+	expectedPageSize := 5
 	expectedTotalPages := 1
 	expectedTotalCount := int64(count)
 
@@ -674,7 +674,7 @@ func TestDiseaseController_GetBySubstring_DiseaseNotFound(t *testing.T) {
 	testName := "Wilson"
 
 	offset := 0
-	pageSize := 10
+	pageSize := 5
 
 	mockRepo.On("FindBySubstring", testName, offset, pageSize).Return(
 		nil, &errors.DiseaseNotFoundError{},
@@ -709,7 +709,7 @@ func TestDiseaseController_GetBySubstring_RepoError(t *testing.T) {
 	testName := "Test"
 
 	offset := 0
-	pageSize := 10
+	pageSize := 5
 
 	mockRepo.On("FindBySubstring", testName, offset, pageSize).Return(
 		nil, &commonsErrors.DatabaseError{},

@@ -4,7 +4,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"errors"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -28,7 +27,7 @@ func NewDrugController(service services.DrugService) *DrugController {
 func (ctrl *DrugController) GetRecommendedDrugs(c *gin.Context) {
 	disease := c.Param("disease")
 	pageStr := c.DefaultQuery("page", "1")
-	pageSizeStr := c.DefaultQuery("pageSize", "10")
+	pageSizeStr := c.DefaultQuery("pageSize", "5")
 	orderByStr := c.DefaultQuery("orderBy", "id")
 	orderMethodStr := c.DefaultQuery("orderMethod", "asc")
 
@@ -63,8 +62,6 @@ func (ctrl *DrugController) GetRecommendedDrugs(c *gin.Context) {
 		})
 		return
 	}
-	log.Printf("%v", orderBy)
-	log.Printf("%v", orderMethod)
 
 	drugs, err := ctrl.service.GetRecommendedDrugs(disease, page, pageSize, orderBy, orderMethod)
 	if err != nil {
