@@ -1,35 +1,41 @@
 import { useState } from 'react';
 
-interface Disease {
+interface Drug {
   id: string,
-  rx_norm_id: string,
   name: string,
+  substance: string,
 }
 
-interface DiseaseTableProps {
-  diseases: Disease[];
+interface DrugTableProps {
+  drugs: Drug[];
   page: number;
   totalPages: number;
   errorMessage: string | null;
   onPrev: () => void;
   onNext: () => void;
-  onSelect: (disease: Disease) => void;
+  onSelect: (selected: Drug[]) => void;
 }
 
-function DiseaseTable(
-  { diseases, page, totalPages, errorMessage, onPrev, onNext, onSelect }: DiseaseTableProps
+function DrugTable(
+  { drugs, page, totalPages, errorMessage, onPrev, onNext, onSelect }: DrugTableProps 
 ) {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
-  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
-
-  const handleSelect = (idx: number) => {
-    setSelectedIdx(idx);
-    onSelect(diseases[idx]);
+  const handleSelect = (drug: Drug) => {
+    const newSet = new Set(selectedIds);
+    if (newSet.has(drug.id)) {
+        newSet.delete(drug.id);
+    } else {
+        newSet.add(drug.id);
+    }
+    setSelectedIds(newSet);
+    const selectedDrugs = drugs.filter(d => newSet.has(d.id));
+    onSelect(selectedDrugs);
   };
 
-  const listDiseases = diseases.map((disease, idx) =>
+  const listDrugs = drugs.map((drug, idx) =>
     <tr 
-      key={disease.id}
+      key={drug.id}
       className={`bg-neutral-primary border-b border-default`}>
       <th 
         scope="row" 
@@ -39,17 +45,17 @@ function DiseaseTable(
           truncate
         `}
       >
-        {disease.name}
+        {drug.name}
       </th>
       <td className={`px-6 py-4 truncate`}>
-        {disease.rx_norm_id}
+        {drug.substance}
       </td>
       <td className={`px-6 py-4 text-center`}>
         <input
-          type="radio"
-          name="disease-select"
-          checked={selectedIdx === idx}
-          onChange={() => handleSelect(idx)}
+          type="checkbox"
+          name="drug-select"
+          checked={selectedIds.has(drug.id)}
+          onChange={() => handleSelect(drug)}
           className={`
             border
             checked:border-brand
@@ -61,7 +67,7 @@ function DiseaseTable(
   );
 
   return (
-    <div className={`disease-pagination-table`}>
+    <div className={`drug-pagination-table`}>
       <div 
         className={`
           relative 
@@ -73,8 +79,7 @@ function DiseaseTable(
           className={`
             w-full text-sm text-left 
             rtl:text-right text-body
-            table-fixed
-         `}
+          `}
         >
           <thead className={`text-sm text-body border-b`}>
             <tr>
@@ -82,7 +87,7 @@ function DiseaseTable(
                 Name
               </th>
               <th scope="col" className={`px-6 py-3 font-medium w-2/5 truncate`}>
-                RxNorm ID
+                Substance
               </th>
               <th scope="col" className={`px-6 py-3 font-medium w-1/5 text-center`}>
                 Select
@@ -90,14 +95,14 @@ function DiseaseTable(
             </tr>
           </thead>
           <tbody>
-          {diseases.length === 0 ? (
+          {drugs.length === 0 ? (
             <tr>
               <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
-                No diseases found. Try a search.
+                No drugs found. Try a search.
               </td>
             </tr>
           ) : (
-            listDiseases
+            listDrugs
           )}
           </tbody>
         </table>
@@ -138,6 +143,6 @@ function DiseaseTable(
       </div>
     </div>
   );
-};
+}
 
-export default DiseaseTable;
+export default DrugTable;
