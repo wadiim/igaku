@@ -22,10 +22,10 @@ func (m *MockRxClassAPI) GetSubstances(diseaseID string) ([]commonsModels.Substa
 	return r0, args.Error(1)
 }
 
-func (m *MockRxClassAPI) GetDrugsBySubstance(
-	substance commonsModels.Substance,
+func (m *MockRxClassAPI) GetDrugsByName(
+	name string,
 ) ([]commonsModels.Drug, error) {
-	args := m.Called(substance)
+	args := m.Called(name)
 
 	var r0 []commonsModels.Drug
 	if args.Get(0) != nil {
@@ -34,6 +34,7 @@ func (m *MockRxClassAPI) GetDrugsBySubstance(
 	return r0, args.Error(1)
 }
 
+// TODO: Move this function
 func (m *MockRxClassAPI) GetRecommendedDrugs(
 	diseaseID string,
 	page int,

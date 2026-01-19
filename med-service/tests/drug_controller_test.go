@@ -611,11 +611,11 @@ func TestDrugController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) 
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		nil,
 		&errors.DrugNotFoundError{},
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance2).Return(
+	mockAPI.On("GetDrugsByName", substance2.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -695,7 +695,7 @@ func TestDrugController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -743,7 +743,7 @@ func TestDrugController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -823,7 +823,7 @@ func TestDrugController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -871,7 +871,7 @@ func TestDrugController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -913,6 +913,134 @@ func TestDrugController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
+func TestDrugController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	substance1 := commonsModels.Substance{
+		ID: "1598096",
+		Name: "baloxavir",
+		Type: "IN",
+	}
+	substances := []commonsModels.Substance{
+		substance1,
+	}
+	drugs := []commonsModels.Drug{
+		{
+			ID: "1115702",
+			Name: "ZZZ",
+			Substance: "daloxavir",
+		},
+		{
+			ID: "1115701",
+			Name: "Oseltamivir",
+			Substance: "caloxavir",
+		},
+		{
+			ID: "1115700",
+			Name: "AAA",
+			Substance: "baloxavir",
+		},
+	}
+	diseaseID := "D007251"
+
+	// Asc
+	mockAPI.On("GetSubstances", diseaseID).Return(
+		substances,
+		nil,
+	).Once()
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod := "asc" 
+	orderBy := "name"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	var paginatedResponse commonsDtos.PaginatedResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err := json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	var drugResponse []dtos.DrugDetails
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "baloxavir", drugResponse[0].Substance)
+	assert.Equal(t, "caloxavir", drugResponse[1].Substance)
+	assert.Equal(t, "daloxavir", drugResponse[2].Substance)
+
+	mockAPI.AssertExpectations(t)
+
+	// Desc
+	mockAPI.On("GetSubstances", diseaseID).Return(
+		substances,
+		nil,
+	).Once()
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod = "desc" 
+	orderBy = "name"
+	req, err = http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec = httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err = json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "daloxavir", drugResponse[0].Substance)
+	assert.Equal(t, "caloxavir", drugResponse[1].Substance)
+	assert.Equal(t, "baloxavir", drugResponse[2].Substance)
+
+	mockAPI.AssertExpectations(t)
+}
+
 func TestDrugController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	router := setupDrugRouter(mockAPI)
@@ -946,7 +1074,7 @@ func TestDrugController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -1025,7 +1153,7 @@ func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -1082,7 +1210,7 @@ func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -1156,7 +1284,7 @@ func TestDrugController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 		substances,
 		nil,
 	).Once()
-	mockAPI.On("GetDrugsBySubstance", substance1).Return(
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
 		drugs,
 		nil,
 	).Once()
@@ -1165,6 +1293,1147 @@ func TestDrugController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 		http.MethodGet,
 		fmt.Sprintf(
 			"/med/drug/recommend/%s", diseaseID,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	var paginatedResponse commonsDtos.PaginatedResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err := json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	var drugResponse []dtos.DrugDetails
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	page := 1
+	pageSize := 5
+	totalPages := 1
+	totalCount := int64(count)
+	assert.Equal(t, page, paginatedResponse.Page)
+	assert.Equal(t, pageSize, paginatedResponse.PageSize)
+	assert.Equal(t, totalPages, paginatedResponse.TotalPages)
+	assert.Equal(t, totalCount, paginatedResponse.TotalCount)
+
+	assert.Equal(t, count, len(drugResponse))
+	assert.Equal(t, "1115700", drugResponse[0].ID)
+	assert.Equal(t, "Drug0", drugResponse[0].Name)
+	assert.Equal(t, "Substance0", drugResponse[0].Substance)
+	assert.Equal(t, "1115704", drugResponse[4].ID)
+	assert.Equal(t, "Drug4", drugResponse[4].Name)
+	assert.Equal(t, "Substance4", drugResponse[4].Substance)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_NoToken(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	drugName := "morphine"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s", drugName),
+		nil,
+	)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Authorization header required"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_InvalidTokenFormat(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	drugName := "morphine"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s", drugName),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "INVALID.TOKEN")
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Unauthorized"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_ExpiredToken(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	drugName := "morphine"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s", drugName),
+		nil,
+	)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Doctor,
+	}
+
+	issuedAt, err := time.Parse(time.DateTime, "1998-06-07 08:00:00")
+	require.NoError(t, err)
+	expiresAt, err := time.Parse(time.DateTime, "1998-06-07 09:00:00")
+	require.NoError(t, err)
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		issuedAt,
+		expiresAt,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Token has expired"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_UnauthorizedPatient(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	drugName := "morphine"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s", drugName),
+		nil,
+	)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "jdoe",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Patient,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusForbidden, rec.Code,
+		"Expected HTTP status 403 Forbidden",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Insufficient permissions"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_UnauthorizedAdmin(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	drugName := "morphine"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s", drugName),
+		nil,
+	)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "admin",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Admin,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusForbidden, rec.Code,
+		"Expected HTTP status 403 Forbidden",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Insufficient permissions"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_InvalidPage(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	// Zero page
+	drugName := "morphine"
+	page := 0
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Invalid page parameter. Must be a positive integer."
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for invalid page number",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+	mockAPI.AssertExpectations(t)
+
+	// Negative page
+	page = -1
+	req, err = http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec = httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg = "Invalid page parameter. Must be a positive integer."
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for invalid page number",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_InvalidPageSize(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	// Zero page
+	drugName := "morphine"
+	pageSize := 0
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s?pageSize=%d", drugName, pageSize),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Invalid pageSize parameter. Must be a positive integer."
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for invalid page number",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+	mockAPI.AssertExpectations(t)
+
+	// Negative page
+	pageSize = -1
+	req, err = http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s?pageSize=%d", drugName, pageSize),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec = httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg = "Invalid pageSize parameter. Must be a positive integer."
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for invalid page size",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_InvalidOrderBy(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	drugName := "morphine"
+	orderBy := "invalid"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s?orderBy=%s", drugName, orderBy),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Invalid orderBy parameter. Must be `id`, `name` or `substance`"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for invalid orderBy parameter",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_InvalidOrderMethod(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	drugName := "morphine"
+	orderMethod := "invalid"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s?orderMethod=%s", drugName, orderMethod),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Invalid orderMethod parameter. Must be `asc` or `desc`"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for invalid orderMethod parameter",
+	)
+
+	mockAPI.AssertNotCalled(t, "GetDrugsByName", mock.Anything)
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_RxClassUnavailable(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	drugName := "morphine"
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		nil,
+		&errors.RxClassUnavailableError{},
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s", drugName),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusServiceUnavailable, rec.Code,
+		"Expected HTTP status 503 Service Unavailable",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	log.Printf("%v", rec.Body)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "RxClass API Unavailable"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for RxClass API unavailable",
+	)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_DrugNotFound(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	drugName := "morphine"
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		nil,
+		&errors.DrugNotFoundError{},
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/%s", drugName),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusNotFound, rec.Code,
+		"Expected HTTP status 404 Not Found",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	log.Printf("%v", rec.Body)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Drug not found"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for drug not found",
+	)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_OrderByID(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	drugs := []commonsModels.Drug{
+		{
+			ID: "1115702",
+			Name: "ZZZ",
+			Substance: "daloxavir",
+		},
+		{
+			ID: "1115701",
+			Name: "Oseltamivir",
+			Substance: "caloxavir",
+		},
+		{
+			ID: "1115700",
+			Name: "AAA",
+			Substance: "baloxavir",
+		},
+	}
+
+	drugName := "morphine"
+	// Asc
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod := "asc" 
+	orderBy := "id"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	var paginatedResponse commonsDtos.PaginatedResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err := json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	var drugResponse []dtos.DrugDetails
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "1115700", drugResponse[0].ID)
+	assert.Equal(t, "1115701", drugResponse[1].ID)
+	assert.Equal(t, "1115702", drugResponse[2].ID)
+
+	mockAPI.AssertExpectations(t)
+
+	// Desc
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod = "desc" 
+	orderBy = "id"
+	req, err = http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec = httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err = json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "1115702", drugResponse[0].ID)
+	assert.Equal(t, "1115701", drugResponse[1].ID)
+	assert.Equal(t, "1115700", drugResponse[2].ID)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_OrderByName(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	drugs := []commonsModels.Drug{
+		{
+			ID: "1115702",
+			Name: "ZZZ",
+			Substance: "daloxavir",
+		},
+		{
+			ID: "1115701",
+			Name: "Oseltamivir",
+			Substance: "caloxavir",
+		},
+		{
+			ID: "1115700",
+			Name: "AAA",
+			Substance: "baloxavir",
+		},
+	}
+	drugName := "morphine"
+
+	// Asc
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod := "asc" 
+	orderBy := "name"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	var paginatedResponse commonsDtos.PaginatedResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err := json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	var drugResponse []dtos.DrugDetails
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "AAA", drugResponse[0].Name)
+	assert.Equal(t, "Oseltamivir", drugResponse[1].Name)
+	assert.Equal(t, "ZZZ", drugResponse[2].Name)
+
+	mockAPI.AssertExpectations(t)
+
+	// Desc
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod = "desc" 
+	orderBy = "name"
+	req, err = http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec = httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err = json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "ZZZ", drugResponse[0].Name)
+	assert.Equal(t, "Oseltamivir", drugResponse[1].Name)
+	assert.Equal(t, "AAA", drugResponse[2].Name)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_OrderBySubstance(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	drugs := []commonsModels.Drug{
+		{
+			ID: "1115702",
+			Name: "ZZZ",
+			Substance: "daloxavir",
+		},
+		{
+			ID: "1115701",
+			Name: "Oseltamivir",
+			Substance: "caloxavir",
+		},
+		{
+			ID: "1115700",
+			Name: "AAA",
+			Substance: "baloxavir",
+		},
+	}
+	drugName := "morphine"
+
+	// Asc
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod := "asc" 
+	orderBy := "name"
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	var paginatedResponse commonsDtos.PaginatedResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err := json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	var drugResponse []dtos.DrugDetails
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "baloxavir", drugResponse[0].Substance)
+	assert.Equal(t, "caloxavir", drugResponse[1].Substance)
+	assert.Equal(t, "daloxavir", drugResponse[2].Substance)
+
+	mockAPI.AssertExpectations(t)
+
+	// Desc
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	orderMethod = "desc" 
+	orderBy = "name"
+	req, err = http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec = httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err = json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "daloxavir", drugResponse[0].Substance)
+	assert.Equal(t, "caloxavir", drugResponse[1].Substance)
+	assert.Equal(t, "baloxavir", drugResponse[2].Substance)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_SinglePage(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	count := 4
+	var drugs []commonsModels.Drug
+
+	for i := 0; i < count; i++ {
+		drug := commonsModels.Drug{
+			ID: fmt.Sprintf("111570%d", i),
+			Name: fmt.Sprintf("Drug%d", i),
+			Substance: fmt.Sprintf("Substance%d", i),
+		}
+		drugs = append(drugs, drug)
+	}
+
+	drugName := "morphine"
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s", drugName,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	var paginatedResponse commonsDtos.PaginatedResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err := json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	var drugResponse []dtos.DrugDetails
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	expectedPage := 1
+	expectedPageSize := 5
+	expectedTotalPages := 1
+	expectedTotalCount := int64(4)
+
+	assert.Equal(t, count, len(drugResponse))
+	assert.Equal(t, "1115700", drugResponse[0].ID)
+	assert.Equal(t, "Drug0", drugResponse[0].Name)
+	assert.Equal(t, "Substance0", drugResponse[0].Substance)
+	assert.Equal(t, "1115703", drugResponse[3].ID)
+	assert.Equal(t, "Drug3", drugResponse[3].Name)
+	assert.Equal(t, "Substance3", drugResponse[3].Substance)
+	assert.Equal(t, expectedPage, paginatedResponse.Page)
+	assert.Equal(t, expectedPageSize, paginatedResponse.PageSize)
+	assert.Equal(t, expectedTotalPages, paginatedResponse.TotalPages)
+	assert.Equal(t, expectedTotalCount, paginatedResponse.TotalCount)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_MultiplePages(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	count := 6
+	var drugs []commonsModels.Drug
+
+	for i := 0; i < count; i++ {
+		drug := commonsModels.Drug{
+			ID: fmt.Sprintf("111570%d", i),
+			Name: fmt.Sprintf("Drug%d", i),
+			Substance: fmt.Sprintf("Substance%d", i),
+		}
+		drugs = append(drugs, drug)
+	}
+	drugName := "morphine"
+
+	page := 1
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?page=%d", drugName, page,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	var paginatedResponse commonsDtos.PaginatedResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err := json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	var drugResponse []dtos.DrugDetails
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	pageSize := 5
+	totalPages := 2
+	totalCount := int64(count)
+	assert.Equal(t, page, paginatedResponse.Page)
+	assert.Equal(t, pageSize, paginatedResponse.PageSize)
+	assert.Equal(t, totalPages, paginatedResponse.TotalPages)
+	assert.Equal(t, totalCount, paginatedResponse.TotalCount)
+
+	assert.Equal(t, pageSize, len(drugResponse))
+	assert.Equal(t, "1115700", drugResponse[0].ID)
+	assert.Equal(t, "Drug0", drugResponse[0].Name)
+	assert.Equal(t, "Substance0", drugResponse[0].Substance)
+	assert.Equal(t, "1115704", drugResponse[4].ID)
+	assert.Equal(t, "Drug4", drugResponse[4].Name)
+	assert.Equal(t, "Substance4", drugResponse[4].Substance)
+
+	mockAPI.AssertExpectations(t)
+
+	page = 2
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	req, err = http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s?page=%d", drugName, page,
+		),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec = httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 Success",
+	)
+
+	err = json.Unmarshal(rec.Body.Bytes(), &paginatedResponse)
+	assert.NoError(t, err)
+
+	jsonData, err = json.Marshal(paginatedResponse.Data)
+	assert.NoError(t, err)
+
+	err = json.Unmarshal(jsonData, &drugResponse)
+	assert.NoError(t, err)
+
+	expectedCount := 1
+	assert.Equal(t, page, paginatedResponse.Page)
+	assert.Equal(t, expectedCount, len(drugResponse))
+	assert.Equal(t, "1115705", drugResponse[0].ID)
+	assert.Equal(t, "Drug5", drugResponse[0].Name)
+	assert.Equal(t, "Substance5", drugResponse[0].Substance)
+
+	mockAPI.AssertExpectations(t)
+}
+
+func TestDrugController_GetDrugsByName_DefaultParams(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	var drugs []commonsModels.Drug
+
+	count := 5
+	for i := 0; i < count; i++ {
+		drug := commonsModels.Drug{
+			ID: fmt.Sprintf("111570%d", i),
+			Name: fmt.Sprintf("Drug%d", i),
+			Substance: fmt.Sprintf("Substance%d", i),
+		}
+		drugs = append(drugs, drug)
+	}
+	drugName := "morphine"
+
+	mockAPI.On("GetDrugsByName", drugName).Return(
+		drugs,
+		nil,
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf(
+			"/med/drug/%s", drugName,
 		),
 		nil,
 	)

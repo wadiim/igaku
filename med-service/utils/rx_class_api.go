@@ -15,7 +15,7 @@ const RxClassDomainURL = "https://rxnav.nlm.nih.gov"
 
 type RxClassAPI interface {
 	GetSubstances(diseaseID string) ([]commonsModels.Substance, error)
-	GetDrugsBySubstance(substance commonsModels.Substance) ([]commonsModels.Drug, error)
+	GetDrugsByName(name string) ([]commonsModels.Drug, error)
 }
 
 type rxClassAPI struct {
@@ -93,9 +93,7 @@ func (api *rxClassAPI) GetSubstances(diseaseID string) ([]commonsModels.Substanc
 	return substances, nil
 }
 
-func (api *rxClassAPI) GetDrugsBySubstance(
-	substance commonsModels.Substance,
-) ([]commonsModels.Drug, error) {
+func (api *rxClassAPI) GetDrugsByName(name string) ([]commonsModels.Drug, error) {
 	type ConceptProperty struct {
 		Rxcui    string `json:"rxcui"`
 		Name     string `json:"name"`
@@ -121,10 +119,7 @@ func (api *rxClassAPI) GetDrugsBySubstance(
 	}
 
 	var drugs []commonsModels.Drug
-	endpoint := fmt.Sprintf(
-		"/REST/drugs.json?name=%s",
-		substance.Name,
-	)
+	endpoint := fmt.Sprintf("/REST/drugs.json?name=%s", name)
 	data, err := api.fetchFromEndpoint(endpoint)
 	if err != nil {
 		return nil, err
@@ -140,7 +135,7 @@ func (api *rxClassAPI) GetDrugsBySubstance(
 			drugs = append(drugs, commonsModels.Drug{
 				ID:        cp.Rxcui,
 				Name:      cp.Name,
-				Substance: substance.Name,
+				Substance: name,
 			})
 		}
 	}

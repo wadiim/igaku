@@ -86,6 +86,68 @@ func (ctrl *DrugController) GetRecommendedDrugs(c *gin.Context) {
 	c.JSON(http.StatusOK, drugs)
 }
 
+func (ctrl *DrugController) GetDrugsByName(c *gin.Context) {
+	name := c.Param("name")
+	pageStr := c.DefaultQuery("page", "1")
+	pageSizeStr := c.DefaultQuery("pageSize", "5")
+	orderByStr := c.DefaultQuery("orderBy", "id")
+	orderMethodStr := c.DefaultQuery("orderMethod", "asc")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid page parameter. Must be a positive integer.",
+		})
+		return
+	}
+
+	pageSize, err := strconv.Atoi(pageSizeStr)
+	if err != nil || pageSize < 1 {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid pageSize parameter. Must be a positive integer.",
+		})
+		return
+	}
+
+	orderBy, ok := commonsModels.DrugOrderableFieldsMap[strings.ToLower(orderByStr)]
+	if !ok {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid orderBy parameter. Must be `id`, `name` or `substance`",
+		})
+		return
+	}
+
+	orderMethod, ok := commonsUtils.OrderingsMap[strings.ToLower(orderMethodStr)]
+	if !ok {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid orderMethod parameter. Must be `asc` or `desc`",
+		})
+		return
+	}
+
+	drugs, err := ctrl.service.GetDrugsByName(name, page, pageSize, orderBy, orderMethod)
+	if err != nil {
+		if errors.Is(err, &medErrors.RxClassUnavailableError{}) {
+			c.JSON(http.StatusServiceUnavailable, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+			return
+		} else if errors.Is(err, &medErrors.DrugNotFoundError{}) {
+			c.JSON(http.StatusNotFound, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{
+				Message: "Failed to retrieve list of drugs",
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, drugs)
+}
+
 func (ctrl *DrugController) RegisterRoutes(router *gin.Engine) {
 	routes := router.Group("/med/drug")
 	routes.Use(middleware.Authenticate())
@@ -94,6 +156,11 @@ func (ctrl *DrugController) RegisterRoutes(router *gin.Engine) {
 			"/recommend/:disease",
 			middleware.Authorize(commonsModels.Doctor),
 			ctrl.GetRecommendedDrugs,
+		)
+		routes.GET(
+			"/:name",
+			middleware.Authorize(commonsModels.Doctor),
+			ctrl.GetDrugsByName,
 		)
 	}
 }
