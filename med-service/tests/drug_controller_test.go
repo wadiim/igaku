@@ -1800,10 +1800,7 @@ func TestDrugController_GetDrugsByName_RxClassUnavailable(t *testing.T) {
 	token := genDoctorToken(t)
 
 	drugName := "morphine"
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		nil,
-		&errors.RxClassUnavailableError{},
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(nil, &errors.RxClassUnavailableError{}).Once()
 
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -1843,10 +1840,7 @@ func TestDrugController_GetDrugsByName_DrugNotFound(t *testing.T) {
 	token := genDoctorToken(t)
 
 	drugName := "morphine"
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		nil,
-		&errors.DrugNotFoundError{},
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(nil, &errors.DrugNotFoundError{}).Once()
 
 	req, err := http.NewRequest(
 		http.MethodGet,
@@ -1905,10 +1899,7 @@ func TestDrugController_GetDrugsByName_OrderByID(t *testing.T) {
 
 	drugName := "morphine"
 	// Asc
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	orderMethod := "asc" 
 	orderBy := "id"
@@ -1949,10 +1940,7 @@ func TestDrugController_GetDrugsByName_OrderByID(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 
 	// Desc
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	orderMethod = "desc" 
 	orderBy = "id"
@@ -2017,10 +2005,7 @@ func TestDrugController_GetDrugsByName_OrderByName(t *testing.T) {
 	drugName := "morphine"
 
 	// Asc
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	orderMethod := "asc" 
 	orderBy := "name"
@@ -2061,10 +2046,7 @@ func TestDrugController_GetDrugsByName_OrderByName(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 
 	// Desc
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	orderMethod = "desc" 
 	orderBy = "name"
@@ -2129,10 +2111,7 @@ func TestDrugController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 	drugName := "morphine"
 
 	// Asc
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	orderMethod := "asc" 
 	orderBy := "name"
@@ -2173,10 +2152,7 @@ func TestDrugController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 
 	// Desc
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	orderMethod = "desc" 
 	orderBy = "name"
@@ -2234,16 +2210,11 @@ func TestDrugController_GetDrugsByName_SinglePage(t *testing.T) {
 	}
 
 	drugName := "morphine"
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s", drugName,
-		),
+		fmt.Sprintf("/med/drug/%s", drugName),
 		nil,
 	)
 	require.NoError(t, err)
@@ -2309,16 +2280,11 @@ func TestDrugController_GetDrugsByName_MultiplePages(t *testing.T) {
 	drugName := "morphine"
 
 	page := 1
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?page=%d", drugName, page,
-		),
+		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
 		nil,
 	)
 	require.NoError(t, err)
@@ -2363,16 +2329,11 @@ func TestDrugController_GetDrugsByName_MultiplePages(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 
 	page = 2
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	req, err = http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?page=%d", drugName, page,
-		),
+		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
 		nil,
 	)
 	require.NoError(t, err)
@@ -2425,16 +2386,11 @@ func TestDrugController_GetDrugsByName_DefaultParams(t *testing.T) {
 	}
 	drugName := "morphine"
 
-	mockAPI.On("GetDrugsByName", drugName).Return(
-		drugs,
-		nil,
-	).Once()
+	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
 	req, err := http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s", drugName,
-		),
+		fmt.Sprintf("/med/drug/%s", drugName),
 		nil,
 	)
 	require.NoError(t, err)
