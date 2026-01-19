@@ -33,6 +33,8 @@ function Prescribe() {
   const [recDrugTotalPages, setRecDrugTotalPages] = useState<int>(1);
 
   const [manualDrugData, setManualDrugData] = useState<Drug[]>([]);
+  const [manualDrugPage, setManualDrugPage] = useState<int>(1);
+  const [manualDrugTotalPages, setManualDrugTotalPages] = useState<int>(1);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [diseaseErrorMessage, setDiseaseErrorMessage] = useState<string | null>(null);
@@ -178,6 +180,44 @@ function Prescribe() {
     };
   }
 
+  const onDrugSearch = (page: number = 1) => {
+    let jwt = localStorage.getItem("jwt"); 
+    if (isTokenExpired(jwt)) {
+      navigate("/");
+    }
+    if(jwt === null) {
+      throw new Error("Authentication failed");
+    } else {
+      fetch(`http://localhost:4000/med/drug/${drugSearchString}?page=${page}`, {
+        method: "GET",
+        headers: {
+          "accept": "application/json",
+          "Authorization": jwt,
+        }
+      })
+      .then((res) => {
+        if (res.status === 400) {
+          throw new Error("Invalid parameters"); 
+        } else if (res.status === 401 || res.status === 403) {
+          throw new Error("You do not have permission to perform this action"); 
+        } else if (res.status === 404) {
+          throw new Error("Drug not found"); 
+        } else if (res.status === 500) {
+          throw new Error("Something went wrong"); 
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setManualDrugData(data.data);
+        setManualDrugPage(data.page);
+        setManualDrugTotalPages(data.total_pages);
+      })
+      .catch((err) => {
+        console.log(err);
+      })
+    }
+  }
+
   return (
     <div className={`flex-1 flex items-center justify-center`}>
       <div
@@ -244,9 +284,17 @@ function Prescribe() {
           <SearchBar 
               searchString={drugSearchString}
               setSearchString={setDrugSearchString}
-              onSearch={recommendDrugs}
+              onSearch={onDrugSearch}
           />
-          <DrugTable drugs={[{id: "Test", name: "Test", substance: "Test"}]}/>
+          <DrugTable 
+            drugs={manualDrugData}
+            page={manualDrugPage}
+            totalPages={manualDrugTotalPages}
+            errorMessage={null}
+            onPrev={ () => {onDrugSearch(manualDrugPage - 1)} }
+            onNext={ () => {onDrugSearch(manualDrugPage + 1)} }
+            onSelect={handleRecommendedDrugSelect}
+          />
         </div>
 
       </div>
