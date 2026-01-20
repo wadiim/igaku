@@ -14,11 +14,17 @@ interface DrugTableProps {
   onPrev: () => void;
   onNext: () => void;
   onSelect: (selected: Drug[]) => void;
+  orderBy: "name" | "substance";
+  orderMethod: "asc" | "desc";
+  onSortChange: (field: "name" | "substance") => void;
 }
 
-function DrugTable(
-  { drugs, page, totalPages, errorMessage, onPrev, onNext, onSelect }: DrugTableProps 
-) {
+function DrugTable({ 
+    drugs, page, totalPages, errorMessage,
+    onPrev, onNext, onSelect, orderBy,
+    orderMethod, onSortChange
+  }: DrugTableProps)
+{
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const handleSelect = (drug: Drug) => {
@@ -83,11 +89,19 @@ function DrugTable(
         >
           <thead className={`text-sm text-body border-b`}>
             <tr>
-              <th scope="col" className={`px-6 py-3 font-medium w-2/5 truncate`}>
-                Name
+              <th 
+                scope="col" 
+                className={`px-6 py-3 font-medium w-2/5 truncate`}
+                onClick={() => onSortChange("name")}
+              >
+                Name {orderBy === "name" && (orderMethod === "asc" ? "▲" : "▼")}
               </th>
-              <th scope="col" className={`px-6 py-3 font-medium w-2/5 truncate`}>
-                Substance
+              <th 
+                scope="col" 
+                className={`px-6 py-3 font-medium w-2/5 truncate`}
+                onClick={() => onSortChange("substance")}
+              >
+                Substance {orderBy === "substance" && (orderMethod === "asc" ? "▲" : "▼")}
               </th>
               <th scope="col" className={`px-6 py-3 font-medium w-1/5 text-center`}>
                 Select

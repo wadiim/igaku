@@ -48,15 +48,53 @@ function Prescribe() {
   let [selectedDisease, setSelectedDisease] = useState<Disease | null>(null);
   let [selectedDrugs, setSelectedDrugs] = useState<Drug[]>([]);
 
+  const [recOrderBy, setRecOrderBy] = useState<"name" | "substance">("name");
+  const [recOrderMethod, setRecOrderMethod] = useState<"asc" | "desc">("asc");
+
+  const [manualOrderBy, setManualOrderBy] = useState<"name" | "substance">("name");
+  const [manualOrderMethod, setManualOrderMethod] = useState<"asc" | "desc">("asc");
+
   let navigate = useNavigate();
 
   const handleDiseaseSelect = (disease: Disease) => {
     setSelectedDisease(disease); 
-    recommendDrugs(disease, 1);
+    recommendDrugs(disease, 1, recOrderBy, recOrderMethod);
   }
 
   const handleRecommendedDrugSelect = (drugs: Drug[]) => {
     setSelectedDrugs(drugs);
+  };
+
+  const toggleRecSort = (field: "name" | "substance") => {
+    const newOrderBy = recOrderBy === field ? recOrderBy : field;
+    const newOrderMethod =
+      recOrderBy === field
+        ? recOrderMethod === "asc"
+        ? "desc"
+        : "asc"
+      : "asc";
+
+    setRecOrderBy(newOrderBy);
+    setRecOrderMethod(newOrderMethod);
+
+    if (selectedDisease) {
+      recommendDrugs(selectedDisease, 1, newOrderBy, newOrderMethod);
+    }
+  };
+
+  const toggleManualSort = (field: "name" | "substance") => {
+    const newOrderBy = manualOrderBy === field ? manualOrderBy : field;
+    const newOrderMethod =
+      manualOrderBy === field
+        ? manualOrderMethod === "asc"
+        ? "desc"
+        : "asc"
+      : "asc";
+
+    setManualOrderBy(newOrderBy);
+    setManualOrderMethod(newOrderMethod);
+
+    onDrugSearch(manualDrugPage, newOrderBy, newOrderMethod);
   };
 
   const onPatientSearch = () => {
@@ -136,7 +174,12 @@ function Prescribe() {
     }
   };
 
-  const recommendDrugs = (disease: Disease, page: number = 1) => {
+  const recommendDrugs = (
+    disease: Disease,
+    page: number = 1,
+    orderBy: "name" | "substance",
+    orderMethod: "asc" | "desc"
+  ) => {
     let jwt = localStorage.getItem("jwt"); 
     if (isTokenExpired(jwt)) {
       navigate("/");
@@ -144,7 +187,7 @@ function Prescribe() {
     if(jwt === null) {
       throw new Error("Authentication failed");
     } else {
-      fetch(`http://localhost:4000/med/drug/recommend/${disease.rx_norm_id}?page=${page}`, {
+      fetch(`http://localhost:4000/med/drug/recommend/${disease.rx_norm_id}?page=${page}&orderBy=${orderBy}&orderMethod=${orderMethod}`, {
         method: "GET",
         headers: {
           "accept": "application/json",
@@ -178,7 +221,11 @@ function Prescribe() {
     };
   }
 
-  const onDrugSearch = (page: number = 1) => {
+  const onDrugSearch = (
+    page: number = 1,
+    orderBy: "name" | "substance",
+    orderMethod: "asc" | "desc"
+  ) => {
     let jwt = localStorage.getItem("jwt"); 
     if (isTokenExpired(jwt)) {
       navigate("/");
@@ -186,7 +233,7 @@ function Prescribe() {
     if(jwt === null) {
       throw new Error("Authentication failed");
     } else {
-      fetch(`http://localhost:4000/med/drug/${drugSearchString}?page=${page}`, {
+      fetch(`http://localhost:4000/med/drug/${drugSearchString}?page=${page}&orderBy=${orderBy}&orderMethod=${orderMethod}`, {
         method: "GET",
         headers: {
           "accept": "application/json",
@@ -276,28 +323,34 @@ function Prescribe() {
             errorMessage={recDrugErrorMessage}
             onPrev={ () => {
               if (!selectedDisease) return;
-              recommendDrugs(selectedDisease, recDrugPage - 1);
+              recommendDrugs(selectedDisease, recDrugPage - 1, recOrderBy, recOrderMethod);
             } }
             onNext={ () => {
               if (!selectedDisease) return;
-              recommendDrugs(selectedDisease, recDrugPage + 1);
+              recommendDrugs(selectedDisease, recDrugPage + 1, recOrderBy, recOrderMethod);
             } }
             onSelect={handleRecommendedDrugSelect}
+            orderBy={recOrderBy}
+            orderMethod={recOrderMethod}
+            onSortChange={toggleRecSort}
           />
           <h2 className={`text-m`}>Manual search</h2>
           <SearchBar 
               searchString={drugSearchString}
               setSearchString={setDrugSearchString}
-              onSearch={onDrugSearch}
+              onSearch={ () => {onDrugSearch(1, manualOrderBy, manualOrderMethod)} }
           />
           <DrugTable 
             drugs={manualDrugData}
             page={manualDrugPage}
             totalPages={manualDrugTotalPages}
             errorMessage={manualDrugErrorMessage}
-            onPrev={ () => {onDrugSearch(manualDrugPage - 1)} }
-            onNext={ () => {onDrugSearch(manualDrugPage + 1)} }
+            onPrev={ () => {onDrugSearch(manualDrugPage - 1, manualOrderBy, manualOrderMethod)} }
+            onNext={ () => {onDrugSearch(manualDrugPage + 1, manualOrderBy, manualOrderMethod)} }
             onSelect={handleRecommendedDrugSelect}
+            orderBy={manualOrderBy}
+            orderMethod={manualOrderMethod}
+            onSortChange={toggleManualSort}
           />
         </div>
 
