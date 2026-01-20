@@ -59,12 +59,6 @@ function Prescribe() {
     setSelectedDrugs(drugs);
   };
 
-  const goToDrugPage = (page: number) => {
-    if (!selectedDisease) return;
-
-    recommendDrugs(selectedDisease, page);
-  }
-
   const onPatientSearch = () => {
     let jwt = localStorage.getItem("jwt"); 
     if (isTokenExpired(jwt)) {
@@ -150,8 +144,6 @@ function Prescribe() {
     if(jwt === null) {
       throw new Error("Authentication failed");
     } else {
-      if (!selectedDisease) return
-
       fetch(`http://localhost:4000/med/drug/recommend/${disease.rx_norm_id}?page=${page}`, {
         method: "GET",
         headers: {
@@ -282,8 +274,14 @@ function Prescribe() {
             page={recDrugPage}
             totalPages={recDrugTotalPages}
             errorMessage={recDrugErrorMessage}
-            onPrev={ () => {goToDrugPage(recDrugPage - 1)} }
-            onNext={ () => {goToDrugPage(recDrugPage + 1)} }
+            onPrev={ () => {
+              if (!selectedDisease) return;
+              recommendDrugs(selectedDisease, recDrugPage - 1);
+            } }
+            onNext={ () => {
+              if (!selectedDisease) return;
+              recommendDrugs(selectedDisease, recDrugPage + 1);
+            } }
             onSelect={handleRecommendedDrugSelect}
           />
           <h2 className={`text-m`}>Manual search</h2>
