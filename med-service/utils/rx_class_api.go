@@ -139,6 +139,9 @@ func (api *rxClassAPI) GetDrugsByName(name string) ([]commonsModels.Drug, error)
 			})
 		}
 	}
+	if len(drugs) == 0 {
+		return nil, &errors.DrugNotFoundError{}
+	}
 
 	return drugs, nil
 }

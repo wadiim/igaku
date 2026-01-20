@@ -8,6 +8,7 @@ import (
 	commonsModels "igaku/commons/models"
 	commonsUtils "igaku/commons/utils"
 	"igaku/med-service/dtos"
+	"igaku/med-service/errors"
 	"igaku/med-service/utils"
 )
 
@@ -141,6 +142,9 @@ func (s *drugService) GetRecommendedDrugs(
 			continue
 		}
 		drugs = append(drugs, d...)
+	}
+	if len(drugs) == 0 {
+		return nil, &errors.DrugNotFoundError{}
 	}
 
 	drugs = s.sortDrugs(drugs, orderBy, orderMethod)

@@ -75,6 +75,11 @@ func (ctrl *DrugController) GetRecommendedDrugs(c *gin.Context) {
 				Message: err.Error(),
 			})
 			return
+		} else if errors.Is(err, &medErrors.DrugNotFoundError{}) {
+			c.JSON(http.StatusNotFound, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+			return
 		} else {
 			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{
 				Message: "Failed to retrieve list of drugs",

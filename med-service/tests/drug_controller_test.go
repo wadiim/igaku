@@ -657,6 +657,62 @@ func TestDrugController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) 
 	mockAPI.AssertExpectations(t)
 }
 
+func TestDrugController_GetRecommendedDrugs_DrugNotFoundError(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	router := setupDrugRouter(mockAPI)
+
+	token := genDoctorToken(t)
+
+	substance1 := commonsModels.Substance{
+		ID: "1598096",
+		Name: "baloxavir",
+		Type: "IN",
+	}
+	substances := []commonsModels.Substance{
+		substance1,
+	}
+	drugs := []commonsModels.Drug{}
+	diseaseID := "D007251"
+	mockAPI.On("GetSubstances", diseaseID).Return(
+		substances,
+		nil,
+	).Once()
+	mockAPI.On("GetDrugsByName", substance1.Name).Return(
+		drugs,
+		nil,
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusNotFound, rec.Code,
+		"Expected HTTP status 404 Not Found",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	log.Printf("%v", rec.Body)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Drug not found"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for drug not found",
+	)
+
+	mockAPI.AssertExpectations(t)
+}
+
 func TestDrugController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	router := setupDrugRouter(mockAPI)

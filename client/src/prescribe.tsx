@@ -38,6 +38,8 @@ function Prescribe() {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [diseaseErrorMessage, setDiseaseErrorMessage] = useState<string | null>(null);
+  const [recDrugErrorMessage, setRecDrugErrorMessage] = useState<string | null>(null);
+  const [manualDrugErrorMessage, setManualDrugErrorMessage] = useState<string | null>(null);
 
   let [patientSearchString, setPatientSearchString] = useState<string>("");
   let [diseaseSearchString, setDiseaseSearchString] = useState<string>("");
@@ -173,9 +175,13 @@ function Prescribe() {
         setRecDrugData(data.data);
         setRecDrugPage(data.page);
         setRecDrugTotalPages(data.total_pages);
+        setRecDrugErrorMessage(null);
       })
       .catch((err) => { 
-        console.error(err);
+        setRecDrugData([]);
+        setRecDrugPage(1);
+        setRecDrugTotalPages(1);
+        setRecDrugErrorMessage(err.message);
       })
     };
   }
@@ -213,7 +219,7 @@ function Prescribe() {
         setManualDrugTotalPages(data.total_pages);
       })
       .catch((err) => {
-        console.log(err);
+        setManualDrugErrorMessage(err.message);
       })
     }
   }
@@ -275,7 +281,7 @@ function Prescribe() {
             drugs={recDrugData} 
             page={recDrugPage}
             totalPages={recDrugTotalPages}
-            errorMessage={null}
+            errorMessage={recDrugErrorMessage}
             onPrev={ () => {goToDrugPage(recDrugPage - 1)} }
             onNext={ () => {goToDrugPage(recDrugPage + 1)} }
             onSelect={handleRecommendedDrugSelect}
@@ -290,7 +296,7 @@ function Prescribe() {
             drugs={manualDrugData}
             page={manualDrugPage}
             totalPages={manualDrugTotalPages}
-            errorMessage={null}
+            errorMessage={manualDrugErrorMessage}
             onPrev={ () => {onDrugSearch(manualDrugPage - 1)} }
             onNext={ () => {onDrugSearch(manualDrugPage + 1)} }
             onSelect={handleRecommendedDrugSelect}
