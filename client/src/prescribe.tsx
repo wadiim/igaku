@@ -54,6 +54,9 @@ function Prescribe() {
   const [manualOrderBy, setManualOrderBy] = useState<"name" | "substance">("name");
   const [manualOrderMethod, setManualOrderMethod] = useState<"asc" | "desc">("asc");
 
+  const [selectedDrugIds, setSelectedDrugIds] = useState<Set<string>>(new Set());
+  const [drugCache, setDrugCache] = useState<Map<string, Drug>>(new Map());
+
   let navigate = useNavigate();
 
   const handleDiseaseSelect = (disease: Disease) => {
@@ -61,8 +64,24 @@ function Prescribe() {
     recommendDrugs(disease, 1, recOrderBy, recOrderMethod);
   }
 
-  const handleRecommendedDrugSelect = (drugs: Drug[]) => {
-    setSelectedDrugs(drugs);
+  const mergeIntoCache = (drugs: Drug[]) => {
+    setDrugCache(prev => {
+      const next = new Map(prev);
+      drugs.forEach(d => next.set(d.id, d));
+      return next;
+    });
+  };
+
+  const handleToggleDrug = (drugId: string) => {
+    setSelectedDrugIds(prev => {
+      const next = new Set(prev);
+      if (next.has(drugId)) {
+        next.delete(drugId);
+      } else {
+        next.add(drugId);
+      }
+      return next;
+    });
   };
 
   const toggleRecSort = (field: "name" | "substance") => {
@@ -95,6 +114,12 @@ function Prescribe() {
     setManualOrderMethod(newOrderMethod);
 
     onDrugSearch(manualDrugPage, newOrderBy, newOrderMethod);
+  };
+
+  const getSelectedDrugs = (): Drug[] => {
+    return Array.from(selectedDrugIds)
+      .map(id => drugCache.get(id))
+      .filter((d): d is Drug => d !== undefined);
   };
 
   const onPatientSearch = () => {
@@ -211,6 +236,7 @@ function Prescribe() {
         setRecDrugPage(data.page);
         setRecDrugTotalPages(data.total_pages);
         setRecDrugErrorMessage(null);
+        mergeIntoCache(data.data);
       })
       .catch((err) => { 
         setRecDrugData([]);
@@ -256,6 +282,7 @@ function Prescribe() {
         setManualDrugData(data.data);
         setManualDrugPage(data.page);
         setManualDrugTotalPages(data.total_pages);
+        mergeIntoCache(data.data);
       })
       .catch((err) => {
         setManualDrugErrorMessage(err.message);
@@ -317,7 +344,9 @@ function Prescribe() {
         <div className={`border-1 mt-3 mb-3 pl-2 pr-2 pt-2 pb-2`}>
           <h2 className={`text-m`}>Recommended</h2>
           <DrugTable 
+            tableName={"recommend"}
             drugs={recDrugData} 
+            setDrugs={setRecDrugData}
             page={recDrugPage}
             totalPages={recDrugTotalPages}
             errorMessage={recDrugErrorMessage}
@@ -329,7 +358,8 @@ function Prescribe() {
               if (!selectedDisease) return;
               recommendDrugs(selectedDisease, recDrugPage + 1, recOrderBy, recOrderMethod);
             } }
-            onSelect={handleRecommendedDrugSelect}
+            onSelect={handleToggleDrug}
+            selectedIds={selectedDrugIds}
             orderBy={recOrderBy}
             orderMethod={recOrderMethod}
             onSortChange={toggleRecSort}
@@ -341,17 +371,55 @@ function Prescribe() {
               onSearch={ () => {onDrugSearch(1, manualOrderBy, manualOrderMethod)} }
           />
           <DrugTable 
+            tableName={"manual"}
             drugs={manualDrugData}
+            setDrugs={setManualDrugData}
             page={manualDrugPage}
             totalPages={manualDrugTotalPages}
             errorMessage={manualDrugErrorMessage}
             onPrev={ () => {onDrugSearch(manualDrugPage - 1, manualOrderBy, manualOrderMethod)} }
             onNext={ () => {onDrugSearch(manualDrugPage + 1, manualOrderBy, manualOrderMethod)} }
-            onSelect={handleRecommendedDrugSelect}
+            onSelect={handleToggleDrug}
+            selectedIds={selectedDrugIds}
             orderBy={manualOrderBy}
             orderMethod={manualOrderMethod}
             onSortChange={toggleManualSort}
           />
+        </div>
+        <div className="border-1 mt-6 p-4">
+          <h2 className="text-xl mb-2">Summary</h2>
+
+          <div className="mb-3">
+            <ul>
+              <li><strong>Username: </strong>{patientData.username}</li>  
+              <li><strong>Email: </strong>{patientData.email}</li>  
+              <li><strong>National ID: </strong>{patientData.national_id}</li>  
+            </ul>
+          </div>
+
+          {selectedDisease && (
+            <div className="mb-3">
+              <strong>Disease:</strong> {selectedDisease.name}
+            </div>
+          )}
+
+          <div className="mb-3">
+            <strong>Drugs to prescribe:</strong>
+            <ul className="list-disc list-inside">
+              {getSelectedDrugs().map(d => (
+                <li key={d.id}>{d.name} – {d.substance ?? ""}</li>
+              ))}
+            </ul>
+          </div>
+
+          <button
+            className={`
+              px-4 py-2 bg-blue-600 text-white rounded
+              hover:bg-blue-700 disabled:opacity-50
+            `}
+          >
+            Submit
+          </button>
         </div>
 
       </div>

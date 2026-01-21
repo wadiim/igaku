@@ -7,25 +7,31 @@ interface Drug {
 }
 
 interface DrugTableProps {
+  tableName: string;
   drugs: Drug[];
+  setDrugs: () => void;
   page: number;
   totalPages: number;
   errorMessage: string | null;
   onPrev: () => void;
   onNext: () => void;
-  onSelect: (selected: Drug[]) => void;
+  onSelect: (drugId: string) => void;   // now receives a single id
+  selectedIds: Set<string>;            // global set from parent<<
   orderBy: "name" | "substance";
   orderMethod: "asc" | "desc";
   onSortChange: (field: "name" | "substance") => void;
 }
 
 function DrugTable({ 
-    drugs, page, totalPages, errorMessage,
-    onPrev, onNext, onSelect, orderBy,
+    tableName, drugs, setDrugs, page, totalPages, errorMessage,
+    onPrev, onNext, onSelect, selectedIds, orderBy,
     orderMethod, onSortChange
   }: DrugTableProps)
 {
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const handleRowClick = (drug: Drug) => {
+    onSelect(drug.id);          // just tell parent which id changed
+  };
+  // const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const handleSelect = (drug: Drug) => {
     const newSet = new Set(selectedIds);
@@ -36,7 +42,7 @@ function DrugTable({
     }
     setSelectedIds(newSet);
     const selectedDrugs = drugs.filter(d => newSet.has(d.id));
-    onSelect(selectedDrugs);
+    onSelect(tableName, selectedDrugs);
   };
 
   const listDrugs = drugs.map((drug, idx) =>
@@ -61,7 +67,7 @@ function DrugTable({
           type="checkbox"
           name="drug-select"
           checked={selectedIds.has(drug.id)}
-          onChange={() => handleSelect(drug)}
+          onChange={() => handleRowClick(drug)}
           className={`
             border
             checked:border-brand
