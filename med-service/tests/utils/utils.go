@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -15,7 +17,12 @@ import (
 	"testing"
 	"time"
 
+	"igaku/commons/models"
+	commonsUtils "igaku/commons/utils"
+	"igaku/med-service/controllers"
+	"igaku/med-service/services"
 	"igaku/med-service/utils"
+	"igaku/med-service/tests/mocks"
 )
 
 func SetupTestDatabase(ctx context.Context, t *testing.T) (db *gorm.DB, cleanup func()) {
@@ -62,4 +69,38 @@ func SetupTestDatabase(ctx context.Context, t *testing.T) (db *gorm.DB, cleanup 
 	require.NoError(t, tx.Error, "Failed to execute init script")
 
 	return db, cleanup
+}
+
+func SetupRouter(
+	mockAPI *mocks.MockRxClassAPI,
+	mockUserClient *mocks.UserClient,
+	mockRepo *mocks.MockMedRepository,
+) *gin.Engine {
+	gin.SetMode(gin.TestMode)
+
+	medService := services.NewMedService(mockAPI, mockUserClient, mockRepo)
+	medController := controllers.NewMedController(medService)
+
+	router := gin.Default()
+	medController.RegisterRoutes(router)
+
+	return router
+}
+
+func GenDoctorToken(t *testing.T) string {
+	admin := &models.User{
+		ID: uuid.New(),
+		Username: "ghouse",
+		Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+		Role: models.Doctor,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		admin,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	return token
 }

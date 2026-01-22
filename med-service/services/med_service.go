@@ -5,49 +5,103 @@ import (
 	"sort"
 
 	commonsDtos "igaku/commons/dtos"
-	commonsModels "igaku/commons/models"
 	commonsUtils "igaku/commons/utils"
+	"igaku/commons/models"
+	"igaku/med-service/clients"
 	"igaku/med-service/dtos"
 	"igaku/med-service/errors"
+	"igaku/med-service/repositories"
 	"igaku/med-service/utils"
 )
 
-type DrugService interface {
+type MedService interface {
+	GetBySubstring(name string, offset int, limit int) (*commonsDtos.PaginatedResponse, error)
 	GetRecommendedDrugs(
 		diseaseID string,
 		page int, pageSize int,
-		orderBy commonsModels.DrugOrderableField,
+		orderBy models.DrugOrderableField,
 		orderMethod commonsUtils.Ordering,
 	) (*commonsDtos.PaginatedResponse, error)
 	GetDrugsByName(
 		name string,
 		page int, pageSize int,
-		orderBy commonsModels.DrugOrderableField,
+		orderBy models.DrugOrderableField,
 		orderMethod commonsUtils.Ordering,
 	) (*commonsDtos.PaginatedResponse, error)
+	ValidateUniquePatient(record *models.PatientRecord) error
+	CreatePatient(data *models.PatientRecord) error
+	GetPatientByNationalID(nationalID string) (*dtos.PatientDetails, error)
 }
 
-type drugService struct {
+type medService struct {
 	api utils.RxClassAPI
+	userClient clients.UserClient
+	repo repositories.MedRepository
 }
 
-func NewDrugService(api utils.RxClassAPI) DrugService {
-	return &drugService{api}
+func NewMedService(
+	api utils.RxClassAPI,
+	userClient clients.UserClient,
+	repo repositories.MedRepository,
+) MedService {
+	return &medService{api: api, userClient: userClient, repo: repo}
 }
 
-func (s *drugService) sortDrugs(
-	drugs []commonsModels.Drug,
-	orderBy commonsModels.DrugOrderableField,
+func (s *medService) GetBySubstring(
+	name string,
+	page int,
+	pageSize int,
+) (*commonsDtos.PaginatedResponse, error) {
+
+	offset := (page - 1) * pageSize
+	diseases, err := s.repo.FindBySubstring(name, offset, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	totalCount, err := s.repo.CountBySubstring(name)
+	if err != nil {
+		return nil, err
+	}
+
+	diseaseDetailsList := make([]dtos.DiseaseDetails, len(diseases))
+	for i, disease := range diseases {
+		diseaseDetailsList[i] = dtos.DiseaseDetails{
+			ID: disease.ID.String(),
+			RxNormID: disease.RxNormID,
+			Name: disease.Name,
+		}
+	}
+	
+	totalPages := 0
+	if totalCount > 0 {
+		totalPages = int(math.Ceil(float64(totalCount) / float64(pageSize)))
+	}
+
+	paginatedResponse := &commonsDtos.PaginatedResponse{
+		Data:       diseaseDetailsList,
+		Page:       page,
+		PageSize:   pageSize,
+		TotalPages: totalPages,
+		TotalCount: totalCount,
+	}
+
+	return paginatedResponse, nil
+}
+
+func (s *medService) sortDrugs(
+	drugs []models.Drug,
+	orderBy models.DrugOrderableField,
 	orderMethod commonsUtils.Ordering,
-) []commonsModels.Drug {
+) []models.Drug {
 	if orderMethod == commonsUtils.Desc {
 		sort.Slice(drugs, func(i, j int) bool {
 			switch orderBy {
-			case commonsModels.DrugID:
+			case models.DrugID:
 				return drugs[i].ID > drugs[j].ID
-			case commonsModels.DrugName:
+			case models.DrugName:
 				return drugs[i].Name > drugs[j].Name
-			case commonsModels.SubstanceName:
+			case models.SubstanceName:
 				return drugs[i].Substance > drugs[j].Substance
 			default:
 				return drugs[i].Name > drugs[j].Name // fallback
@@ -56,11 +110,11 @@ func (s *drugService) sortDrugs(
 	} else {
 		sort.Slice(drugs, func(i, j int) bool {
 			switch orderBy {
-			case commonsModels.DrugID:
+			case models.DrugID:
 				return drugs[i].ID < drugs[j].ID
-			case commonsModels.DrugName:
+			case models.DrugName:
 				return drugs[i].Name < drugs[j].Name
-			case commonsModels.SubstanceName:
+			case models.SubstanceName:
 				return drugs[i].Substance < drugs[j].Substance
 			default:
 				return drugs[i].Name < drugs[j].Name
@@ -71,8 +125,8 @@ func (s *drugService) sortDrugs(
 	return drugs
 }
 
-func (s *drugService) marshalPaginatedResponse(
-	drugs []commonsModels.Drug,
+func (s *medService) marshalPaginatedResponse(
+	drugs []models.Drug,
 	page int,
 	pageSize int,
 ) *commonsDtos.PaginatedResponse {
@@ -124,10 +178,10 @@ func (s *drugService) marshalPaginatedResponse(
 	return resp
 }
 
-func (s *drugService) GetRecommendedDrugs(
+func (s *medService) GetRecommendedDrugs(
 	diseaseID string,
 	page, pageSize int,
-	orderBy commonsModels.DrugOrderableField,
+	orderBy models.DrugOrderableField,
 	orderMethod commonsUtils.Ordering,
 ) (*commonsDtos.PaginatedResponse, error) {
 	substances, err := s.api.GetSubstances(diseaseID)
@@ -135,7 +189,7 @@ func (s *drugService) GetRecommendedDrugs(
 		return nil, err
 	}
 
-	var drugs []commonsModels.Drug
+	var drugs []models.Drug
 	for _, sub := range substances {
 		d, err := s.api.GetDrugsByName(sub.Name)
 		if err != nil {
@@ -153,10 +207,10 @@ func (s *drugService) GetRecommendedDrugs(
 	return resp, nil
 }
 
-func (s *drugService) GetDrugsByName(
+func (s *medService) GetDrugsByName(
 	name string,
 	page int, pageSize int,
-	orderBy commonsModels.DrugOrderableField,
+	orderBy models.DrugOrderableField,
 	orderMethod commonsUtils.Ordering,
 ) (*commonsDtos.PaginatedResponse, error) {
 	drugs, err := s.api.GetDrugsByName(name)
@@ -167,4 +221,36 @@ func (s *drugService) GetDrugsByName(
 	resp := s.marshalPaginatedResponse(drugs, page, pageSize)
 
 	return resp, nil
+}
+
+func (s *medService) GetPatientByNationalID(nationalID string) (*dtos.PatientDetails, error) {
+	record, err := s.repo.FindByNationalID(nationalID)
+	if err != nil {
+		return nil, err
+	}
+
+	patient, err := s.userClient.FindByID(record.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	patientDetails := &dtos.PatientDetails{
+		Username: patient.Username,
+		Email: patient.Email,
+		NationalID: record.NationalID,
+	}
+
+	return patientDetails, nil
+}
+
+func (s *medService) ValidateUniquePatient(record *models.PatientRecord) error {
+	err := s.repo.ValidateUniquePatient(record)
+
+	return err
+}
+
+func (s *medService) CreatePatient(data *models.PatientRecord) error {
+	err := s.repo.AddPatient(data)
+
+	return err
 }

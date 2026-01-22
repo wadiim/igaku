@@ -25,7 +25,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Disease name substring",
+                        "description": "Partial disease name to search for (case‑insensitive)",
                         "name": "name",
                         "in": "path"
                     },
@@ -94,6 +94,236 @@
                 }
             }
         },
+        "/med/drug/recommend/{disease}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves drugs that are indicated for the specified disease. Supports pagination and sorting. Requires Doctor privileges.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Drugs"
+                ],
+                "summary": "List recommended drugs for a disease (Doctor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Disease RxNormID",
+                        "name": "disease",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Number of items per page (default: 5)",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "name",
+                            "substance"
+                        ],
+                        "type": "string",
+                        "description": "Field to sort by: `id`, `name` or `substance` (default: `id`)",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort direction: `asc` or `desc` (default: `asc`)",
+                        "name": "orderMethod",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list of recommended drugs",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dtos.PaginatedResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.DrugDetails"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request – Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized – Invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden – User does not have Doctor role",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found – Drug not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error – Failed to retrieve drugs",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/med/drug/{name}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves drugs whose names contain the supplied substring. Supports pagination and sorting. Requires Doctor privileges.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Drugs"
+                ],
+                "summary": "List drugs by name substring (Doctor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Partial drug name to search for (case‑insensitive)",
+                        "name": "name",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Page number (default: 1)",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "maximum": 100,
+                        "minimum": 1,
+                        "type": "integer",
+                        "description": "Number of items per page (default: 5)",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "id",
+                            "name",
+                            "substance"
+                        ],
+                        "type": "string",
+                        "description": "Field to sort by: `id`, `name` or `substance` (default: `id`)",
+                        "name": "orderBy",
+                        "in": "query"
+                    },
+                    {
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "type": "string",
+                        "description": "Sort direction: `asc` or `desc` (default: `asc`)",
+                        "name": "orderMethod",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved list of drugs",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dtos.PaginatedResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dtos.DrugDetails"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request – Invalid query parameters",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized – Invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden – User does not have Doctor role",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found – No matching drugs",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error – Failed to retrieve drugs",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/med/health": {
             "get": {
                 "description": "Returns an OK message",
@@ -132,7 +362,7 @@
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "National ID",
+                        "description": "11‑digit national identification number of the patient",
                         "name": "national_id",
                         "in": "path",
                         "required": true
@@ -193,6 +423,26 @@
                 "rx_norm_id": {
                     "type": "string",
                     "example": "D000111"
+                }
+            }
+        },
+        "dtos.DrugDetails": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "substance"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "substance": {
+                    "type": "string",
+                    "example": "oseltamivir"
                 }
             }
         },

@@ -1,5 +1,14 @@
 package main
 
+	// diseaseController := controllers.NewDiseaseController(diseaseService)
+	// diseaseController.RegisterRoutes(router)
+
+	// patientController := controllers.NewPatientController(patientService)
+	// patientController.RegisterRoutes(router)
+
+	// drugController := controllers.NewDrugController(drugService)
+	// drugController.RegisterRoutes(router)
+
 import (
 	"context"
 	"log"
@@ -46,23 +55,26 @@ func main() {
 	}
 	defer userClient.Shutdown()
 
-	diseaseRepo := repositories.NewGormDiseaseRepository(db)
-	diseaseService := services.NewDiseaseService(diseaseRepo)
+	// diseaseRepo := repositories.NewGormDiseaseRepository(db)
+	// diseaseService := services.NewDiseaseService(diseaseRepo)
 
-	patientRepo := repositories.NewGormPatientRepository(db)
-	patientService := services.NewPatientService(userClient, patientRepo)
+	// patientRepo := repositories.NewGormPatientRepository(db)
+	// patientService := services.NewPatientService(userClient, patientRepo)
 
 	rxClassAPI := utils.NewRxClassAPI()
-	drugService := services.NewDrugService(rxClassAPI)
+	// drugService := services.NewDrugService(rxClassAPI)
 
-	rbServer, err := servers.NewRabbitMQServer(amqpURI, patientService)
+	medRepo := repositories.NewGormMedRepository(db)
+	medService := services.NewMedService(rxClassAPI, userClient, medRepo)
+
+	rbServer, err := servers.NewRabbitMQServer(amqpURI, medService)
 	failOnError(err, "[RabbitMQ] Failed to initialize server")
 	defer rbServer.Shutdown()
 
 	err = rbServer.Start()
 	failOnError(err, "[RabbitMQ] Failed to start listeners")
 
-	apiServer := servers.NewApiServer(diseaseService, patientService, drugService)
+	apiServer := servers.NewApiServer(medService)
 	apiServer.Start()
 
 	quit := make(chan os.Signal, 1)

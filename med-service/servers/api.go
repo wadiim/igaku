@@ -22,25 +22,15 @@ type ApiServer struct {
 	server *http.Server
 }
 
-func NewApiServer(
-	diseaseService services.DiseaseService,
-	patientService services.PatientService,
-	drugService services.DrugService,
-) *ApiServer {
+func NewApiServer(medService services.MedService) *ApiServer {
 	router := gin.Default()
 	docs.SwaggerInfo.BasePath = "/"
 
 	healthController := controllers.NewHealthController()
 	healthController.RegisterRoutes(router)
 
-	diseaseController := controllers.NewDiseaseController(diseaseService)
-	diseaseController.RegisterRoutes(router)
-
-	patientController := controllers.NewPatientController(patientService)
-	patientController.RegisterRoutes(router)
-
-	drugController := controllers.NewDrugController(drugService)
-	drugController.RegisterRoutes(router)
+	medController := controllers.NewMedController(medService)
+	medController.RegisterRoutes(router)
 
 	actuatorHandler := actuator.GetActuatorHandler(configs.ActuatorConfig)
 	ginActuatorHandler := func(ctx *gin.Context) {

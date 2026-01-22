@@ -18,12 +18,12 @@ import (
 type RabbitMQServer struct {
 	conn	*amqp.Connection
 	ch	*amqp.Channel
-	service	services.PatientService
+	service	services.MedService
 }
 
 func NewRabbitMQServer(
 	amqpURI string,
-	service services.PatientService,
+	service services.MedService,
 ) (*RabbitMQServer, error) {
 	conn, err := amqp.Dial(amqpURI)
 	if err != nil {
