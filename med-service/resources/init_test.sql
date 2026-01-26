@@ -51,6 +51,24 @@ VALUES
     'Pneumonia, Lipid'
 );
 
+INSERT INTO substances (id, rx_class_id, name, substance_type)
+VALUES
+(
+    'a5504c0c-1eb4-4967-8185-2fd82b3295b4',
+    '1234567',
+    'hydrocodone',
+    'IN'
+);
+
+INSERT INTO drugs (id, rx_norm_id, name, substance)
+VALUES
+(
+    'ee5fd388-c675-477b-9bc5-3f16cc359abe',
+    '261315',
+    'Tamiflu',
+    'hydrocodone'
+);
+
 INSERT INTO patient_records (id, national_id)
 VALUES
 (
@@ -60,4 +78,19 @@ VALUES
 (
     'c2aa753e-ce76-43db-b855-399d1955ad66',
     '12345654321'
+);
+
+INSERT INTO doctors (id) 
+VALUES 
+(
+    '880e8400-e29b-41d4-a716-446655440001'
+);
+
+INSERT INTO medical_history_items (id, patient_id, doctor_id, created_at) 
+VALUES 
+(
+    'aa0e8400-e29b-41d4-a716-446655440001', 
+    '0b6f13da-efb9-4221-9e89-e2729ae90030', 
+    '880e8400-e29b-41d4-a716-446655440001', 
+    '2025-10-15 14:30:00'
 );

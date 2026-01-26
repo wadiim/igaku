@@ -6,6 +6,7 @@ import DiseaseTable from './disease.tsx'
 import DrugTable from './drug.tsx'
 
 interface PatientData {
+  id: string,
   username: string,
   email: string,
   national_id: string,
@@ -290,6 +291,72 @@ function Prescribe() {
     }
   }
 
+  const handleSubmit = () => {
+    const payload = {
+      patient: {
+        id: patientData.id,
+        username: patientData.username,
+        email: patientData.email,
+        national_id: patientData.national_id,
+      },
+      disease: {
+        id: selectedDisease.id, 
+        rx_norm_id: selectedDisease.rx_norm_id,
+        name: selectedDisease.name,
+      },
+      drugs: getSelectedDrugs().map(d => ({
+        id: d.id,
+        name: d.name,
+        substance: d.substance,
+      })),
+    };
+
+    if (!payload.patient) {
+      setErrorMessage("Patient must be selected before submitting.");
+      return;
+    }
+    if (!payload.disease) {
+      setErrorMessage("Select a disease first.");
+      return;
+    }
+    if (payload.drugs.length === 0) {
+      setErrorMessage("Choose at least one drug to prescribe.");
+      return;
+    }
+
+    let jwt = localStorage.getItem("jwt"); 
+    if (isTokenExpired(jwt)) {
+      navigate("/");
+    }
+
+    if(jwt === null) {
+      throw new Error("Authentication failed");
+    } else {
+      fetch(`http://localhost:4000/med/prescribe`, {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "Authorization": jwt,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+      .then((res) => {console.log(res);})
+      // TODO: Finish this endpoint
+
+    //   const data = await res.json();
+    //   console.log("Prescription saved:", data);
+    //   setSelectedDisease(null);
+    //   setSelectedDrugIds(new Set());
+    //   setRecDrugData([]);
+    //   setManualDrugData([]);
+    //   setErrorMessage(null);
+    //   alert("Prescription submitted successfully!");
+    // } catch (e: any) {
+    //   setErrorMessage(e.message ?? "An unexpected error occurred.");
+    }
+  };
+
   return (
     <div className={`flex-1 flex items-center justify-center`}>
       <div
@@ -413,6 +480,7 @@ function Prescribe() {
           </div>
 
           <button
+            onClick={handleSubmit}
             className={`
               px-4 py-2 bg-blue-600 text-white rounded
               hover:bg-blue-700 disabled:opacity-50

@@ -4,18 +4,28 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"errors"
 	"strings"
 
 	commonsErrors "igaku/commons/errors"
-	"igaku/commons/models"
-	"igaku/med-service/errors"
+	commonsModels "igaku/commons/models"
+	medErrors "igaku/med-service/errors"
+	"igaku/med-service/models"
 )
 
 type MedRepository interface {
-	AddPatient(record *models.PatientRecord) error
-	FindByID(id uuid.UUID) (*models.PatientRecord, error)
-	FindByNationalID(nationalID string) (*models.PatientRecord, error)
-	ValidateUniquePatient(record *models.PatientRecord) error
+	AddPatient(record *commonsModels.PatientRecord) error
+	AddDisease(rxNormID string, name string) (*models.Disease, error)
+	GetDiseaseByRxNormID(rxNormID string) (*models.Disease, error)
+	AddSubstance(rxClassID string, name string, subType string) (*models.Substance, error)
+	GetSubstanceByName(name string) (*models.Substance, error)
+	AddDrug(rxNormID string, name string, substance string) (*models.Drug, error)
+	GetDrugByRxNormID(name string) (*models.Drug, error)
+	AddMedicalHistoryItem(patientID uuid.UUID, doctorID uuid.UUID) (*models.MedicalHistoryItem, error)
+	GetMedicalHistoryItemByPatientID(patientID uuid.UUID) (*models.MedicalHistoryItem, error)
+	FindByID(id uuid.UUID) (*commonsModels.PatientRecord, error)
+	FindByNationalID(nationalID string) (*commonsModels.PatientRecord, error)
+	ValidateUniquePatient(record *commonsModels.PatientRecord) error
 	FindBySubstring(name string, offset int, limit int) ([]*models.Disease, error)
 	CountBySubstring(name string) (int64, error)
 }
@@ -28,28 +38,165 @@ func NewGormMedRepository(db *gorm.DB) MedRepository {
 	return &gormMedRepository{db: db}
 }
 
-func (r *gormMedRepository) FindByID(id uuid.UUID) (*models.PatientRecord, error) {
-	var record models.PatientRecord
+func (r *gormMedRepository) AddDisease(
+	rxNormID string,
+	name string,
+) (*models.Disease, error) {
+	disease := models.Disease{
+		RxNormID: rxNormID,
+		Name:     name,
+	}
+
+	result := r.db.Where(map[string]interface{}{"rx_norm_id": rxNormID}).FirstOrCreate(&disease)
+	if result.Error != nil {
+		return nil, &medErrors.DiseaseInsertError{}
+	}
+
+	return &disease, nil
+}
+
+func (r *gormMedRepository) GetDiseaseByRxNormID(
+	rxNormID string,
+) (*models.Disease, error) {
+	var disease models.Disease
+
+	result := r.db.Where("rx_norm_id = ?", rxNormID).First(&disease)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, &medErrors.DiseaseNotFoundError{}
+		}
+		return nil, &commonsErrors.DatabaseError{}
+	}
+
+	return &disease, nil
+}
+
+func (r *gormMedRepository) AddMedicalHistoryItem(
+	patientID uuid.UUID,
+	doctorID uuid.UUID,
+) (*models.MedicalHistoryItem, error) {
+	item := models.MedicalHistoryItem{
+		ID: uuid.New(),
+		PatientID: patientID,
+		DoctorID:   doctorID,
+	}
+
+	result := r.db.Create(&item)
+	if result.Error != nil {
+		return nil, &medErrors.MedicalHistoryItemInsertError{}
+	}
+
+	return &item, nil
+}
+
+func (r *gormMedRepository) GetMedicalHistoryItemByPatientID(
+	patientID uuid.UUID,
+) (*models.MedicalHistoryItem, error) {
+	var item models.MedicalHistoryItem
+
+	result := r.db.Preload("Patient").Preload("Doctor").Where("patient_id = ?", patientID).First(&item)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, &medErrors.MedicalHistoryItemNotFoundError{}
+		}
+		return nil, &commonsErrors.DatabaseError{}
+	}
+
+	return &item, nil
+}
+
+func (r *gormMedRepository) FindByID(id uuid.UUID) (*commonsModels.PatientRecord, error) {
+	var record commonsModels.PatientRecord
 	err := r.db.First(&record, id).Error
 	if err != nil {
-		return nil, &errors.PatientNotFoundError{}
+		return nil, &medErrors.PatientNotFoundError{}
 	}
 	return &record, nil
+}
+
+func (r *gormMedRepository) AddSubstance(
+	rxClassID string,
+	name string,
+	subType string,
+) (*models.Substance, error) {
+	substance := models.Substance{
+		RxClassID: rxClassID,
+		Name: name,
+		SubstanceType: subType,
+	}
+
+	result := r.db.Where(map[string]interface{}{"rx_class_id": rxClassID}).FirstOrCreate(&substance)
+	if result.Error != nil {
+		return nil, &medErrors.SubstanceInsertError{}
+	}
+
+	return &substance, nil
+}
+
+func (r *gormMedRepository) GetSubstanceByName(
+	name string,
+) (*models.Substance, error) {
+	var substance models.Substance
+
+	result := r.db.Where("name = ?", name).First(&substance)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, &medErrors.SubstanceNotFoundError{}
+		}
+		return nil, &commonsErrors.DatabaseError{}
+	}
+
+	return &substance, nil
+}
+
+func (r *gormMedRepository) AddDrug(
+	rxNormID string,
+	name string,
+	substance string,
+) (*models.Drug, error) {
+	drug := models.Drug{
+		RxNormID: rxNormID,
+		Name: name,
+		Substance: substance,
+	}
+
+	result := r.db.Where(map[string]interface{}{"rx_norm_id": rxNormID}).FirstOrCreate(&drug)
+	if result.Error != nil {
+		return nil, &medErrors.DrugInsertError{}
+	}
+
+	return &drug, nil
+}
+
+func (r *gormMedRepository) GetDrugByRxNormID(
+	rxNormID string,
+) (*models.Drug, error) {
+	var drug models.Drug
+
+	result := r.db.Where("rx_norm_id = ?", rxNormID).First(&drug)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return nil, &medErrors.DrugNotFoundError{}
+		}
+		return nil, &commonsErrors.DatabaseError{}
+	}
+
+	return &drug, nil
 }
 
 func (r *gormMedRepository) FindByNationalID(
 	nationalID string,
-) (*models.PatientRecord, error) {
-	var record models.PatientRecord
-	err := r.db.Where(&models.PatientRecord{NationalID: nationalID}).First(&record).Error
+) (*commonsModels.PatientRecord, error) {
+	var record commonsModels.PatientRecord
+	err := r.db.Where(&commonsModels.PatientRecord{NationalID: nationalID}).First(&record).Error
 	if err != nil {
-		return nil, &errors.PatientNotFoundError{}
+		return nil, &medErrors.PatientNotFoundError{}
 	}
 	return &record, nil
 }
 
-func (r *gormMedRepository) ValidateUniquePatient(record *models.PatientRecord) error {
-	var existingPatient models.PatientRecord
+func (r *gormMedRepository) ValidateUniquePatient(record *commonsModels.PatientRecord) error {
+	var existingPatient commonsModels.PatientRecord
 	result := r.db.
 		Where("id = ?", &record.ID).
 		Or("national_id = ?", &record.NationalID).
@@ -71,7 +218,7 @@ func (r *gormMedRepository) ValidateUniquePatient(record *models.PatientRecord) 
 	return nil
 }
 
-func (r *gormMedRepository) AddPatient(record *models.PatientRecord) error {
+func (r *gormMedRepository) AddPatient(record *commonsModels.PatientRecord) error {
 	err := r.db.Create(record).Error
 	if err == nil {
 		return nil
@@ -107,10 +254,10 @@ func (r *gormMedRepository) FindBySubstring(
 	limit int,
 ) ([]*models.Disease, error) {
 	if offset < 0 {
-		return nil, &errors.OffsetNegativeError{}
+		return nil, &medErrors.OffsetNegativeError{}
 	}
 	if limit < 0 {
-		return nil, &errors.LimitNegativeError{}
+		return nil, &medErrors.LimitNegativeError{}
 	}
 	var diseases []*models.Disease
 	// Converting `name` to lowercase is necessary to make sure that names provided
@@ -124,7 +271,7 @@ func (r *gormMedRepository) FindBySubstring(
 		return nil, &commonsErrors.DatabaseError{}
 	}
 	if len(diseases) == 0 {
-		return nil, &errors.DiseaseNotFoundError{}
+		return nil, &medErrors.DiseaseNotFoundError{}
 	}
 	return diseases, nil
 }
@@ -141,7 +288,7 @@ func (r *gormMedRepository) CountBySubstring(name string) (int64, error) {
 		return 0, &commonsErrors.DatabaseError{}
 	}
 	if count == 0 {
-		return 0, &errors.DiseaseNotFoundError{}
+		return 0, &medErrors.DiseaseNotFoundError{}
 	}
 	return count, nil
 }

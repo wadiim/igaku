@@ -4,7 +4,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 
-	"igaku/commons/models"
+	commonsModels "igaku/commons/models"
+	"igaku/med-service/models"
 )
 
 type MockMedRepository struct {
@@ -28,6 +29,132 @@ func (m *MockMedRepository) FindBySubstring(
 	return r0, r1
 }
 
+func (m *MockMedRepository) AddDisease(
+	rxNormID string,
+	name string,
+) (*models.Disease, error) {
+	args := m.Called(rxNormID, name)
+
+	var r0 *models.Disease
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.Disease)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
+func (m *MockMedRepository) GetDiseaseByRxNormID(
+	rxNormID string,
+) (*models.Disease, error) {
+	args := m.Called(rxNormID)
+
+	var r0 *models.Disease
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.Disease)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
+func (m *MockMedRepository) AddSubstance(
+	rxClassID string,
+	name string,
+	subType string,
+) (*models.Substance, error) {
+	args := m.Called(rxClassID, name, subType)
+
+	var r0 *models.Substance
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.Substance)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
+func (m *MockMedRepository) GetSubstanceByName(
+	name string,
+) (*models.Substance, error) {
+	args := m.Called(name)
+
+	var r0 *models.Substance
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.Substance)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
+func (m *MockMedRepository) AddDrug(
+	rxNormID string,
+	name string,
+	substance string,
+) (*models.Drug, error) {
+	args := m.Called(rxNormID, name, substance)
+
+	var r0 *models.Drug
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.Drug)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
+func (m *MockMedRepository) GetDrugByRxNormID(
+	rxNormID string,
+) (*models.Drug, error) {
+	args := m.Called(rxNormID)
+
+	var r0 *models.Drug
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.Drug)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
+func (m *MockMedRepository) AddMedicalHistoryItem(
+	patientID uuid.UUID,
+	doctorID uuid.UUID,
+) (*models.MedicalHistoryItem, error) {
+	args := m.Called(patientID, doctorID)
+
+	var r0 *models.MedicalHistoryItem
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.MedicalHistoryItem)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
+func (m *MockMedRepository) GetMedicalHistoryItemByPatientID(
+	patientID uuid.UUID,
+) (*models.MedicalHistoryItem, error) {
+	args := m.Called(patientID)
+
+	var r0 *models.MedicalHistoryItem
+	if args.Get(0) != nil {
+		r0 = args.Get(0).(*models.MedicalHistoryItem)
+	}
+
+	r1 := args.Error(1)
+
+	return r0, r1
+}
+
 func (m *MockMedRepository) CountBySubstring(name string) (int64, error) {
 	args := m.Called(name)
 
@@ -41,18 +168,18 @@ func (m *MockMedRepository) CountBySubstring(name string) (int64, error) {
 	return r0, r1
 }
 
-func (m *MockMedRepository) AddPatient(record *models.PatientRecord) error {
+func (m *MockMedRepository) AddPatient(record *commonsModels.PatientRecord) error {
 	args := m.Called(record)
 
 	return args.Error(0)
 }
 
-func (m *MockMedRepository) FindByID(id uuid.UUID) (*models.PatientRecord, error) {
+func (m *MockMedRepository) FindByID(id uuid.UUID) (*commonsModels.PatientRecord, error) {
 	args := m.Called(id)
 
-	var r0 *models.PatientRecord
+	var r0 *commonsModels.PatientRecord
 	if args.Get(0) != nil {
-		r0 = args.Get(0).(*models.PatientRecord)
+		r0 = args.Get(0).(*commonsModels.PatientRecord)
 	}
 
 	r1 := args.Error(1)
@@ -60,12 +187,12 @@ func (m *MockMedRepository) FindByID(id uuid.UUID) (*models.PatientRecord, error
 	return r0, r1
 }
 
-func (m *MockMedRepository) FindByNationalID(nationalID string) (*models.PatientRecord, error) {
+func (m *MockMedRepository) FindByNationalID(nationalID string) (*commonsModels.PatientRecord, error) {
 	args := m.Called(nationalID)
 
-	var r0 *models.PatientRecord
+	var r0 *commonsModels.PatientRecord
 	if args.Get(0) != nil {
-		r0 = args.Get(0).(*models.PatientRecord)
+		r0 = args.Get(0).(*commonsModels.PatientRecord)
 	}
 
 	r1 := args.Error(1)
@@ -73,7 +200,7 @@ func (m *MockMedRepository) FindByNationalID(nationalID string) (*models.Patient
 	return r0, r1
 }
 
-func (m *MockMedRepository) ValidateUniquePatient(record *models.PatientRecord) error{
+func (m *MockMedRepository) ValidateUniquePatient(record *commonsModels.PatientRecord) error{
 	args := m.Called(record)
 
 	return args.Error(1)

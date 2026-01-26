@@ -352,6 +352,70 @@ const docTemplate = `{
                 }
             }
         },
+        "/med/history/{patient_id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retrieves the most recent medical‑history entry for the specified patient UUID.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "MedicalHistory"
+                ],
+                "summary": "Get medical‑history item by patient ID (Doctor)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Patient UUID",
+                        "name": "patient_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.MedicalHistoryItem"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request - Invalid patient ID",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User does not have Doctor role",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found - Medical history item not found",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error – Failed to retrieve item",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/med/patient/{national_id}": {
             "get": {
                 "security": [
@@ -409,6 +473,66 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/med/prescribe": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Stores a prescription (patient, disease, drugs) and creates a medical‑history record linking the patient with the prescribing doctor.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Prescription"
+                ],
+                "summary": "Create a prescription (Doctor)",
+                "parameters": [
+                    {
+                        "description": "Prescription payload",
+                        "name": "prescription",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.PrescriptionDetails"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Prescription created successfully"
+                    },
+                    "400": {
+                        "description": "Invalid doctor ID",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden - User does not have Doctor role",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Server error",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -443,10 +567,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "D007251"
                 },
                 "name": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "Tamiflu 30 MG Oral Capsule"
                 },
                 "substance": {
                     "type": "string",
@@ -485,6 +611,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "id",
                 "national_id",
                 "username"
             ],
@@ -493,6 +620,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "jdoe@mail.com"
                 },
+                "id": {
+                    "type": "string",
+                    "example": "0b6f13da-efb9-4221-9e89-e2729ae90030"
+                },
                 "national_id": {
                     "type": "string",
                     "example": "44051401458"
@@ -500,6 +631,89 @@ const docTemplate = `{
                 "username": {
                     "type": "string",
                     "example": "jdoe"
+                }
+            }
+        },
+        "dtos.PrescriptionDetails": {
+            "type": "object",
+            "required": [
+                "disease",
+                "drugs",
+                "patient"
+            ],
+            "properties": {
+                "disease": {
+                    "$ref": "#/definitions/dtos.DiseaseDetails"
+                },
+                "drugs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.DrugDetails"
+                    }
+                },
+                "patient": {
+                    "$ref": "#/definitions/dtos.PatientDetails"
+                }
+            }
+        },
+        "models.Doctor": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "0b6f13da-efb9-4221-9e89-e2729ae90030"
+                },
+                "medicalHistoryItems": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.MedicalHistoryItem"
+                    }
+                }
+            }
+        },
+        "models.MedicalHistoryItem": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "doctor": {
+                    "$ref": "#/definitions/models.Doctor"
+                },
+                "doctorID": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "0b6f13da-efb9-4221-9e89-e2729ae90030"
+                },
+                "patient": {
+                    "$ref": "#/definitions/models.PatientRecord"
+                },
+                "patientID": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PatientRecord": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "0b6f13da-efb9-4221-9e89-e2729ae90030"
+                },
+                "national_id": {
+                    "type": "string",
+                    "example": "44051401458"
                 }
             }
         }

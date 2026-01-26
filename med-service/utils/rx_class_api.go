@@ -1,21 +1,23 @@
 package utils
 
 import (
+	"github.com/google/uuid"
+
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 
-	commonsModels "igaku/commons/models"
 	"igaku/med-service/errors"
+	"igaku/med-service/models"
 )
 
 const RxClassDomainURL = "https://rxnav.nlm.nih.gov"
 
 type RxClassAPI interface {
-	GetSubstances(diseaseID string) ([]commonsModels.Substance, error)
-	GetDrugsByName(name string) ([]commonsModels.Drug, error)
+	GetSubstances(diseaseID string) ([]models.Substance, error)
+	GetDrugsByName(name string) ([]models.Drug, error)
 }
 
 type rxClassAPI struct {
@@ -37,7 +39,7 @@ func (api *rxClassAPI) fetchFromEndpoint(endpoint string) ([]byte, error) {
 	return io.ReadAll(res.Body)
 }
 
-func (api *rxClassAPI) GetSubstances(diseaseID string) ([]commonsModels.Substance, error) {
+func (api *rxClassAPI) GetSubstances(diseaseID string) ([]models.Substance, error) {
 	endpoint := fmt.Sprintf(
 		"/REST/rxclass/classMembers.json?classId=%s&relaSource=MEDRT&rela=may_treat",
 		diseaseID,
@@ -76,14 +78,16 @@ func (api *rxClassAPI) GetSubstances(diseaseID string) ([]commonsModels.Substanc
 		return nil, &errors.SubstanceNotFoundError{}
 	}
 
-	var substances []commonsModels.Substance
+	var substances []models.Substance
 	for _, dm := range rx.DrugMemberGroup.DrugMembers {
 		for _, a := range dm.NodeAttrs {
 			if a.AttrName == "Relation" && a.AttrValue == "DIRECT" {
-				substances = append(substances, commonsModels.Substance{
-					ID:   dm.MinConcept.Rxcui,
+				id := uuid.New()
+				substances = append(substances, models.Substance{
+					ID:   id,
+					RxClassID: dm.MinConcept.Rxcui,
 					Name: dm.MinConcept.Name,
-					Type: dm.MinConcept.Tty,
+					SubstanceType: dm.MinConcept.Tty,
 				})
 				break
 			}
@@ -93,7 +97,7 @@ func (api *rxClassAPI) GetSubstances(diseaseID string) ([]commonsModels.Substanc
 	return substances, nil
 }
 
-func (api *rxClassAPI) GetDrugsByName(name string) ([]commonsModels.Drug, error) {
+func (api *rxClassAPI) GetDrugsByName(name string) ([]models.Drug, error) {
 	type ConceptProperty struct {
 		Rxcui    string `json:"rxcui"`
 		Name     string `json:"name"`
@@ -118,7 +122,7 @@ func (api *rxClassAPI) GetDrugsByName(name string) ([]commonsModels.Drug, error)
 		DrugGroup DrugGroup `json:"drugGroup"`
 	}
 
-	var drugs []commonsModels.Drug
+	var drugs []models.Drug
 	endpoint := fmt.Sprintf("/REST/drugs.json?name=%s", name)
 	data, err := api.fetchFromEndpoint(endpoint)
 	if err != nil {
@@ -132,8 +136,10 @@ func (api *rxClassAPI) GetDrugsByName(name string) ([]commonsModels.Drug, error)
 
 	for _, cg := range resp.DrugGroup.ConceptGroup {
 		for _, cp := range cg.ConceptProperties {
-			drugs = append(drugs, commonsModels.Drug{
-				ID:        cp.Rxcui,
+			id := uuid.New()
+			drugs = append(drugs, models.Drug{
+				ID:        id,
+				RxNormID:  cp.Rxcui,
 				Name:      cp.Name,
 				Substance: name,
 			})

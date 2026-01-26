@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"github.com/google/uuid"
 	"github.com/gin-gonic/gin"
 
 	"errors"
@@ -13,7 +14,9 @@ import (
 	commonsErrors "igaku/commons/errors"
 	commonsModels "igaku/commons/models"
 	commonsUtils "igaku/commons/utils"
+	"igaku/med-service/dtos"
 	"igaku/med-service/middleware"
+	"igaku/med-service/models"
 	"igaku/med-service/services"
 	medErrors "igaku/med-service/errors"
 )
@@ -120,7 +123,7 @@ func (ctrl *MedController) GetRecommendedDrugs(c *gin.Context) {
 		return
 	}
 
-	orderBy, ok := commonsModels.DrugOrderableFieldsMap[strings.ToLower(orderByStr)]
+	orderBy, ok := models.DrugOrderableFieldsMap[strings.ToLower(orderByStr)]
 	if !ok {
 		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
 			Message: "Invalid orderBy parameter. Must be `id`, `name` or `substance`",
@@ -205,7 +208,7 @@ func (ctrl *MedController) GetDrugsByName(c *gin.Context) {
 		return
 	}
 
-	orderBy, ok := commonsModels.DrugOrderableFieldsMap[strings.ToLower(orderByStr)]
+	orderBy, ok := models.DrugOrderableFieldsMap[strings.ToLower(orderByStr)]
 	if !ok {
 		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
 			Message: "Invalid orderBy parameter. Must be `id`, `name` or `substance`",
@@ -291,6 +294,106 @@ func (ctrl *MedController) GetByNationalID(c *gin.Context) {
 	c.JSON(http.StatusOK, patient)
 }
 
+// CreatePrescription creates a new prescription and adds a medical‑history entry for the patient.
+// @Summary      Create a prescription (Doctor)
+// @Description  Stores a prescription (patient, disease, drugs) and creates a medical‑history record linking the patient with the prescribing doctor.
+// @Tags         Prescription
+// @Accept       json
+// @Produce      json
+// @Param        prescription body dtos.PrescriptionDetails true "Prescription payload"
+// @Success      201 {object} nil "Prescription created successfully"
+// @Failure      400 {object} commonsDtos.ErrorResponse "Invalid doctor ID"
+// @Failure      401  {object}  dtos.ErrorResponse  "Unauthorized - Invalid or missing token"
+// @Failure      403  {object}  dtos.ErrorResponse  "Forbidden - User does not have Doctor role"
+// @Failure      500 {object} commonsDtos.ErrorResponse "Server error"
+// @Security     BearerAuth
+// @Router       /med/prescribe [post]
+func (ctrl *MedController) CreatePrescription(c *gin.Context) {
+	val, exists := c.Get("id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, commonsDtos.ErrorResponse{
+			Message: "Doctor ID not found in token",
+		})
+		return
+	}
+
+	doctorID, err := uuid.Parse(val.(string))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid doctor ID",
+		})
+	}
+
+	var prescription dtos.PrescriptionDetails
+	if err := c.ShouldBindJSON(&prescription); err != nil {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid request payload",
+		})
+		return
+	}
+
+	patientID := prescription.Patient.ID
+	err = ctrl.service.AddMedicalHistoryItem(patientID, doctorID)
+	if err != nil {
+		var medHistItemInsertError *medErrors.MedicalHistoryItemInsertError
+
+		if errors.As(err, &medHistItemInsertError) {
+			c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{
+				Message: "Server error",
+			})
+		}
+		return
+	}
+
+	c.JSON(http.StatusCreated, nil)
+}
+
+// GetMedicalHistoryItemByPatientID returns the medical‑history record for a given patient.
+// @Summary      Get medical‑history item by patient ID (Doctor)
+// @Description  Retrieves the most recent medical‑history entry for the specified patient UUID.
+// @Tags         MedicalHistory
+// @Produce      json
+// @Param        patient_id path string true "Patient UUID"
+// @Success      200 {object} models.MedicalHistoryItem
+// @Failure      400 {object} commonsDtos.ErrorResponse "Bad Request - Invalid patient ID"
+// @Failure      401 {object} dtos.ErrorResponse  "Unauthorized - Invalid or missing token"
+// @Failure      403 {object} dtos.ErrorResponse  "Forbidden - User does not have Doctor role"
+// @Failure      404 {object} commonsDtos.ErrorResponse "Not Found - Medical history item not found"
+// @Failure      500 {object} commonsDtos.ErrorResponse "Internal Server Error – Failed to retrieve item"
+// @Security     BearerAuth
+// @Router       /med/history/{patient_id} [get]
+func (ctrl *MedController) GetMedicalHistoryItemByPatientID(c *gin.Context) {
+	patientIDStr := c.Param("patient_id")
+	patientID, err := uuid.Parse(patientIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
+			Message: "Invalid patient ID",
+		})
+	}
+
+	patient, err := ctrl.service.GetMedicalHistoryItemByPatientID(patientID)
+	if err != nil {
+		var medHistItemNotFoundError *medErrors.MedicalHistoryItemNotFoundError
+
+		if errors.As(err, &medHistItemNotFoundError) {
+			c.JSON(http.StatusNotFound, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, commonsDtos.ErrorResponse{
+				Message: "Failed to find medical history item",
+			})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, patient)
+}
+
 func (ctrl *MedController) RegisterRoutes(router *gin.Engine) {
 	routes := router.Group("/med")
 	routes.Use(middleware.Authenticate())
@@ -314,6 +417,16 @@ func (ctrl *MedController) RegisterRoutes(router *gin.Engine) {
 			"/drug/:name",
 			middleware.Authorize(commonsModels.Doctor),
 			ctrl.GetDrugsByName,
+		)
+		routes.POST(
+			"/prescribe",
+			middleware.Authorize(commonsModels.Doctor),
+			ctrl.CreatePrescription,
+		)
+		routes.GET(
+			"/history/:patient_id",
+			middleware.Authorize(commonsModels.Doctor),
+			ctrl.GetMedicalHistoryItemByPatientID,
 		)
 	}
 }

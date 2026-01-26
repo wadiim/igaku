@@ -18,8 +18,10 @@ definitions:
   dtos.DrugDetails:
     properties:
       id:
+        example: D007251
         type: string
       name:
+        example: Tamiflu 30 MG Oral Capsule
         type: string
       substance:
         example: oseltamivir
@@ -52,6 +54,9 @@ definitions:
       email:
         example: jdoe@mail.com
         type: string
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
       national_id:
         example: "44051401458"
         type: string
@@ -60,8 +65,65 @@ definitions:
         type: string
     required:
     - email
+    - id
     - national_id
     - username
+    type: object
+  dtos.PrescriptionDetails:
+    properties:
+      disease:
+        $ref: '#/definitions/dtos.DiseaseDetails'
+      drugs:
+        items:
+          $ref: '#/definitions/dtos.DrugDetails'
+        type: array
+      patient:
+        $ref: '#/definitions/dtos.PatientDetails'
+    required:
+    - disease
+    - drugs
+    - patient
+    type: object
+  models.Doctor:
+    properties:
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      medicalHistoryItems:
+        items:
+          $ref: '#/definitions/models.MedicalHistoryItem'
+        type: array
+    required:
+    - id
+    type: object
+  models.MedicalHistoryItem:
+    properties:
+      createdAt:
+        type: string
+      doctor:
+        $ref: '#/definitions/models.Doctor'
+      doctorID:
+        type: string
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      patient:
+        $ref: '#/definitions/models.PatientRecord'
+      patientID:
+        type: string
+    required:
+    - id
+    type: object
+  models.PatientRecord:
+    properties:
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      national_id:
+        example: "44051401458"
+        type: string
+    required:
+    - id
     type: object
 host: localhost:4000
 info:
@@ -287,6 +349,48 @@ paths:
       summary: Check health
       tags:
       - Health
+  /med/history/{patient_id}:
+    get:
+      description: Retrieves the most recent medical‑history entry for the specified
+        patient UUID.
+      parameters:
+      - description: Patient UUID
+        in: path
+        name: patient_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MedicalHistoryItem'
+        "400":
+          description: Bad Request - Invalid patient ID
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found - Medical history item not found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error – Failed to retrieve item
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get medical‑history item by patient ID (Doctor)
+      tags:
+      - MedicalHistory
   /med/patient/{national_id}:
     get:
       description: Retrieves username, email and national ID of patient. Requires
@@ -325,6 +429,45 @@ paths:
       summary: Retrieve data of patient with given national ID (Doctor)
       tags:
       - Patient
+  /med/prescribe:
+    post:
+      consumes:
+      - application/json
+      description: Stores a prescription (patient, disease, drugs) and creates a medical‑history
+        record linking the patient with the prescribing doctor.
+      parameters:
+      - description: Prescription payload
+        in: body
+        name: prescription
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.PrescriptionDetails'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Prescription created successfully
+        "400":
+          description: Invalid doctor ID
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a prescription (Doctor)
+      tags:
+      - Prescription
 securityDefinitions:
   BearerAuth:
     in: header

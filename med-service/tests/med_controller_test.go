@@ -18,9 +18,10 @@ import (
 	commonsDtos "igaku/commons/dtos"
 	commonsErrors "igaku/commons/errors"
 	commonsUtils "igaku/commons/utils"
-	"igaku/commons/models"
+	commonsModels "igaku/commons/models"
 	"igaku/med-service/dtos"
 	"igaku/med-service/errors"
+	"igaku/med-service/models"
 	"igaku/med-service/tests/mocks"
 	testUtils "igaku/med-service/tests/utils"
 )
@@ -43,7 +44,7 @@ func unpackPaginatedResponse(t *testing.T, body *bytes.Buffer) (
 	return paginatedResponse, diseasesResponse
 }
 
-func TestDrugController_GetRecommendedDrugs_NoToken(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_NoToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -80,7 +81,7 @@ func TestDrugController_GetRecommendedDrugs_NoToken(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_InvalidTokenFormat(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_InvalidTokenFormat(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -119,7 +120,7 @@ func TestDrugController_GetRecommendedDrugs_InvalidTokenFormat(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_ExpiredToken(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_ExpiredToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -135,11 +136,11 @@ func TestDrugController_GetRecommendedDrugs_ExpiredToken(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "ghouse",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Doctor,
+		Role: commonsModels.Doctor,
 	}
 
 	issuedAt, err := time.Parse(time.DateTime, "1998-06-07 08:00:00")
@@ -178,7 +179,7 @@ func TestDrugController_GetRecommendedDrugs_ExpiredToken(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_UnauthorizedPatient(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_UnauthorizedPatient(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -194,11 +195,11 @@ func TestDrugController_GetRecommendedDrugs_UnauthorizedPatient(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "jdoe",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Patient,
+		Role: commonsModels.Patient,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -233,7 +234,7 @@ func TestDrugController_GetRecommendedDrugs_UnauthorizedPatient(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_UnauthorizedAdmin(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_UnauthorizedAdmin(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -249,11 +250,11 @@ func TestDrugController_GetRecommendedDrugs_UnauthorizedAdmin(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "admin",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Admin,
+		Role: commonsModels.Admin,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -288,7 +289,7 @@ func TestDrugController_GetRecommendedDrugs_UnauthorizedAdmin(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_InvalidPage(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_InvalidPage(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -362,7 +363,7 @@ func TestDrugController_GetRecommendedDrugs_InvalidPage(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_InvalidPageSize(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_InvalidPageSize(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -436,7 +437,7 @@ func TestDrugController_GetRecommendedDrugs_InvalidPageSize(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_InvalidOrderBy(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_InvalidOrderBy(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -477,7 +478,7 @@ func TestDrugController_GetRecommendedDrugs_InvalidOrderBy(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_InvalidOrderMethod(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_InvalidOrderMethod(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -518,7 +519,7 @@ func TestDrugController_GetRecommendedDrugs_InvalidOrderMethod(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_RxClassUnavailable(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_RxClassUnavailable(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -563,7 +564,7 @@ func TestDrugController_GetRecommendedDrugs_RxClassUnavailable(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_SubstanceNotFound(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_SubstanceNotFound(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -608,7 +609,7 @@ func TestDrugController_GetRecommendedDrugs_SubstanceNotFound(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -616,22 +617,28 @@ func TestDrugController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) 
 
 	token := testUtils.GenDoctorToken(t)
 
+	id1 := uuid.New()
+	id2 := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id1,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substance2 := models.Substance{
-		ID: "1598097",
+		ID: id2,
+		RxClassID: "1598097",
 		Name: "Non-existent",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1, substance2,
 	}
+	id := uuid.New()
 	drugs := []models.Drug{
 		{
-			ID: "1115700",
+			ID: id,
+			RxNormID: "1115700",
 			Name: "Oseltamivir",
 			Substance: "baloxavir",
 		},
@@ -680,14 +687,14 @@ func TestDrugController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) 
 
 	expectedCount := 1
 	assert.Equal(t, expectedCount, len(drugResponse))
-	assert.Equal(t, drugs[0].ID, drugResponse[0].ID)
+	assert.Equal(t, drugs[0].RxNormID, drugResponse[0].ID)
 	assert.Equal(t, drugs[0].Name, drugResponse[0].Name)
 	assert.Equal(t, drugs[0].Substance, drugResponse[0].Substance)
 
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_DrugNotFoundError(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_DrugNotFoundError(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -695,10 +702,12 @@ func TestDrugController_GetRecommendedDrugs_DrugNotFoundError(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	id := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -745,7 +754,7 @@ func TestDrugController_GetRecommendedDrugs_DrugNotFoundError(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_OrderByID(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -753,27 +762,35 @@ func TestDrugController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	id := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
 	}
+	drugID1 := uuid.New()
+	drugID2 := uuid.New()
+	drugID3 := uuid.New()
 	drugs := []models.Drug{
 		{
-			ID: "1115702",
+			ID: drugID1,
+			RxNormID: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
-			ID: "1115701",
+			ID: drugID2,
+			RxNormID: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
-			ID: "1115700",
+			ID: drugID3,
+			RxNormID: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -875,7 +892,7 @@ func TestDrugController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_OrderByName(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -883,27 +900,35 @@ func TestDrugController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	id := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
 	}
+	drugID1 := uuid.New()
+	drugID2 := uuid.New()
+	drugID3 := uuid.New()
 	drugs := []models.Drug{
 		{
-			ID: "1115702",
+			ID: drugID1,
+			RxNormID: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
-			ID: "1115701",
+			ID: drugID2,
+			RxNormID: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
-			ID: "1115700",
+			ID: drugID3,
+			RxNormID: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -1005,7 +1030,7 @@ func TestDrugController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1013,27 +1038,35 @@ func TestDrugController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	id := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
 	}
+	drugID1 := uuid.New()
+	drugID2 := uuid.New()
+	drugID3 := uuid.New()
 	drugs := []models.Drug{
 		{
-			ID: "1115702",
+			ID: drugID1,
+			RxNormID: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
-			ID: "1115701",
+			ID: drugID2,
+			RxNormID: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
-			ID: "1115700",
+			ID: drugID3,
+			RxNormID: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -1135,7 +1168,7 @@ func TestDrugController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_SinglePage(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1143,10 +1176,12 @@ func TestDrugController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	id := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -1156,8 +1191,10 @@ func TestDrugController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 	var drugs []models.Drug
 
 	for i := 0; i < count; i++ {
+		id := uuid.New()
 		drug := models.Drug{
-			ID: fmt.Sprintf("111570%d", i),
+			ID: id,
+			RxNormID: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -1216,7 +1253,7 @@ func TestDrugController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1224,10 +1261,12 @@ func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	id := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -1237,8 +1276,10 @@ func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 	var drugs []models.Drug
 
 	for i := 0; i < count; i++ {
+		id := uuid.New()
 		drug := models.Drug{
-			ID: fmt.Sprintf("111570%d", i),
+			ID: id,
+			RxNormID: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -1351,7 +1392,7 @@ func TestDrugController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
+func TestMedController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1359,10 +1400,12 @@ func TestDrugController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	id := uuid.New()
 	substance1 := models.Substance{
-		ID: "1598096",
+		ID: id,
+		RxClassID: "1598096",
 		Name: "baloxavir",
-		Type: "IN",
+		SubstanceType: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -1371,8 +1414,10 @@ func TestDrugController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 
 	count := 5
 	for i := 0; i < count; i++ {
+		id := uuid.New()
 		drug := models.Drug{
-			ID: fmt.Sprintf("111570%d", i),
+			ID: id,
+			RxNormID: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -1439,7 +1484,7 @@ func TestDrugController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_NoToken(t *testing.T) {
+func TestMedController_GetDrugsByName_NoToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1476,7 +1521,7 @@ func TestDrugController_GetDrugsByName_NoToken(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_InvalidTokenFormat(t *testing.T) {
+func TestMedController_GetDrugsByName_InvalidTokenFormat(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1515,7 +1560,7 @@ func TestDrugController_GetDrugsByName_InvalidTokenFormat(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_ExpiredToken(t *testing.T) {
+func TestMedController_GetDrugsByName_ExpiredToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1531,11 +1576,11 @@ func TestDrugController_GetDrugsByName_ExpiredToken(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "ghouse",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Doctor,
+		Role: commonsModels.Doctor,
 	}
 
 	issuedAt, err := time.Parse(time.DateTime, "1998-06-07 08:00:00")
@@ -1574,7 +1619,7 @@ func TestDrugController_GetDrugsByName_ExpiredToken(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_UnauthorizedPatient(t *testing.T) {
+func TestMedController_GetDrugsByName_UnauthorizedPatient(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1590,11 +1635,11 @@ func TestDrugController_GetDrugsByName_UnauthorizedPatient(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "jdoe",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Patient,
+		Role: commonsModels.Patient,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -1629,7 +1674,7 @@ func TestDrugController_GetDrugsByName_UnauthorizedPatient(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_UnauthorizedAdmin(t *testing.T) {
+func TestMedController_GetDrugsByName_UnauthorizedAdmin(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1645,11 +1690,11 @@ func TestDrugController_GetDrugsByName_UnauthorizedAdmin(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "admin",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Admin,
+		Role: commonsModels.Admin,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -1683,7 +1728,7 @@ func TestDrugController_GetDrugsByName_UnauthorizedAdmin(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_InvalidPage(t *testing.T) {
+func TestMedController_GetDrugsByName_InvalidPage(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1756,7 +1801,7 @@ func TestDrugController_GetDrugsByName_InvalidPage(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_InvalidPageSize(t *testing.T) {
+func TestMedController_GetDrugsByName_InvalidPageSize(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1829,7 +1874,7 @@ func TestDrugController_GetDrugsByName_InvalidPageSize(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_InvalidOrderBy(t *testing.T) {
+func TestMedController_GetDrugsByName_InvalidOrderBy(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1870,7 +1915,7 @@ func TestDrugController_GetDrugsByName_InvalidOrderBy(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_InvalidOrderMethod(t *testing.T) {
+func TestMedController_GetDrugsByName_InvalidOrderMethod(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1911,7 +1956,7 @@ func TestDrugController_GetDrugsByName_InvalidOrderMethod(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_RxClassUnavailable(t *testing.T) {
+func TestMedController_GetDrugsByName_RxClassUnavailable(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1953,7 +1998,7 @@ func TestDrugController_GetDrugsByName_RxClassUnavailable(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_DrugNotFound(t *testing.T) {
+func TestMedController_GetDrugsByName_DrugNotFound(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -1995,7 +2040,7 @@ func TestDrugController_GetDrugsByName_DrugNotFound(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_OrderByID(t *testing.T) {
+func TestMedController_GetDrugsByName_OrderByID(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2003,19 +2048,25 @@ func TestDrugController_GetDrugsByName_OrderByID(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	drugID1 := uuid.New()
+	drugID2 := uuid.New()
+	drugID3 := uuid.New()
 	drugs := []models.Drug{
 		{
-			ID: "1115702",
+			ID: drugID1,
+			RxNormID: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
-			ID: "1115701",
+			ID: drugID2,
+			RxNormID: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
-			ID: "1115700",
+			ID: drugID3,
+			RxNormID: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -2103,7 +2154,7 @@ func TestDrugController_GetDrugsByName_OrderByID(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_OrderByName(t *testing.T) {
+func TestMedController_GetDrugsByName_OrderByName(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2111,19 +2162,25 @@ func TestDrugController_GetDrugsByName_OrderByName(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	drugID1 := uuid.New()
+	drugID2 := uuid.New()
+	drugID3 := uuid.New()
 	drugs := []models.Drug{
 		{
-			ID: "1115702",
+			ID: drugID1,
+			RxNormID: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
-			ID: "1115701",
+			ID: drugID2,
+			RxNormID: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
-			ID: "1115700",
+			ID: drugID3,
+			RxNormID: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -2211,7 +2268,7 @@ func TestDrugController_GetDrugsByName_OrderByName(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_OrderBySubstance(t *testing.T) {
+func TestMedController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2219,19 +2276,25 @@ func TestDrugController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 
 	token := testUtils.GenDoctorToken(t)
 
+	drugID1 := uuid.New()
+	drugID2 := uuid.New()
+	drugID3 := uuid.New()
 	drugs := []models.Drug{
 		{
-			ID: "1115702",
+			ID: drugID1,
+			RxNormID: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
-			ID: "1115701",
+			ID: drugID2,
+			RxNormID: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
-			ID: "1115700",
+			ID: drugID3,
+			RxNormID: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -2319,7 +2382,7 @@ func TestDrugController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_SinglePage(t *testing.T) {
+func TestMedController_GetDrugsByName_SinglePage(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2331,8 +2394,10 @@ func TestDrugController_GetDrugsByName_SinglePage(t *testing.T) {
 	var drugs []models.Drug
 
 	for i := 0; i < count; i++ {
+		id := uuid.New()
 		drug := models.Drug{
-			ID: fmt.Sprintf("111570%d", i),
+			ID: id,
+			RxNormID: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -2390,7 +2455,7 @@ func TestDrugController_GetDrugsByName_SinglePage(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_MultiplePages(t *testing.T) {
+func TestMedController_GetDrugsByName_MultiplePages(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2402,8 +2467,10 @@ func TestDrugController_GetDrugsByName_MultiplePages(t *testing.T) {
 	var drugs []models.Drug
 
 	for i := 0; i < count; i++ {
+		id := uuid.New()
 		drug := models.Drug{
-			ID: fmt.Sprintf("111570%d", i),
+			ID: id,
+			RxNormID: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -2499,7 +2566,7 @@ func TestDrugController_GetDrugsByName_MultiplePages(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDrugController_GetDrugsByName_DefaultParams(t *testing.T) {
+func TestMedController_GetDrugsByName_DefaultParams(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2511,8 +2578,10 @@ func TestDrugController_GetDrugsByName_DefaultParams(t *testing.T) {
 
 	count := 5
 	for i := 0; i < count; i++ {
+		id := uuid.New()
 		drug := models.Drug{
-			ID: fmt.Sprintf("111570%d", i),
+			ID: id,
+			RxNormID: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -2570,7 +2639,7 @@ func TestDrugController_GetDrugsByName_DefaultParams(t *testing.T) {
 	mockAPI.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_NoToken(t *testing.T) {
+func TestMedController_GetBySubstring_NoToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2601,7 +2670,7 @@ func TestDiseaseController_GetBySubstring_NoToken(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 }
-func TestDiseaseController_GetBySubstring_InvalidTokenFormat(t *testing.T) {
+func TestMedController_GetBySubstring_InvalidTokenFormat(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2635,7 +2704,7 @@ func TestDiseaseController_GetBySubstring_InvalidTokenFormat(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_ExpiredToken(t *testing.T) {
+func TestMedController_GetBySubstring_ExpiredToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2646,11 +2715,11 @@ func TestDiseaseController_GetBySubstring_ExpiredToken(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "ghouse",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Doctor,
+		Role: commonsModels.Doctor,
 	}
 
 	issuedAt, err := time.Parse(time.DateTime, "1998-06-07 08:00:00")
@@ -2689,7 +2758,7 @@ func TestDiseaseController_GetBySubstring_ExpiredToken(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_UnauthorizedPatient(t *testing.T) {
+func TestMedController_GetBySubstring_UnauthorizedPatient(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2700,11 +2769,11 @@ func TestDiseaseController_GetBySubstring_UnauthorizedPatient(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "jdoe",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Patient,
+		Role: commonsModels.Patient,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -2739,7 +2808,7 @@ func TestDiseaseController_GetBySubstring_UnauthorizedPatient(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_UnauthorizedAdmin(t *testing.T) {
+func TestMedController_GetBySubstring_UnauthorizedAdmin(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2750,11 +2819,11 @@ func TestDiseaseController_GetBySubstring_UnauthorizedAdmin(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "lcuddy",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Admin,
+		Role: commonsModels.Admin,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -2789,7 +2858,7 @@ func TestDiseaseController_GetBySubstring_UnauthorizedAdmin(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
+func TestMedController_GetBySubstring_DefaultParam(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2838,7 +2907,7 @@ func TestDiseaseController_GetBySubstring_DefaultParam(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_WithParam(t *testing.T) {
+func TestMedController_GetBySubstring_WithParam(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2890,7 +2959,7 @@ func TestDiseaseController_GetBySubstring_WithParam(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
+func TestMedController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -2971,7 +3040,7 @@ func TestDiseaseController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 	assert.Equal(t, expectedTotalCount, paginatedResponse.TotalCount)
 }
 
-func TestDiseaseController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
+func TestMedController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3025,7 +3094,7 @@ func TestDiseaseController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_EmptyPage(t *testing.T) {
+func TestMedController_GetBySubstring_EmptyPage(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3073,7 +3142,7 @@ func TestDiseaseController_GetBySubstring_EmptyPage(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_InvalidPageParam(t *testing.T) {
+func TestMedController_GetBySubstring_InvalidPageParam(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3130,7 +3199,7 @@ func TestDiseaseController_GetBySubstring_InvalidPageParam(t *testing.T) {
 	mockRepo.AssertNotCalled(t, "CountBySubstring")
 }
 
-func TestDiseaseController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
+func TestMedController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3187,7 +3256,7 @@ func TestDiseaseController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
 	mockRepo.AssertNotCalled(t, "CountBySubstring")
 }
 
-func TestDiseaseController_GetBySubstring_DiseaseNotFound(t *testing.T) {
+func TestMedController_GetBySubstring_DiseaseNotFound(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3224,7 +3293,7 @@ func TestDiseaseController_GetBySubstring_DiseaseNotFound(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestDiseaseController_GetBySubstring_RepoError(t *testing.T) {
+func TestMedController_GetBySubstring_RepoError(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3261,7 +3330,7 @@ func TestDiseaseController_GetBySubstring_RepoError(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestPatientController_GetByNationalID_NoToken(t *testing.T) {
+func TestMedController_GetByNationalID_NoToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3295,7 +3364,7 @@ func TestPatientController_GetByNationalID_NoToken(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 }
 
-func TestPatientController_GetByNationalID_InvalidTokenFormat(t *testing.T) {
+func TestMedController_GetMedicalHistoryItemByPatientID_InvalidTokenFormat(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3331,7 +3400,7 @@ func TestPatientController_GetByNationalID_InvalidTokenFormat(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 }
 
-func TestPatientController_GetByNationalID_UnauthorizedPatient(t *testing.T) {
+func TestMedController_GetByNationalID_UnauthorizedPatient(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3342,11 +3411,11 @@ func TestPatientController_GetByNationalID_UnauthorizedPatient(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "jdoe",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Patient,
+		Role: commonsModels.Patient,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -3383,7 +3452,7 @@ func TestPatientController_GetByNationalID_UnauthorizedPatient(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 }
 
-func TestPatientController_GetByNationalID_UnauthorizedAdmin(t *testing.T) {
+func TestMedController_GetByNationalID_UnauthorizedAdmin(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3394,11 +3463,11 @@ func TestPatientController_GetByNationalID_UnauthorizedAdmin(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "lcuddy",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Admin,
+		Role: commonsModels.Admin,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
@@ -3435,7 +3504,7 @@ func TestPatientController_GetByNationalID_UnauthorizedAdmin(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 }
 
-func TestPatientController_GetByNationalID_ExpiredToken(t *testing.T) {
+func TestMedController_GetByNationalID_ExpiredToken(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3446,11 +3515,11 @@ func TestPatientController_GetByNationalID_ExpiredToken(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "ghouse",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Doctor,
+		Role: commonsModels.Doctor,
 	}
 
 	issuedAt, err := time.Parse(time.DateTime, "1998-06-07 08:00:00")
@@ -3491,7 +3560,7 @@ func TestPatientController_GetByNationalID_ExpiredToken(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 }
 
-func TestPatientController_GetByNationalID_InvalidNationalID(t *testing.T) {
+func TestMedController_GetByNationalID_InvalidNationalID(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3499,11 +3568,11 @@ func TestPatientController_GetByNationalID_InvalidNationalID(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "ghouse",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Doctor,
+		Role: commonsModels.Doctor,
 	}
 	token, err := commonsUtils.GenerateJWTToken(
 		&user,
@@ -3592,7 +3661,7 @@ func TestPatientController_GetByNationalID_InvalidNationalID(t *testing.T) {
 	mockUserClient.AssertNotCalled(t, "FindByID", mock.Anything)
 }
 
-func TestPatientController_GetByNationalID_NotFound(t *testing.T) {
+func TestMedController_GetByNationalID_NotFound(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3600,11 +3669,11 @@ func TestPatientController_GetByNationalID_NotFound(t *testing.T) {
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := models.User{
+	user := commonsModels.User{
 		ID: id,
 		Username: "ghouse",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Doctor,
+		Role: commonsModels.Doctor,
 	}
 	token, err := commonsUtils.GenerateJWTToken(
 		&user,
@@ -3654,7 +3723,7 @@ func TestPatientController_GetByNationalID_NotFound(t *testing.T) {
 	// User not found
 	id, err = uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	patient := &models.PatientRecord{
+	patient := &commonsModels.PatientRecord{
 		ID: id,
 		NationalID: nationalID,
 	}
@@ -3695,7 +3764,7 @@ func TestPatientController_GetByNationalID_NotFound(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 }
 
-func TestPatientController_GetByNationalID_Success(t *testing.T) {
+func TestMedController_GetByNationalID_Success(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
@@ -3703,11 +3772,11 @@ func TestPatientController_GetByNationalID_Success(t *testing.T) {
 
 	id, err := uuid.Parse("0c0f5212-e90b-4d65-b4aa-60fa72c6565a")
 	require.NoError(t, err)
-	doctor := models.User{
+	doctor := commonsModels.User{
 		ID: id,
 		Username: "ghouse",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Doctor,
+		Role: commonsModels.Doctor,
 	}
 	token, err := commonsUtils.GenerateJWTToken(
 		&doctor,
@@ -3720,15 +3789,15 @@ func TestPatientController_GetByNationalID_Success(t *testing.T) {
 
 	id, err = uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	patient := &models.PatientRecord{
+	patient := &commonsModels.PatientRecord{
 		ID: id,
 		NationalID: nationalID,
 	}
-	user := &models.User{
+	user := &commonsModels.User{
 		ID: id,
 		Username: "jdoe",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: models.Patient,
+		Role: commonsModels.Patient,
 	}
 	mockRepo.On("FindByNationalID", nationalID).Return(
 		patient, nil,
@@ -3764,4 +3833,602 @@ func TestPatientController_GetByNationalID_Success(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 	mockUserClient.AssertExpectations(t)
+}
+
+func TestMedController_GetMedicalHistoryItemByPatientID_NoToken(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	req, err := http.NewRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Authorization header required"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "GetMedicalHistoryItemByPatientID", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestMedController_GetByNationalID_InvalidTokenFormat(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	req, err := http.NewRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", "INVALID.TOKEN")
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Unauthorized"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "GetMedicalHistoryItemByPatientID", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestMedController_GetMedicalHistoryItemByPatientID_UnauthorizedPatient(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	req, err := http.NewRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "jdoe",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Patient,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusForbidden, rec.Code,
+		"Expected HTTP status 403 Forbidden",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Insufficient permissions"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "GetMedicalHistoryItemByPatientID", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestMedController_GetMedicalHistoryItemByPatientID_UnauthorizedAdmin(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	req, err := http.NewRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "lcuddy",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Admin,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusForbidden, rec.Code,
+		"Expected HTTP status 403 Forbidden",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Insufficient permissions"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "GetMedicalHistoryItemByPatientID", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestMedController_GetMedicalHistoryItemByPatientID_ExpiredToken(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	req, err := http.NewRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Doctor,
+	}
+
+	issuedAt, err := time.Parse(time.DateTime, "1998-06-07 08:00:00")
+	require.NoError(t, err)
+	expiresAt, err := time.Parse(time.DateTime, "1998-06-07 09:00:00")
+	require.NoError(t, err)
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		issuedAt,
+		expiresAt,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusUnauthorized, rec.Code,
+		"Expected HTTP status 401 Unauthorized",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Token has expired"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for missing header",
+	)
+
+	mockRepo.AssertNotCalled(t, "GetMedicalHistoryItemByPatientID", mock.Anything)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestMedController_GetMedicalHistoryItemByPatientID_NotFound(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Doctor,
+	}
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	patientID, err := uuid.Parse(patientIDStr)
+	require.NoError(t, err)
+
+	mockRepo.On("GetMedicalHistoryItemByPatientID", patientID).Return(
+		nil, &errors.MedicalHistoryItemNotFoundError{},
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusNotFound, rec.Code,
+		"Expected HTTP status 404 Not Found",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Medical history item not found"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for patient not found",
+	)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestMedController_GetMedicalHistoryItemByPatientID_InvalidPatientID(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	require.NoError(t, err)
+	user := commonsModels.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Doctor,
+	}
+	token, err := commonsUtils.GenerateJWTToken(
+		&user,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	patientIDStr := "invalid uuid"
+
+	req, err := http.NewRequest(
+		http.MethodGet, 
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Invalid patient ID"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for patient not found",
+	)
+
+	mockRepo.AssertNotCalled(t, "GetMedicalHistoryItemByPatientID", mock.Anything)
+}
+
+func TestMedController_GetMedicalHistoryItemByPatientID_Success(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	id, err := uuid.Parse("0c0f5212-e90b-4d65-b4aa-60fa72c6565a")
+	require.NoError(t, err)
+	doctor := commonsModels.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Doctor,
+	}
+	token, err := commonsUtils.GenerateJWTToken(
+		&doctor,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	patientID, err := uuid.Parse(patientIDStr)
+	require.NoError(t, err)
+
+	itemID, err := uuid.Parse("aa0e8400-e29b-41d4-a716-446655440001")
+	require.NoError(t, err)
+	doctorID, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
+	require.NoError(t, err)
+
+	layout := "2006-01-02 15:04:05"
+	createdAt, err := time.Parse(layout, "2025-10-15 14:30:00")
+	require.NoError(t, err)
+
+	item := &models.MedicalHistoryItem{
+		ID: itemID,
+		PatientID: patientID,
+		DoctorID: doctorID,
+		CreatedAt: createdAt,
+	}
+	mockRepo.On("GetMedicalHistoryItemByPatientID", patientID).Return(
+		item, nil,
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("/med/history/%s", patientIDStr),
+		nil,
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusOK, rec.Code,
+		"Expected HTTP status 200 OK",
+	)
+
+	var response models.MedicalHistoryItem
+	err = json.Unmarshal(rec.Body.Bytes(), &response)
+	require.NoError(t, err, "Failed to unmarshal response body")
+
+	assert.Equal(t, itemID, response.ID)
+	assert.Equal(t, patientID, response.PatientID)
+	assert.Equal(t, doctorID, response.DoctorID)
+	assert.Equal(t, createdAt, response.CreatedAt)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestMedController_CreatePrescription_MedicalHistoryItemInsertError(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	id, err := uuid.Parse("10b3d8eb-ebb9-4a0f-9280-54981a0bda9d")
+	doctor := commonsModels.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Doctor,
+	}
+	token, err := commonsUtils.GenerateJWTToken(
+		&doctor,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	patientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
+	require.NoError(t, err)
+	patient := dtos.PatientDetails{
+		ID: patientID,
+		Username: "Irene Adler",
+		Email: "iadler@mail.com",
+		NationalID: "12345123451",
+	}
+
+	disease := dtos.DiseaseDetails{
+		ID: "0d8209f8-a04d-493d-a162-50878a8ee5c0",
+		RxNormID: "D018549",
+		Name: "Cryptogenic Organizing Pneumonia",
+	}
+
+	drugs := []dtos.DrugDetails{
+		{
+			ID: "D007251",
+			Name: "Tamiflu",
+			Substance: "hydrocodone",
+		},
+	}
+	prescription := &dtos.PrescriptionDetails{
+		Patient: patient,
+		Disease: disease,
+		Drugs: drugs,
+	}
+	body, err := json.Marshal(prescription)
+	require.NoError(t, err)
+
+	mockRepo.On("AddMedicalHistoryItem", patientID, id).Return(
+		nil, &errors.MedicalHistoryItemInsertError{},
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/med/prescribe",
+		bytes.NewReader(body),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusBadRequest, rec.Code,
+		"Expected HTTP status 400 Bad Request",
+	)
+
+	var errResponse commonsDtos.ErrorResponse
+	err = json.Unmarshal(rec.Body.Bytes(), &errResponse)
+	require.NoError(t, err, "Failed to unmarshal error response body")
+
+	expectedErrMsg := "Medical history item could not be inserted"
+	assert.Equal(
+		t, expectedErrMsg, errResponse.Message,
+		"Expected specific error message for medical history item not inserted",
+	)
+}
+
+func TestMedController_CreatePrescription_Success(t *testing.T) {
+	mockAPI := new(mocks.MockRxClassAPI)
+	mockUserClient := new(mocks.UserClient)
+	mockRepo := new(mocks.MockMedRepository)
+	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
+
+	id, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
+	doctor := commonsModels.User{
+		ID: id,
+		Username: "ghouse",
+		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
+		Role: commonsModels.Doctor,
+	}
+	token, err := commonsUtils.GenerateJWTToken(
+		&doctor,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
+
+	patientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
+	require.NoError(t, err)
+	patient := dtos.PatientDetails{
+		ID: patientID,
+		Username: "Irene Adler",
+		Email: "iadler@mail.com",
+		NationalID: "12345123451",
+	}
+
+	disease := dtos.DiseaseDetails{
+		ID: "0d8209f8-a04d-493d-a162-50878a8ee5c0",
+		RxNormID: "D018549",
+		Name: "Cryptogenic Organizing Pneumonia",
+	}
+
+	drugs := []dtos.DrugDetails{
+		{
+			ID: "D007251",
+			Name: "Tamiflu",
+			Substance: "hydrocodone",
+		},
+	}
+	prescription := &dtos.PrescriptionDetails{
+		Patient: patient,
+		Disease: disease,
+		Drugs: drugs,
+	}
+	body, err := json.Marshal(prescription)
+	require.NoError(t, err)
+
+	itemID, err := uuid.Parse("3f01c3e1-0c19-41b5-9a11-fcdfeb41864b")
+	require.NoError(t, err)
+	layout := "2006-01-02 15:04:05"
+	createdAt, err := time.Parse(layout, "2025-10-15 14:30:00")
+	require.NoError(t, err)
+	item := &models.MedicalHistoryItem{
+		ID: itemID,
+		PatientID: patient.ID,
+		DoctorID: id,
+		CreatedAt: createdAt,
+	}
+
+	mockRepo.On("AddMedicalHistoryItem", patientID, id).Return(
+		item, nil,
+	).Once()
+
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/med/prescribe",
+		bytes.NewReader(body),
+	)
+	require.NoError(t, err)
+
+	req.Header.Set("Authorization", token)
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(
+		t, http.StatusCreated, rec.Code,
+		"Expected HTTP status 200 Created",
+	)
+
+	mockRepo.AssertExpectations(t)
 }

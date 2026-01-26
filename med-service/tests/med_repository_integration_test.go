@@ -575,4 +575,424 @@ func TestGormMedRepository(t *testing.T) {
 			t, patient.NationalID, result.NationalID, "Expected patient ID to match",
 		)
 	})
+
+	t.Run("GetDiseaseByRxNormID_DiseaseNotFound", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "D000000"
+		disease, err := repo.GetDiseaseByRxNormID(rxNormID)
+
+		errMsg := "Disease not found"
+		assert.Nil(t, disease, "Expected disease to be nil")
+		assert.Error(t, err, "Expected error when disease not found")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("GetDiseaseByRxNormID_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "D011014"
+		disease, err := repo.GetDiseaseByRxNormID(rxNormID)
+
+		assert.NoError(t, err, "Expected no error finding disease")
+
+		expectedID, err := uuid.Parse("ebb58b3c-4356-4564-bd01-ddd495927025")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		expectedRxNormID := "D011014"
+		expectedName := "Pneumonia"
+		assert.Equal(t, expectedID, disease.ID)
+		assert.Equal(t, expectedRxNormID, disease.RxNormID)
+		assert.Equal(t, expectedName, disease.Name)
+	})
+
+	t.Run("AddDisease_DiseaseInsertError", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := ""
+		name := ""
+		disease, err := repo.AddDisease(rxNormID, name)
+
+		errMsg := "Disease could not be inserted"
+		assert.Nil(t, disease, "Expected disease to be nil")
+		assert.Error(t, err, "Expected error when disease cannot be inserted")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("AddDisease_NewDisease", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "D000000"
+		name := "New disease"
+		disease, err := repo.AddDisease(rxNormID, name)
+
+		assert.NoError(t, err, "Expected no error adding disease")
+
+		expectedRxNormID := "D000000"
+		expectedName := "New disease"
+		assert.Equal(t, expectedRxNormID, disease.RxNormID)
+		assert.Equal(t, expectedName, disease.Name)
+	})
+
+	t.Run("AddDisease_ExistingDisease", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "D031249"
+		name := "Erdheim-Chester Disease"
+		disease, err := repo.AddDisease(rxNormID, name)
+
+		assert.NoError(t, err, "Expected no error adding disease")
+
+		expectedID, err := uuid.Parse("6288b3bd-959f-4b57-a26e-11688e26ce5c")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		expectedRxNormID := "D031249"
+		expectedName := "Erdheim-Chester Disease"
+		assert.Equal(t, expectedID, disease.ID)
+		assert.Equal(t, expectedRxNormID, disease.RxNormID)
+		assert.Equal(t, expectedName, disease.Name)
+	})
+
+	t.Run("GetSubstanceByName_SubstanceNotFound", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		name := "non-existent substance"
+		substance, err := repo.GetSubstanceByName(name)
+
+		errMsg := "Substance not found"
+		assert.Nil(t, substance, "Expected substance to be nil")
+		assert.Error(t, err, "Expected error when substance not found")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("GetSubstanceByName_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		name := "hydrocodone"
+		substance, err := repo.GetSubstanceByName(name)
+
+		assert.NoError(t, err, "Expected no error finding substance")
+
+		expectedID, err := uuid.Parse("a5504c0c-1eb4-4967-8185-2fd82b3295b4")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		expectedRxClassID := "1234567"
+		expectedName := "hydrocodone"
+		expectedType := "IN"
+		assert.Equal(t, expectedID, substance.ID)
+		assert.Equal(t, expectedRxClassID, substance.RxClassID)
+		assert.Equal(t, expectedName, substance.Name)
+		assert.Equal(t, expectedType, substance.SubstanceType)
+	})
+
+	t.Run("AddSubstance_SubstanceInsertError", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxClassID := ""
+		name := ""
+		substanceType := ""
+		substance, err := repo.AddSubstance(rxClassID, name, substanceType)
+
+		errMsg := "Substance could not be inserted"
+		assert.Nil(t, substance, "Expected substance to be nil")
+		assert.Error(t, err, "Expected error when substance cannot be inserted")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("AddSubstance_NewSubstance", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxClassID := "7654321"
+		name := "New Substance"
+		substanceType := "PIN"
+		substance, err := repo.AddSubstance(rxClassID, name, substanceType)
+
+		assert.NoError(t, err, "Expected no error adding substance")
+
+		expectedRxClassID := "7654321"
+		expectedName := "New Substance"
+		expectedSubstanceType := "PIN"
+		assert.Equal(t, expectedRxClassID, substance.RxClassID)
+		assert.Equal(t, expectedName, substance.Name)
+		assert.Equal(t, expectedSubstanceType, substance.SubstanceType)
+	})
+
+	t.Run("AddSubstance_ExistingSubstance", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxClassID := "1234567"
+		name := "hydrocodone"
+		substanceType := "IN"
+		substance, err := repo.AddSubstance(rxClassID, name, substanceType)
+
+		assert.NoError(t, err, "Expected no error adding substance")
+
+		expectedID, err := uuid.Parse("a5504c0c-1eb4-4967-8185-2fd82b3295b4")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		expectedRxClassID := "1234567"
+		expectedName := "hydrocodone"
+		expectedSubstanceType := "IN"
+		assert.Equal(t, expectedID, substance.ID)
+		assert.Equal(t, expectedRxClassID, substance.RxClassID)
+		assert.Equal(t, expectedName, substance.Name)
+		assert.Equal(t, expectedSubstanceType, substance.SubstanceType)
+	})
+
+	t.Run("GetDrugByRxNormID_DrugNotFoundError", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "non-existent substance"
+		drug, err := repo.GetDrugByRxNormID(rxNormID)
+
+		errMsg := "Drug not found"
+		assert.Nil(t, drug, "Expected drug to be nil")
+		assert.Error(t, err, "Expected error when drug not found")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("GetDrugByRxNormID_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "261315"
+		drug, err := repo.GetDrugByRxNormID(rxNormID)
+
+		assert.NoError(t, err, "Expected no error finding drug")
+
+		expectedID, err := uuid.Parse("ee5fd388-c675-477b-9bc5-3f16cc359abe")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		expectedRxNormID := "261315"
+		expectedName := "Tamiflu"
+		expectedSubstance := "hydrocodone"
+		assert.Equal(t, expectedID, drug.ID)
+		assert.Equal(t, expectedRxNormID, drug.RxNormID)
+		assert.Equal(t, expectedName, drug.Name)
+		assert.Equal(t, expectedSubstance, drug.Substance)
+	})
+
+	t.Run("AddDrug_DrugInsertError", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := ""
+		name := ""
+		substance := ""
+		drug, err := repo.AddDrug(rxNormID, name, substance)
+
+		errMsg := "Drug could not be inserted"
+		assert.Nil(t, drug, "Expected drug to be nil")
+		assert.Error(t, err, "Expected error when drug cannot be inserted")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("AddDrug_NewDrug", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "111111"
+		name := "New Drug"
+		substance := "substance"
+		drug, err := repo.AddDrug(rxNormID, name, substance)
+
+		assert.NoError(t, err, "Expected no error adding drug")
+
+		expectedRxNormID := "111111"
+		expectedName := "New Drug"
+		expectedSubstance := "substance"
+		assert.Equal(t, expectedRxNormID, drug.RxNormID)
+		assert.Equal(t, expectedName, drug.Name)
+		assert.Equal(t, expectedSubstance, drug.Substance)
+	})
+
+	t.Run("AddDrug_ExistingDrug", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		rxNormID := "261315"
+		name := "Tamiflu"
+		substance:= "hydrocodone"
+		drug, err := repo.AddDrug(rxNormID, name, substance)
+
+		assert.NoError(t, err, "Expected no error adding drug")
+
+		expectedID, err := uuid.Parse("ee5fd388-c675-477b-9bc5-3f16cc359abe")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		expectedRxNormID := "261315"
+		expectedName := "Tamiflu"
+		expectedSubstance:= "hydrocodone"
+		assert.Equal(t, expectedID, drug.ID)
+		assert.Equal(t, expectedRxNormID, drug.RxNormID)
+		assert.Equal(t, expectedName, drug.Name)
+		assert.Equal(t, expectedSubstance, drug.Substance)
+	})
+
+	t.Run("GetMedicalHistoryItem_MedicalHistoryItemNotFound", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		patientID, err := uuid.Parse("4a4e830a-36f8-4d32-a691-ff808bc36a56")
+		require.NoError(t, err, "Failed to parse target UUID")
+		item, err := repo.GetMedicalHistoryItemByPatientID(patientID)
+
+		errMsg := "Medical history item not found"
+		assert.Nil(t, item, "Expected medical history item to be nil")
+		assert.Error(t, err, "Expected error when medical history item not found")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("GetMedicalHistoryItem_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		patientID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		item, err := repo.GetMedicalHistoryItemByPatientID(patientID)
+
+		assert.NoError(t, err, "Expected no error finding medical history item")
+
+		expectedID, err := uuid.Parse("aa0e8400-e29b-41d4-a716-446655440001")
+		require.NoError(t, err, "Failed to parse target UUID")
+		expectedPatientID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+		require.NoError(t, err, "Failed to parse target UUID")
+		expectedDoctorID, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		assert.Equal(t, expectedID, item.ID)
+		assert.Equal(t, expectedPatientID, item.PatientID)
+		assert.Equal(t, expectedDoctorID, item.DoctorID)
+	})
+
+	t.Run("AddMedicalHistoryItem_MedicalHistoryItemInsertError", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		patientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
+		require.NoError(t, err, "Failed to parse target UUID")
+		doctorID, err := uuid.Parse("4f070b72-1b62-43d7-b085-b9af88d1eefb")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		item, err := repo.AddMedicalHistoryItem(patientID, doctorID)
+
+		errMsg := "Medical history item could not be inserted"
+		assert.Nil(t, item, "Expected medical history item to be nil")
+		assert.Error(t, err, "Expected error when medical history item cannot be inserted")
+		assert.Equal(t, err.Error(), errMsg)
+	})
+
+	t.Run("AddMedicalHistoryItem_Success", func(t *testing.T) {
+		t.Parallel()
+		ctx := context.Background()
+		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		defer cleanup()
+
+		repo := repositories.NewGormMedRepository(db)
+
+		patientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
+		require.NoError(t, err, "Failed to parse target UUID")
+		doctorID, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		item, err := repo.AddMedicalHistoryItem(patientID, doctorID)
+
+		assert.NoError(t, err, "Expected no error adding medical history item")
+
+		item, err = repo.GetMedicalHistoryItemByPatientID(patientID)
+		assert.NoError(t, err, "Expected no error finding medical history item")
+
+		expectedPatientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
+		require.NoError(t, err, "Failed to parse target UUID")
+		expectedDoctorID, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
+		require.NoError(t, err, "Failed to parse target UUID")
+
+		assert.Equal(t, expectedPatientID, item.PatientID)
+		assert.Equal(t, expectedDoctorID, item.DoctorID)
+	})
+
 }

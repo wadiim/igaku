@@ -10,16 +10,21 @@ import (
 	"os"
 	"time"
 
-	"igaku/commons/models"
 	commonsErrors "igaku/commons/errors"
+	commonsModels "igaku/commons/models"
 	commonsUtils "igaku/commons/utils"
+	"igaku/med-service/models"
 )
 
 func MigrateSchema(db *gorm.DB) error {
 	err := db.AutoMigrate(
+		&commonsModels.PatientRecord{},
+		&commonsModels.Setting{},
 		&models.Disease{},
-		&models.PatientRecord{},
-		&models.Setting{},
+		&models.Doctor{},
+		&models.Drug{},
+		&models.MedicalHistoryItem{},
+		&models.Substance{},
 	)
 	if err != nil {
 		log.Printf("Failed to migrate DB schema: %v", err)

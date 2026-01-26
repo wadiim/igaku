@@ -1,15 +1,18 @@
 package services
 
 import (
+	"github.com/google/uuid"
+
 	"math"
 	"sort"
 
 	commonsDtos "igaku/commons/dtos"
+	commonsModels "igaku/commons/models"
 	commonsUtils "igaku/commons/utils"
-	"igaku/commons/models"
 	"igaku/med-service/clients"
 	"igaku/med-service/dtos"
 	"igaku/med-service/errors"
+	"igaku/med-service/models"
 	"igaku/med-service/repositories"
 	"igaku/med-service/utils"
 )
@@ -28,9 +31,11 @@ type MedService interface {
 		orderBy models.DrugOrderableField,
 		orderMethod commonsUtils.Ordering,
 	) (*commonsDtos.PaginatedResponse, error)
-	ValidateUniquePatient(record *models.PatientRecord) error
-	CreatePatient(data *models.PatientRecord) error
+	ValidateUniquePatient(record *commonsModels.PatientRecord) error
+	CreatePatient(data *commonsModels.PatientRecord) error
 	GetPatientByNationalID(nationalID string) (*dtos.PatientDetails, error)
+	AddMedicalHistoryItem(patientID uuid.UUID, doctorID uuid.UUID) error
+	GetMedicalHistoryItemByPatientID(patientID uuid.UUID) (*models.MedicalHistoryItem, error)
 }
 
 type medService struct {
@@ -98,7 +103,7 @@ func (s *medService) sortDrugs(
 		sort.Slice(drugs, func(i, j int) bool {
 			switch orderBy {
 			case models.DrugID:
-				return drugs[i].ID > drugs[j].ID
+				return drugs[i].RxNormID > drugs[j].RxNormID
 			case models.DrugName:
 				return drugs[i].Name > drugs[j].Name
 			case models.SubstanceName:
@@ -111,7 +116,7 @@ func (s *medService) sortDrugs(
 		sort.Slice(drugs, func(i, j int) bool {
 			switch orderBy {
 			case models.DrugID:
-				return drugs[i].ID < drugs[j].ID
+				return drugs[i].RxNormID < drugs[j].RxNormID
 			case models.DrugName:
 				return drugs[i].Name < drugs[j].Name
 			case models.SubstanceName:
@@ -161,7 +166,7 @@ func (s *medService) marshalPaginatedResponse(
 	drugsDetails := make([]dtos.DrugDetails, drugsDetailsLen)
 	for i, d := range paged {
 		drugsDetails[i] = dtos.DrugDetails{
-			ID: d.ID,
+			ID: d.RxNormID,
 			Name: d.Name,
 			Substance: d.Substance,
 		}
@@ -235,6 +240,7 @@ func (s *medService) GetPatientByNationalID(nationalID string) (*dtos.PatientDet
 	}
 
 	patientDetails := &dtos.PatientDetails{
+		ID: record.ID,
 		Username: patient.Username,
 		Email: patient.Email,
 		NationalID: record.NationalID,
@@ -243,14 +249,28 @@ func (s *medService) GetPatientByNationalID(nationalID string) (*dtos.PatientDet
 	return patientDetails, nil
 }
 
-func (s *medService) ValidateUniquePatient(record *models.PatientRecord) error {
+func (s *medService) ValidateUniquePatient(record *commonsModels.PatientRecord) error {
 	err := s.repo.ValidateUniquePatient(record)
 
 	return err
 }
 
-func (s *medService) CreatePatient(data *models.PatientRecord) error {
+func (s *medService) CreatePatient(data *commonsModels.PatientRecord) error {
 	err := s.repo.AddPatient(data)
 
 	return err
+}
+
+func (s *medService) AddMedicalHistoryItem(patientID uuid.UUID, doctorID uuid.UUID) error {
+	_, err := s.repo.AddMedicalHistoryItem(patientID, doctorID)
+
+	return err
+}
+
+func (s *medService) GetMedicalHistoryItemByPatientID(
+	patientID uuid.UUID,
+) (*models.MedicalHistoryItem, error) {
+	item, err := s.repo.GetMedicalHistoryItemByPatientID(patientID)
+
+	return item, err
 }
