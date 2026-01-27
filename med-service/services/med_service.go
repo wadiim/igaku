@@ -72,9 +72,9 @@ func (s *medService) GetBySubstring(
 	diseaseDetailsList := make([]dtos.DiseaseDetails, len(diseases))
 	for i, disease := range diseases {
 		diseaseDetailsList[i] = dtos.DiseaseDetails{
-			ID: disease.ID.String(),
+			ID:       disease.ID.String(),
 			RxNormID: disease.RxNormID,
-			Name: disease.Name,
+			Name:     disease.Name,
 		}
 	}
 	
@@ -103,7 +103,7 @@ func (s *medService) sortDrugs(
 		sort.Slice(drugs, func(i, j int) bool {
 			switch orderBy {
 			case models.DrugID:
-				return drugs[i].RxNormID > drugs[j].RxNormID
+				return drugs[i].RXCUI > drugs[j].RXCUI
 			case models.DrugName:
 				return drugs[i].Name > drugs[j].Name
 			case models.SubstanceName:
@@ -116,7 +116,7 @@ func (s *medService) sortDrugs(
 		sort.Slice(drugs, func(i, j int) bool {
 			switch orderBy {
 			case models.DrugID:
-				return drugs[i].RxNormID < drugs[j].RxNormID
+				return drugs[i].RXCUI < drugs[j].RXCUI
 			case models.DrugName:
 				return drugs[i].Name < drugs[j].Name
 			case models.SubstanceName:
@@ -166,16 +166,16 @@ func (s *medService) marshalPaginatedResponse(
 	drugsDetails := make([]dtos.DrugDetails, drugsDetailsLen)
 	for i, d := range paged {
 		drugsDetails[i] = dtos.DrugDetails{
-			ID: d.RxNormID,
-			Name: d.Name,
+			ID:        d.RXCUI,
+			Name:      d.Name,
 			Substance: d.Substance,
 		}
 	}
 
 	resp := &commonsDtos.PaginatedResponse{
-		Data: drugsDetails,
-		Page: page,
-		PageSize: pageSize,
+		Data:       drugsDetails,
+		Page:       page,
+		PageSize:   pageSize,
 		TotalPages: totalPages,
 		TotalCount: totalCount,
 	}
@@ -240,9 +240,9 @@ func (s *medService) GetPatientByNationalID(nationalID string) (*dtos.PatientDet
 	}
 
 	patientDetails := &dtos.PatientDetails{
-		ID: record.ID,
-		Username: patient.Username,
-		Email: patient.Email,
+		ID:         record.ID,
+		Username:   patient.Username,
+		Email:      patient.Email,
 		NationalID: record.NationalID,
 	}
 

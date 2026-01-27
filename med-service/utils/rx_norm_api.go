@@ -4,26 +4,30 @@ import (
 	"gorm.io/gorm"
 	"github.com/google/uuid"
 
-	"encoding/xml"
+	"encoding/json"
 	"io"
 	"log"
 	"net/http"
 
-	models "igaku/commons/models"
-	errors "igaku/med-service/errors"
+	"igaku/med-service/errors"
+	"igaku/med-service/models"
 )
 
-const domainURL = "https://rxnav.nlm.nih.gov"
+const RxNormDomainURL = "https://rxnav.nlm.nih.gov/REST"
 
-type RxNormAPI struct {
+type RxNormAPI interface {
+	GetAllDiseases(db *gorm.DB) ([]models.Disease, error)
+}
+
+type rxNormAPI struct {
 	URL string
 }
 
-func NewRxNormAPI() *RxNormAPI {
-	return &RxNormAPI{URL: domainURL}
+func NewRxNormAPI() RxNormAPI {
+	return &rxNormAPI{URL: RxNormDomainURL}
 }
 
-func (api *RxNormAPI) fetchFromEndpoint(endpoint string) ([]byte, error) {
+func (api *rxNormAPI) fetchFromEndpoint(endpoint string) ([]byte, error) {
 	res, err := http.Get(api.URL + endpoint)
 	if err != nil {
 		log.Printf("Failed to fetch data from endpoint: %v", err)
@@ -34,25 +38,20 @@ func (api *RxNormAPI) fetchFromEndpoint(endpoint string) ([]byte, error) {
 	return io.ReadAll(res.Body)
 }
 
-func (api *RxNormAPI) transformDiseaseData(diseaseData []byte) []models.Disease {
-	type RxClassMinConcept struct {
-		ClassId string `xml:"classId"`
-		ClassName string `xml:"className"`
-		ClassType string `xml:"classType"`
-	}
-
-	type RxClassMinConceptList struct {
-		XMLName xml.Name `xml:"rxclassMinConceptList"`
-		Concepts []RxClassMinConcept `xml:"rxclassMinConcept"`
-	}
-
-	type RxClassData struct {
-		XMLName xml.Name `xml:"rxclassdata"`
-		ConceptList RxClassMinConceptList `xml:"rxclassMinConceptList"`
+func (api *rxNormAPI) GetAllDiseases(db *gorm.DB) ([]models.Disease, error) {
+	endpoint := "/rxclass/allClasses.json?classTypes=DISEASE"
+	data, err := api.fetchFromEndpoint(endpoint)
+	if err != nil {
+		return nil, err
+		// log.Printf("%v", err)
 	}
 
 	var classData RxClassData
-	xml.Unmarshal(diseaseData, &classData)
+	err = json.Unmarshal(data, &classData)
+	if err != nil {
+		return nil, err
+		// log.Printf("%v", err)
+	}
 
 	diseases := make([]models.Disease, len(classData.ConceptList.Concepts))
 
@@ -64,15 +63,5 @@ func (api *RxNormAPI) transformDiseaseData(diseaseData []byte) []models.Disease 
 		}
 	}
 
-	return diseases
-}
-
-func (api *RxNormAPI) GetAllDiseases(db *gorm.DB) ([]models.Disease){
-	endpoint := "/REST/rxclass/allClasses?classTypes=DISEASE"
-	diseaseData, err := api.fetchFromEndpoint(endpoint)
-	if err != nil {
-		log.Printf("%v", err)
-	}
-
-	return api.transformDiseaseData(diseaseData)
+	return diseases, nil
 }

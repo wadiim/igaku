@@ -621,15 +621,15 @@ func TestMedController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) {
 	id2 := uuid.New()
 	substance1 := models.Substance{
 		ID: id1,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substance2 := models.Substance{
 		ID: id2,
-		RxClassID: "1598097",
+		RXCUI: "1598097",
 		Name: "Non-existent",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1, substance2,
@@ -638,7 +638,7 @@ func TestMedController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) {
 	drugs := []models.Drug{
 		{
 			ID: id,
-			RxNormID: "1115700",
+			RXCUI: "1115700",
 			Name: "Oseltamivir",
 			Substance: "baloxavir",
 		},
@@ -687,7 +687,7 @@ func TestMedController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) {
 
 	expectedCount := 1
 	assert.Equal(t, expectedCount, len(drugResponse))
-	assert.Equal(t, drugs[0].RxNormID, drugResponse[0].ID)
+	assert.Equal(t, drugs[0].RXCUI, drugResponse[0].ID)
 	assert.Equal(t, drugs[0].Name, drugResponse[0].Name)
 	assert.Equal(t, drugs[0].Substance, drugResponse[0].Substance)
 
@@ -705,9 +705,9 @@ func TestMedController_GetRecommendedDrugs_DrugNotFoundError(t *testing.T) {
 	id := uuid.New()
 	substance1 := models.Substance{
 		ID: id,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -765,9 +765,9 @@ func TestMedController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 	id := uuid.New()
 	substance1 := models.Substance{
 		ID: id,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -778,19 +778,19 @@ func TestMedController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 	drugs := []models.Drug{
 		{
 			ID: drugID1,
-			RxNormID: "1115702",
+			RXCUI: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
 			ID: drugID2,
-			RxNormID: "1115701",
+			RXCUI: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
 			ID: drugID3,
-			RxNormID: "1115700",
+			RXCUI: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -903,9 +903,9 @@ func TestMedController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 	id := uuid.New()
 	substance1 := models.Substance{
 		ID: id,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -916,19 +916,19 @@ func TestMedController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 	drugs := []models.Drug{
 		{
 			ID: drugID1,
-			RxNormID: "1115702",
+			RXCUI: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
 			ID: drugID2,
-			RxNormID: "1115701",
+			RXCUI: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
 			ID: drugID3,
-			RxNormID: "1115700",
+			RXCUI: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -1041,9 +1041,9 @@ func TestMedController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
 	id := uuid.New()
 	substance1 := models.Substance{
 		ID: id,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -1054,19 +1054,19 @@ func TestMedController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
 	drugs := []models.Drug{
 		{
 			ID: drugID1,
-			RxNormID: "1115702",
+			RXCUI: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
 			ID: drugID2,
-			RxNormID: "1115701",
+			RXCUI: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
 			ID: drugID3,
-			RxNormID: "1115700",
+			RXCUI: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -1179,9 +1179,9 @@ func TestMedController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 	id := uuid.New()
 	substance1 := models.Substance{
 		ID: id,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -1194,7 +1194,7 @@ func TestMedController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 		id := uuid.New()
 		drug := models.Drug{
 			ID: id,
-			RxNormID: fmt.Sprintf("111570%d", i),
+			RXCUI: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -1264,9 +1264,9 @@ func TestMedController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 	id := uuid.New()
 	substance1 := models.Substance{
 		ID: id,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -1279,7 +1279,7 @@ func TestMedController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 		id := uuid.New()
 		drug := models.Drug{
 			ID: id,
-			RxNormID: fmt.Sprintf("111570%d", i),
+			RXCUI: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -1403,9 +1403,9 @@ func TestMedController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 	id := uuid.New()
 	substance1 := models.Substance{
 		ID: id,
-		RxClassID: "1598096",
+		RXCUI: "1598096",
 		Name: "baloxavir",
-		SubstanceType: "IN",
+		TTY: "IN",
 	}
 	substances := []models.Substance{
 		substance1,
@@ -1417,7 +1417,7 @@ func TestMedController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 		id := uuid.New()
 		drug := models.Drug{
 			ID: id,
-			RxNormID: fmt.Sprintf("111570%d", i),
+			RXCUI: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -2054,19 +2054,19 @@ func TestMedController_GetDrugsByName_OrderByID(t *testing.T) {
 	drugs := []models.Drug{
 		{
 			ID: drugID1,
-			RxNormID: "1115702",
+			RXCUI: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
 			ID: drugID2,
-			RxNormID: "1115701",
+			RXCUI: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
 			ID: drugID3,
-			RxNormID: "1115700",
+			RXCUI: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -2168,19 +2168,19 @@ func TestMedController_GetDrugsByName_OrderByName(t *testing.T) {
 	drugs := []models.Drug{
 		{
 			ID: drugID1,
-			RxNormID: "1115702",
+			RXCUI: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
 			ID: drugID2,
-			RxNormID: "1115701",
+			RXCUI: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
 			ID: drugID3,
-			RxNormID: "1115700",
+			RXCUI: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -2282,19 +2282,19 @@ func TestMedController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 	drugs := []models.Drug{
 		{
 			ID: drugID1,
-			RxNormID: "1115702",
+			RXCUI: "1115702",
 			Name: "ZZZ",
 			Substance: "daloxavir",
 		},
 		{
 			ID: drugID2,
-			RxNormID: "1115701",
+			RXCUI: "1115701",
 			Name: "Oseltamivir",
 			Substance: "caloxavir",
 		},
 		{
 			ID: drugID3,
-			RxNormID: "1115700",
+			RXCUI: "1115700",
 			Name: "AAA",
 			Substance: "baloxavir",
 		},
@@ -2397,7 +2397,7 @@ func TestMedController_GetDrugsByName_SinglePage(t *testing.T) {
 		id := uuid.New()
 		drug := models.Drug{
 			ID: id,
-			RxNormID: fmt.Sprintf("111570%d", i),
+			RXCUI: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -2470,7 +2470,7 @@ func TestMedController_GetDrugsByName_MultiplePages(t *testing.T) {
 		id := uuid.New()
 		drug := models.Drug{
 			ID: id,
-			RxNormID: fmt.Sprintf("111570%d", i),
+			RXCUI: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}
@@ -2581,7 +2581,7 @@ func TestMedController_GetDrugsByName_DefaultParams(t *testing.T) {
 		id := uuid.New()
 		drug := models.Drug{
 			ID: id,
-			RxNormID: fmt.Sprintf("111570%d", i),
+			RXCUI: fmt.Sprintf("111570%d", i),
 			Name: fmt.Sprintf("Drug%d", i),
 			Substance: fmt.Sprintf("Substance%d", i),
 		}

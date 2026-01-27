@@ -34,7 +34,7 @@ func MigrateSchema(db *gorm.DB) error {
 	}
 }
 
-func InitDatabase(api *RxNormAPI) (*gorm.DB, error) {
+func InitDatabase(api RxNormAPI) (*gorm.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s "+
 		"user=%s "+
@@ -96,7 +96,10 @@ func InitDatabase(api *RxNormAPI) (*gorm.DB, error) {
 		return nil, &commonsErrors.DatabaseError{}
 	}
 	if count == 0 {
-		diseases := api.GetAllDiseases(db)
+		diseases, err := api.GetAllDiseases(db)
+		if err != nil {
+			log.Printf("%v", err)
+		}
 		result := db.Create(diseases)
 		if result.Error != nil {
 			log.Printf("%v", result.Error)

@@ -15,10 +15,10 @@ import (
 	commonsModels "igaku/commons/models"
 	commonsUtils "igaku/commons/utils"
 	"igaku/med-service/dtos"
+	medErrors "igaku/med-service/errors"
 	"igaku/med-service/middleware"
 	"igaku/med-service/models"
 	"igaku/med-service/services"
-	medErrors "igaku/med-service/errors"
 )
 
 type MedController struct {

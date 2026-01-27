@@ -51,7 +51,7 @@ VALUES
     'Pneumonia, Lipid'
 );
 
-INSERT INTO substances (id, rx_class_id, name, substance_type)
+INSERT INTO substances (id, rxcui, name, tty)
 VALUES
 (
     'a5504c0c-1eb4-4967-8185-2fd82b3295b4',
@@ -60,7 +60,7 @@ VALUES
     'IN'
 );
 
-INSERT INTO drugs (id, rx_norm_id, name, substance)
+INSERT INTO drugs (id, rxcui, name, substance)
 VALUES
 (
     'ee5fd388-c675-477b-9bc5-3f16cc359abe',

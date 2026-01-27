@@ -1,24 +1,24 @@
 package servers
 
 import (
-	"encoding/json"
 	amqp "github.com/rabbitmq/amqp091-go"
 
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"time"
 
-	commonsErrors "igaku/commons/errors"
 	"igaku/commons/dtos"
+	commonsErrors "igaku/commons/errors"
 	"igaku/commons/models"
 	"igaku/med-service/services"
 )
 
 type RabbitMQServer struct {
-	conn	*amqp.Connection
-	ch	*amqp.Channel
-	service	services.MedService
+	conn    *amqp.Connection
+	ch      *amqp.Channel
+	service services.MedService
 }
 
 func NewRabbitMQServer(
@@ -103,7 +103,7 @@ func (s *RabbitMQServer) StartAddPatientRecordListener() error {
 					err,
 				)
 				resp.Error = &dtos.RPCError{
-					Code: "INVALID_REQUEST",
+					Code:    "INVALID_REQUEST",
 					Message: err.Error(),
 				}
 				goto send_response
@@ -138,7 +138,7 @@ func (s *RabbitMQServer) StartAddPatientRecordListener() error {
 					err,
 				)
 				resp.Error = &dtos.RPCError{
-					Code: "INTERNAL",
+					Code:    "INTERNAL",
 					Message: err.Error(),
 				}
 			}
@@ -206,7 +206,7 @@ func (s *RabbitMQServer) StartValidateUniquePatientListener() error {
 					err,
 				)
 				resp.Error = &dtos.RPCError{
-					Code: "INVALID_REQUEST",
+					Code:    "INVALID_REQUEST",
 					Message: err.Error(),
 				}
 				goto send_response
@@ -238,7 +238,7 @@ func (s *RabbitMQServer) StartValidateUniquePatientListener() error {
 					err,
 				)
 				resp.Error = &dtos.RPCError{
-					Code: "INTERNAL",
+					Code:    "INTERNAL",
 					Message: err.Error(),
 				}
 			}

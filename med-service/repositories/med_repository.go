@@ -19,8 +19,8 @@ type MedRepository interface {
 	GetDiseaseByRxNormID(rxNormID string) (*models.Disease, error)
 	AddSubstance(rxClassID string, name string, subType string) (*models.Substance, error)
 	GetSubstanceByName(name string) (*models.Substance, error)
-	AddDrug(rxNormID string, name string, substance string) (*models.Drug, error)
-	GetDrugByRxNormID(name string) (*models.Drug, error)
+	AddDrug(rxcui string, name string, substance string) (*models.Drug, error)
+	GetDrugByRXCUI(rxcui string) (*models.Drug, error)
 	AddMedicalHistoryItem(patientID uuid.UUID, doctorID uuid.UUID) (*models.MedicalHistoryItem, error)
 	GetMedicalHistoryItemByPatientID(patientID uuid.UUID) (*models.MedicalHistoryItem, error)
 	FindByID(id uuid.UUID) (*commonsModels.PatientRecord, error)
@@ -76,9 +76,9 @@ func (r *gormMedRepository) AddMedicalHistoryItem(
 	doctorID uuid.UUID,
 ) (*models.MedicalHistoryItem, error) {
 	item := models.MedicalHistoryItem{
-		ID: uuid.New(),
+		ID:        uuid.New(),
 		PatientID: patientID,
-		DoctorID:   doctorID,
+		DoctorID:  doctorID,
 	}
 
 	result := r.db.Create(&item)
@@ -115,17 +115,17 @@ func (r *gormMedRepository) FindByID(id uuid.UUID) (*commonsModels.PatientRecord
 }
 
 func (r *gormMedRepository) AddSubstance(
-	rxClassID string,
+	rxcui string,
 	name string,
-	subType string,
+	tty string,
 ) (*models.Substance, error) {
 	substance := models.Substance{
-		RxClassID: rxClassID,
-		Name: name,
-		SubstanceType: subType,
+		RXCUI: rxcui,
+		Name:  name,
+		TTY:   tty,
 	}
 
-	result := r.db.Where(map[string]interface{}{"rx_class_id": rxClassID}).FirstOrCreate(&substance)
+	result := r.db.Where(map[string]interface{}{"rxcui": rxcui}).FirstOrCreate(&substance)
 	if result.Error != nil {
 		return nil, &medErrors.SubstanceInsertError{}
 	}
@@ -150,17 +150,17 @@ func (r *gormMedRepository) GetSubstanceByName(
 }
 
 func (r *gormMedRepository) AddDrug(
-	rxNormID string,
+	rxcui string,
 	name string,
 	substance string,
 ) (*models.Drug, error) {
 	drug := models.Drug{
-		RxNormID: rxNormID,
-		Name: name,
+		RXCUI:     rxcui,
+		Name:      name,
 		Substance: substance,
 	}
 
-	result := r.db.Where(map[string]interface{}{"rx_norm_id": rxNormID}).FirstOrCreate(&drug)
+	result := r.db.Where(map[string]interface{}{"rxcui": rxcui}).FirstOrCreate(&drug)
 	if result.Error != nil {
 		return nil, &medErrors.DrugInsertError{}
 	}
@@ -168,12 +168,10 @@ func (r *gormMedRepository) AddDrug(
 	return &drug, nil
 }
 
-func (r *gormMedRepository) GetDrugByRxNormID(
-	rxNormID string,
-) (*models.Drug, error) {
+func (r *gormMedRepository) GetDrugByRXCUI(rxcui string) (*models.Drug, error) {
 	var drug models.Drug
 
-	result := r.db.Where("rx_norm_id = ?", rxNormID).First(&drug)
+	result := r.db.Where("rxcui = ?", rxcui).First(&drug)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, &medErrors.DrugNotFoundError{}

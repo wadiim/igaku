@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	commonsErrors "igaku/commons/errors"
 	"igaku/commons/dtos"
+	commonsErrors "igaku/commons/errors"
 	"igaku/commons/models"
 	"igaku/med-service/errors"
 )
@@ -23,16 +23,16 @@ type UserClient interface {
 }
 
 type userClient struct {
-	url		string
-	conn		*amqp.Connection
-	ch		*amqp.Channel
-	replyMsgs	<-chan amqp.Delivery
-	pendingCalls	sync.Map
+	url           string
+	conn          *amqp.Connection
+	ch            *amqp.Channel
+	replyMsgs     <-chan amqp.Delivery
+	pendingCalls  sync.Map
 }
 
 type responseChan struct {
-	ch	chan []byte
-	err	chan error
+	ch   chan []byte
+	err  chan error
 }
 
 func NewUserClient(url string) (UserClient, error) {
@@ -92,8 +92,8 @@ func (c *userClient) Shutdown() {
 func (c *userClient) call(routingKey string, body []byte) ([]byte, error) {
 	corrID := uuid.New().String()
 	res := &responseChan{
-		ch:	make(chan []byte, 1),
-		err:	make(chan error, 1),
+		ch:  make(chan []byte, 1),
+		err: make(chan error, 1),
 	}
 
 	c.pendingCalls.Store(corrID, res)

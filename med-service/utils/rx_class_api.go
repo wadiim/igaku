@@ -13,7 +13,7 @@ import (
 	"igaku/med-service/models"
 )
 
-const RxClassDomainURL = "https://rxnav.nlm.nih.gov"
+const RxClassDomainURL = "https://rxnav.nlm.nih.gov/REST"
 
 type RxClassAPI interface {
 	GetSubstances(diseaseID string) ([]models.Substance, error)
@@ -41,112 +41,66 @@ func (api *rxClassAPI) fetchFromEndpoint(endpoint string) ([]byte, error) {
 
 func (api *rxClassAPI) GetSubstances(diseaseID string) ([]models.Substance, error) {
 	endpoint := fmt.Sprintf(
-		"/REST/rxclass/classMembers.json?classId=%s&relaSource=MEDRT&rela=may_treat",
+		"/rxclass/classMembers.json?classId=%s&relaSource=MEDRT&rela=may_treat&trans=1",
 		diseaseID,
 	)
-	substancesData, err := api.fetchFromEndpoint(endpoint)
+	data, err := api.fetchFromEndpoint(endpoint)
 	if err != nil {
 		return nil, err
 	}
 
-	type MinConcept struct {
-		Rxcui string `json:"rxcui"`
-		Name  string `json:"name"`
-		Tty   string `json:"tty"`
-	}
-
-	type NodeAttr struct {
-		AttrName  string `json:"attrName"`
-		AttrValue string `json:"attrValue"`
-	}
-
-	type DrugMember struct {
-		MinConcept MinConcept  `json:"minConcept"`
-		NodeAttrs  []NodeAttr  `json:"nodeAttr"`
-	}
-
-	type DrugMemberGroup struct {
-		DrugMembers []DrugMember `json:"drugMember"`
-	}
-
-	type RxClass struct {
-		DrugMemberGroup DrugMemberGroup `json:"drugMemberGroup"`
-	}
-
 	var rx RxClass
-	if err := json.Unmarshal(substancesData, &rx); err != nil {
+	err = json.Unmarshal(data, &rx)
+	if err != nil {
 		return nil, &errors.SubstanceNotFoundError{}
 	}
 
-	var substances []models.Substance
+	substances := make([]models.Substance, 0, len(rx.DrugMemberGroup.DrugMembers))
+
 	for _, dm := range rx.DrugMemberGroup.DrugMembers {
-		for _, a := range dm.NodeAttrs {
-			if a.AttrName == "Relation" && a.AttrValue == "DIRECT" {
-				id := uuid.New()
-				substances = append(substances, models.Substance{
-					ID:   id,
-					RxClassID: dm.MinConcept.Rxcui,
-					Name: dm.MinConcept.Name,
-					SubstanceType: dm.MinConcept.Tty,
-				})
-				break
-			}
-		}
+		substances = append(substances, models.Substance{
+			ID:    uuid.New(),
+			RXCUI: dm.MinConcept.Rxcui,
+			Name:  dm.MinConcept.Name,
+			TTY:   dm.MinConcept.Tty,
+		})
 	}
 
 	return substances, nil
 }
 
 func (api *rxClassAPI) GetDrugsByName(name string) ([]models.Drug, error) {
-	type ConceptProperty struct {
-		Rxcui    string `json:"rxcui"`
-		Name     string `json:"name"`
-		Synonym  string `json:"synonym"`
-		Tty      string `json:"tty"`
-		Language string `json:"language"`
-		Suppress string `json:"suppress"`
-		Umlscui  string `json:"umlscui"`
-	}
-
-	type ConceptGroup struct {
-		Tty               string               `json:"tty,omitempty"`
-		ConceptProperties []ConceptProperty    `json:"conceptProperties,omitempty"`
-	}
-
-	type DrugGroup struct {
-		Name         *string        `json:"name"`
-		ConceptGroup []ConceptGroup `json:"conceptGroup"`
-	}
-
-	type DrugGroupResponse struct {
-		DrugGroup DrugGroup `json:"drugGroup"`
-	}
-
-	var drugs []models.Drug
-	endpoint := fmt.Sprintf("/REST/drugs.json?name=%s", name)
+	endpoint := fmt.Sprintf("/drugs.json?name=%s", name)
 	data, err := api.fetchFromEndpoint(endpoint)
 	if err != nil {
 		return nil, err
 	}
 
 	var resp DrugGroupResponse
-	if err := json.Unmarshal(data, &resp); err != nil {
+	err = json.Unmarshal(data, &resp)
+	if err != nil {
 		return nil, &errors.DrugNotFoundError{}
 	}
 
+	total := 0
+	for _, cg := range resp.DrugGroup.ConceptGroup {
+		total += len(cg.ConceptProperties)
+	}
+	if total == 0 {
+		return nil, &errors.DrugNotFoundError{}
+	}
+
+	drugs := make([]models.Drug, 0, total)
+
 	for _, cg := range resp.DrugGroup.ConceptGroup {
 		for _, cp := range cg.ConceptProperties {
-			id := uuid.New()
 			drugs = append(drugs, models.Drug{
-				ID:        id,
-				RxNormID:  cp.Rxcui,
+				ID:        uuid.New(),
+				RXCUI:     cp.Rxcui,
 				Name:      cp.Name,
 				Substance: name,
 			})
 		}
-	}
-	if len(drugs) == 0 {
-		return nil, &errors.DrugNotFoundError{}
 	}
 
 	return drugs, nil

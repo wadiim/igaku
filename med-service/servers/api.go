@@ -2,18 +2,18 @@ package servers
 
 import (
 	"github.com/gin-gonic/gin"
+	actuator "github.com/sinhashubham95/go-actuator"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	actuator "github.com/sinhashubham95/go-actuator"
 
 	"context"
 	"log"
 	"net/http"
 
+	configs "igaku/commons/configs"
 	"igaku/med-service/controllers"
 	"igaku/med-service/docs"
 	"igaku/med-service/services"
-	configs "igaku/commons/configs"
 )
 
 
@@ -48,7 +48,7 @@ func NewApiServer(medService services.MedService) *ApiServer {
 	)
 
 	server := &http.Server{
-		Addr: ":8080",
+		Addr:    ":8080",
 		Handler: router,
 	}
 

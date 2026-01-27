@@ -5,11 +5,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 
 	"context"
 	"path/filepath"
@@ -21,8 +21,8 @@ import (
 	commonsUtils "igaku/commons/utils"
 	"igaku/med-service/controllers"
 	"igaku/med-service/services"
-	"igaku/med-service/utils"
 	"igaku/med-service/tests/mocks"
+	"igaku/med-service/utils"
 )
 
 func SetupTestDatabase(ctx context.Context, t *testing.T) (db *gorm.DB, cleanup func()) {

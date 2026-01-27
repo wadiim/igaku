@@ -1,14 +1,5 @@
 package main
 
-	// diseaseController := controllers.NewDiseaseController(diseaseService)
-	// diseaseController.RegisterRoutes(router)
-
-	// patientController := controllers.NewPatientController(patientService)
-	// patientController.RegisterRoutes(router)
-
-	// drugController := controllers.NewDrugController(drugService)
-	// drugController.RegisterRoutes(router)
-
 import (
 	"context"
 	"log"
@@ -22,8 +13,6 @@ import (
 	"igaku/med-service/services"
 	"igaku/med-service/utils"
 	"igaku/med-service/servers"
-	// commonsModels "igaku/commons/models"
-	// commonsUtils "igaku/commons/utils"
 )
 
 // @title		Igaku Med API
@@ -41,12 +30,6 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
-	// diseaseID := "D007251"
-	// substances, err := rxClassAPI.GetSubstances(diseaseID)
-	// drugs, err := rxClassAPI.GetDrugsWithSubstances(substances)
-	// log.Printf("%v", drugs)
-	// drugService.GetRecommendedDrugs(1, 1, diseaseID, commonsModels.DrugName, commonsUtils.Asc)
-
 	amqpURI := os.Getenv("RABBITMQ_URL")
 
 	userClient, err := clients.NewUserClient(amqpURI)
@@ -55,14 +38,7 @@ func main() {
 	}
 	defer userClient.Shutdown()
 
-	// diseaseRepo := repositories.NewGormDiseaseRepository(db)
-	// diseaseService := services.NewDiseaseService(diseaseRepo)
-
-	// patientRepo := repositories.NewGormPatientRepository(db)
-	// patientService := services.NewPatientService(userClient, patientRepo)
-
 	rxClassAPI := utils.NewRxClassAPI()
-	// drugService := services.NewDrugService(rxClassAPI)
 
 	medRepo := repositories.NewGormMedRepository(db)
 	medService := services.NewMedService(rxClassAPI, userClient, medRepo)

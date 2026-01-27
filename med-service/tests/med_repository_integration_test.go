@@ -13,20 +13,25 @@ import (
 	"strings"
 	"testing"
 
-	"igaku/commons/models"
-	"igaku/med-service/repositories"
+	commonsModels "igaku/commons/models"
 	medErrors "igaku/med-service/errors"
+	"igaku/med-service/models"
+	"igaku/med-service/repositories"
 	testUtils "igaku/med-service/tests/utils"
 )
 
+func initRepo(t *testing.T) (repo repositories.MedRepository, cleanup func()) {
+	t.Parallel()
+	ctx := context.Background()
+	db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+
+	return repositories.NewGormMedRepository(db), cleanup
+}
+
 func TestGormMedRepository(t *testing.T) {
 	t.Run("FindBySubstring_LowercaseName", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID1, err := uuid.Parse("ebb58b3c-4356-4564-bd01-ddd495927025")
 		require.NoError(t, err, "Failed to parse first target UUID")
@@ -68,12 +73,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindBySubstring_UppercaseName", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID1, err := uuid.Parse("ebb58b3c-4356-4564-bd01-ddd495927025")
 		require.NoError(t, err, "Failed to parse first target UUID")
@@ -115,12 +116,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindBySubstring_CountLessThanLimit", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID1, err := uuid.Parse("32f5c8d5-9cb0-4b1a-b900-ad2aa78f3a19")
 		require.NoError(t, err, "Failed to parse first target UUID")
@@ -159,12 +156,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindBySubstring_CountMoreThanLimit", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID1, err := uuid.Parse("ebb58b3c-4356-4564-bd01-ddd495927025")
 		require.NoError(t, err, "Failed to parse first target UUID")
@@ -207,12 +200,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindBySubstring_OffsetMoreThanCount", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		name := "Pneumonia"
 		offset := 5
@@ -224,12 +213,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindBySubstring_NotFound", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		name := "Wilson"
 		offset := 5
@@ -241,12 +226,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindBySubstring_OffsetNegative", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		name := "Pneumonia"
 		offset := -1
@@ -258,12 +239,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindBySubstring_LimitNegative", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		name := "Pneumonia"
 		offset := 1
@@ -275,12 +252,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("CountBySubstring_LowercaseName", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		expectedCount := int64(4)
 		name := "pneumonia"
@@ -292,12 +265,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("CountBySubstring_UppercaseName", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		expectedCount := int64(4)
 		name := "Pneumonia"
@@ -309,12 +278,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("CountBySubstring_NotFound", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		expectedCount := int64(0)
 		name := "Wilson"
@@ -329,12 +294,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindByID_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 		require.NoError(t, err, "Failet to parse target UUID")
@@ -354,12 +315,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindByID_NotFound", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID, err := uuid.Parse("64814b64-d138-4209-b869-3b649db06ab1")
 		require.NoError(t, err, "Failed to parse target UUID")
@@ -378,12 +335,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindByNationalID_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 		require.NoError(t, err, "Failed to parse patient UUID")
@@ -402,12 +355,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("FindByNationalID_NotFound", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetNationalID := "44051401458"
 
@@ -425,17 +374,13 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("ValidateUniquePatient_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		patientID, err := uuid.Parse("64814b64-d138-4209-b869-3b649db06ab1")
 		require.NoError(t, err, "Failed to parse patient UUID")
 		patientNationalID := "44051401458"
-		record := &models.PatientRecord{
+		record := &commonsModels.PatientRecord{
 			ID: patientID,
 			NationalID: patientNationalID,
 		}
@@ -446,17 +391,13 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("ValidateUniquePatient_DuplicatedID", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		patientID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 		require.NoError(t, err, "Failed to parse patient UUID")
 		patientNationalID := "44051401458"
-		record := &models.PatientRecord{
+		record := &commonsModels.PatientRecord{
 			ID: patientID,
 			NationalID: patientNationalID,
 		}
@@ -468,17 +409,13 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("ValidateUniquePatient_DuplicatedNationalID", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		patientID, err := uuid.Parse("64814b64-d138-4209-b869-3b649db06ab1")
 		require.NoError(t, err, "Failed to parse patient UUID")
 		patientNationalID := "12345654321"
-		record := &models.PatientRecord{
+		record := &commonsModels.PatientRecord{
 			ID: patientID,
 			NationalID: patientNationalID,
 		}
@@ -490,18 +427,14 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddPatient_InvalidPatient", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		// Duplicate ID
 		targetID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		patient := models.PatientRecord{
+		patient := commonsModels.PatientRecord{
 			ID: targetID,
 			NationalID: "11223311223",
 		}
@@ -513,7 +446,7 @@ func TestGormMedRepository(t *testing.T) {
 		targetID, err = uuid.Parse("b853ebce-828c-4ec6-a667-65e61c471877")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		patient = models.PatientRecord{
+		patient = commonsModels.PatientRecord{
 			ID: targetID,
 			NationalID: "12345123451",
 		}
@@ -525,7 +458,7 @@ func TestGormMedRepository(t *testing.T) {
 		targetID, err = uuid.Parse("b853ebce-828c-4ec6-a667-65e61c471877")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		patient = models.PatientRecord{
+		patient = commonsModels.PatientRecord{
 			ID: targetID,
 			NationalID: "abc45123451",
 		}
@@ -537,7 +470,7 @@ func TestGormMedRepository(t *testing.T) {
 		targetID, err = uuid.Parse("b853ebce-828c-4ec6-a667-65e61c471877")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		patient = models.PatientRecord{
+		patient = commonsModels.PatientRecord{
 			ID: targetID,
 			NationalID: "1234",
 		}
@@ -547,17 +480,13 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddPatient_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		targetID, err := uuid.Parse("b853ebce-828c-4ec6-a667-65e61c471877")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		patient := models.PatientRecord{
+		patient := commonsModels.PatientRecord{
 			ID: targetID,
 			NationalID: "12312312312",
 		}
@@ -577,12 +506,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("GetDiseaseByRxNormID_DiseaseNotFound", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := "D000000"
 		disease, err := repo.GetDiseaseByRxNormID(rxNormID)
@@ -594,12 +519,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("GetDiseaseByRxNormID_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := "D011014"
 		disease, err := repo.GetDiseaseByRxNormID(rxNormID)
@@ -617,12 +538,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddDisease_DiseaseInsertError", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := ""
 		name := ""
@@ -635,12 +552,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddDisease_NewDisease", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := "D000000"
 		name := "New disease"
@@ -655,12 +568,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddDisease_ExistingDisease", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := "D031249"
 		name := "Erdheim-Chester Disease"
@@ -679,12 +588,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("GetSubstanceByName_SubstanceNotFound", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		name := "non-existent substance"
 		substance, err := repo.GetSubstanceByName(name)
@@ -696,12 +601,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("GetSubstanceByName_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		name := "hydrocodone"
 		substance, err := repo.GetSubstanceByName(name)
@@ -711,22 +612,18 @@ func TestGormMedRepository(t *testing.T) {
 		expectedID, err := uuid.Parse("a5504c0c-1eb4-4967-8185-2fd82b3295b4")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		expectedRxClassID := "1234567"
+		expectedRXCUI := "1234567"
 		expectedName := "hydrocodone"
 		expectedType := "IN"
 		assert.Equal(t, expectedID, substance.ID)
-		assert.Equal(t, expectedRxClassID, substance.RxClassID)
+		assert.Equal(t, expectedRXCUI, substance.RXCUI)
 		assert.Equal(t, expectedName, substance.Name)
-		assert.Equal(t, expectedType, substance.SubstanceType)
+		assert.Equal(t, expectedType, substance.TTY)
 	})
 
 	t.Run("AddSubstance_SubstanceInsertError", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxClassID := ""
 		name := ""
@@ -740,12 +637,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddSubstance_NewSubstance", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxClassID := "7654321"
 		name := "New Substance"
@@ -754,21 +647,17 @@ func TestGormMedRepository(t *testing.T) {
 
 		assert.NoError(t, err, "Expected no error adding substance")
 
-		expectedRxClassID := "7654321"
+		expectedRXCUI := "7654321"
 		expectedName := "New Substance"
-		expectedSubstanceType := "PIN"
-		assert.Equal(t, expectedRxClassID, substance.RxClassID)
+		expectedTTY := "PIN"
+		assert.Equal(t, expectedRXCUI, substance.RXCUI)
 		assert.Equal(t, expectedName, substance.Name)
-		assert.Equal(t, expectedSubstanceType, substance.SubstanceType)
+		assert.Equal(t, expectedTTY, substance.TTY)
 	})
 
 	t.Run("AddSubstance_ExistingSubstance", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxClassID := "1234567"
 		name := "hydrocodone"
@@ -780,25 +669,21 @@ func TestGormMedRepository(t *testing.T) {
 		expectedID, err := uuid.Parse("a5504c0c-1eb4-4967-8185-2fd82b3295b4")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		expectedRxClassID := "1234567"
+		expectedRXCUI := "1234567"
 		expectedName := "hydrocodone"
-		expectedSubstanceType := "IN"
+		expectedTTY := "IN"
 		assert.Equal(t, expectedID, substance.ID)
-		assert.Equal(t, expectedRxClassID, substance.RxClassID)
+		assert.Equal(t, expectedRXCUI, substance.RXCUI)
 		assert.Equal(t, expectedName, substance.Name)
-		assert.Equal(t, expectedSubstanceType, substance.SubstanceType)
+		assert.Equal(t, expectedTTY, substance.TTY)
 	})
 
 	t.Run("GetDrugByRxNormID_DrugNotFoundError", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
 
-		repo := repositories.NewGormMedRepository(db)
-
 		rxNormID := "non-existent substance"
-		drug, err := repo.GetDrugByRxNormID(rxNormID)
+		drug, err := repo.GetDrugByRXCUI(rxNormID)
 
 		errMsg := "Drug not found"
 		assert.Nil(t, drug, "Expected drug to be nil")
@@ -807,37 +692,29 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("GetDrugByRxNormID_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
 
-		repo := repositories.NewGormMedRepository(db)
-
 		rxNormID := "261315"
-		drug, err := repo.GetDrugByRxNormID(rxNormID)
+		drug, err := repo.GetDrugByRXCUI(rxNormID)
 
 		assert.NoError(t, err, "Expected no error finding drug")
 
 		expectedID, err := uuid.Parse("ee5fd388-c675-477b-9bc5-3f16cc359abe")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		expectedRxNormID := "261315"
+		expectedRXCUI := "261315"
 		expectedName := "Tamiflu"
 		expectedSubstance := "hydrocodone"
 		assert.Equal(t, expectedID, drug.ID)
-		assert.Equal(t, expectedRxNormID, drug.RxNormID)
+		assert.Equal(t, expectedRXCUI, drug.RXCUI)
 		assert.Equal(t, expectedName, drug.Name)
 		assert.Equal(t, expectedSubstance, drug.Substance)
 	})
 
 	t.Run("AddDrug_DrugInsertError", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := ""
 		name := ""
@@ -851,12 +728,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddDrug_NewDrug", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := "111111"
 		name := "New Drug"
@@ -865,21 +738,17 @@ func TestGormMedRepository(t *testing.T) {
 
 		assert.NoError(t, err, "Expected no error adding drug")
 
-		expectedRxNormID := "111111"
+		expectedRXCUI := "111111"
 		expectedName := "New Drug"
 		expectedSubstance := "substance"
-		assert.Equal(t, expectedRxNormID, drug.RxNormID)
+		assert.Equal(t, expectedRXCUI, drug.RXCUI)
 		assert.Equal(t, expectedName, drug.Name)
 		assert.Equal(t, expectedSubstance, drug.Substance)
 	})
 
 	t.Run("AddDrug_ExistingDrug", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		rxNormID := "261315"
 		name := "Tamiflu"
@@ -891,22 +760,18 @@ func TestGormMedRepository(t *testing.T) {
 		expectedID, err := uuid.Parse("ee5fd388-c675-477b-9bc5-3f16cc359abe")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		expectedRxNormID := "261315"
+		expectedRXCUI := "261315"
 		expectedName := "Tamiflu"
 		expectedSubstance:= "hydrocodone"
 		assert.Equal(t, expectedID, drug.ID)
-		assert.Equal(t, expectedRxNormID, drug.RxNormID)
+		assert.Equal(t, expectedRXCUI, drug.RXCUI)
 		assert.Equal(t, expectedName, drug.Name)
 		assert.Equal(t, expectedSubstance, drug.Substance)
 	})
 
 	t.Run("GetMedicalHistoryItem_MedicalHistoryItemNotFound", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		patientID, err := uuid.Parse("4a4e830a-36f8-4d32-a691-ff808bc36a56")
 		require.NoError(t, err, "Failed to parse target UUID")
@@ -919,12 +784,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("GetMedicalHistoryItem_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		patientID, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 		require.NoError(t, err, "Failed to parse target UUID")
@@ -946,12 +807,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddMedicalHistoryItem_MedicalHistoryItemInsertError", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		patientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
 		require.NoError(t, err, "Failed to parse target UUID")
@@ -967,12 +824,8 @@ func TestGormMedRepository(t *testing.T) {
 	})
 
 	t.Run("AddMedicalHistoryItem_Success", func(t *testing.T) {
-		t.Parallel()
-		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(ctx, t)
+		repo, cleanup := initRepo(t)
 		defer cleanup()
-
-		repo := repositories.NewGormMedRepository(db)
 
 		patientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
 		require.NoError(t, err, "Failed to parse target UUID")

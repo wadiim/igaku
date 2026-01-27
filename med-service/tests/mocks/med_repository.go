@@ -109,10 +109,10 @@ func (m *MockMedRepository) AddDrug(
 	return r0, r1
 }
 
-func (m *MockMedRepository) GetDrugByRxNormID(
-	rxNormID string,
+func (m *MockMedRepository) GetDrugByRXCUI(
+	rxcui string,
 ) (*models.Drug, error) {
-	args := m.Called(rxNormID)
+	args := m.Called(rxcui)
 
 	var r0 *models.Drug
 	if args.Get(0) != nil {
