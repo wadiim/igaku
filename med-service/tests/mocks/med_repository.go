@@ -127,8 +127,9 @@ func (m *MockMedRepository) GetDrugByRXCUI(
 func (m *MockMedRepository) AddMedicalHistoryItem(
 	patientID uuid.UUID,
 	doctorID uuid.UUID,
+	drugs []models.Drug,
 ) (*models.MedicalHistoryItem, error) {
-	args := m.Called(patientID, doctorID)
+	args := m.Called(patientID, doctorID, drugs)
 
 	var r0 *models.MedicalHistoryItem
 	if args.Get(0) != nil {
@@ -142,12 +143,12 @@ func (m *MockMedRepository) AddMedicalHistoryItem(
 
 func (m *MockMedRepository) GetMedicalHistoryItemByPatientID(
 	patientID uuid.UUID,
-) (*models.MedicalHistoryItem, error) {
+) ([]*models.MedicalHistoryItem, error) {
 	args := m.Called(patientID)
 
-	var r0 *models.MedicalHistoryItem
+	var r0 []*models.MedicalHistoryItem
 	if args.Get(0) != nil {
-		r0 = args.Get(0).(*models.MedicalHistoryItem)
+		r0 = args.Get(0).([]*models.MedicalHistoryItem)
 	}
 
 	r1 := args.Error(1)

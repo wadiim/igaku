@@ -21,8 +21,12 @@ type MedRepository interface {
 	GetSubstanceByName(name string) (*models.Substance, error)
 	AddDrug(rxcui string, name string, substance string) (*models.Drug, error)
 	GetDrugByRXCUI(rxcui string) (*models.Drug, error)
-	AddMedicalHistoryItem(patientID uuid.UUID, doctorID uuid.UUID) (*models.MedicalHistoryItem, error)
-	GetMedicalHistoryItemByPatientID(patientID uuid.UUID) (*models.MedicalHistoryItem, error)
+	AddMedicalHistoryItem(
+		patientID uuid.UUID,
+		doctorID uuid.UUID,
+		drugs []models.Drug,
+	) (*models.MedicalHistoryItem, error)
+	GetMedicalHistoryItemByPatientID(patientID uuid.UUID) ([]*models.MedicalHistoryItem, error)
 	FindByID(id uuid.UUID) (*commonsModels.PatientRecord, error)
 	FindByNationalID(nationalID string) (*commonsModels.PatientRecord, error)
 	ValidateUniquePatient(record *commonsModels.PatientRecord) error
@@ -72,37 +76,74 @@ func (r *gormMedRepository) GetDiseaseByRxNormID(
 }
 
 func (r *gormMedRepository) AddMedicalHistoryItem(
-	patientID uuid.UUID,
-	doctorID uuid.UUID,
+    patientID uuid.UUID,
+    doctorID uuid.UUID,
+    drugs []models.Drug,
 ) (*models.MedicalHistoryItem, error) {
-	item := models.MedicalHistoryItem{
-		ID:        uuid.New(),
-		PatientID: patientID,
-		DoctorID:  doctorID,
-	}
 
-	result := r.db.Create(&item)
-	if result.Error != nil {
-		return nil, &medErrors.MedicalHistoryItemInsertError{}
-	}
+    item := models.MedicalHistoryItem{
+        ID:        uuid.New(),
+        PatientID: patientID,
+        DoctorID:  doctorID,
+    }
 
-	return &item, nil
+    err := r.db.Transaction(func(tx *gorm.DB) error {
+        if err := tx.Create(&item).Error; err != nil {
+            return err
+        }
+
+        if len(drugs) > 0 {
+            for i := range drugs {
+                if drugs[i].ID == uuid.Nil {
+                    drugs[i].ID = uuid.New()
+                }
+                
+                if err := tx.Save(&drugs[i]).Error; err != nil {
+                    return err
+                }
+            }
+
+            if err := tx.Model(&item).Association("Drugs").Append(drugs); err != nil {
+                return err
+            }
+        }
+        return nil
+    })
+
+    if err != nil {
+        return nil, &medErrors.MedicalHistoryItemInsertError{}
+    }
+
+    if err := r.db.Preload("Drugs").First(&item, "id = ?", item.ID).Error; err != nil {
+        return nil, err
+    }
+
+    return &item, nil
 }
 
 func (r *gormMedRepository) GetMedicalHistoryItemByPatientID(
 	patientID uuid.UUID,
-) (*models.MedicalHistoryItem, error) {
-	var item models.MedicalHistoryItem
+) ([]*models.MedicalHistoryItem, error) {
+	var items []*models.MedicalHistoryItem
 
-	result := r.db.Preload("Patient").Preload("Doctor").Where("patient_id = ?", patientID).First(&item)
+	result := r.db.
+		Preload("Patient").
+		Preload("Doctor").
+		Preload("Drugs").
+		Where("patient_id = ?", patientID).
+		Find(&items)
+
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, &medErrors.MedicalHistoryItemNotFoundError{}
 		}
 		return nil, &commonsErrors.DatabaseError{}
 	}
+	if len(items) == 0 {
+		return nil, &medErrors.MedicalHistoryItemNotFoundError{}
+	}
 
-	return &item, nil
+	return items, nil
 }
 
 func (r *gormMedRepository) FindByID(id uuid.UUID) (*commonsModels.PatientRecord, error) {

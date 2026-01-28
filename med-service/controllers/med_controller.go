@@ -333,7 +333,8 @@ func (ctrl *MedController) CreatePrescription(c *gin.Context) {
 	}
 
 	patientID := prescription.Patient.ID
-	err = ctrl.service.AddMedicalHistoryItem(patientID, doctorID)
+	drugs := prescription.Drugs
+	err = ctrl.service.AddMedicalHistoryItem(patientID, doctorID, drugs)
 	if err != nil {
 		var medHistItemInsertError *medErrors.MedicalHistoryItemInsertError
 
@@ -352,13 +353,13 @@ func (ctrl *MedController) CreatePrescription(c *gin.Context) {
 	c.JSON(http.StatusCreated, nil)
 }
 
-// GetMedicalHistoryItemByPatientID returns the medical‑history record for a given patient.
-// @Summary      Get medical‑history item by patient ID (Doctor)
-// @Description  Retrieves the most recent medical‑history entry for the specified patient UUID.
+// GetMedicalHistoryItemByPatientID returns the medical history records for a given patient.
+// @Summary      Get medical history items by patient ID (Doctor)
+// @Description  Retrieves a list of medical history entries for the specified patient UUID.
 // @Tags         MedicalHistory
 // @Produce      json
 // @Param        patient_id path string true "Patient UUID"
-// @Success      200 {object} models.MedicalHistoryItem
+// @Success      200 {object} []models.MedicalHistoryItem
 // @Failure      400 {object} commonsDtos.ErrorResponse "Bad Request - Invalid patient ID"
 // @Failure      401 {object} dtos.ErrorResponse  "Unauthorized - Invalid or missing token"
 // @Failure      403 {object} dtos.ErrorResponse  "Forbidden - User does not have Doctor role"
@@ -373,6 +374,7 @@ func (ctrl *MedController) GetMedicalHistoryItemByPatientID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
 			Message: "Invalid patient ID",
 		})
+		return
 	}
 
 	patient, err := ctrl.service.GetMedicalHistoryItemByPatientID(patientID)

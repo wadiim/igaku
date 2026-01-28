@@ -16,4 +16,5 @@ type MedicalHistoryItem struct {
 
 	Patient    commonsModels.PatientRecord  `gorm:"foreignKey:PatientID"`
 	Doctor     Doctor                       `gorm:"foreignKey:DoctorID"`
+	Drugs      []Drug                       `gorm:"many2many:medical_history_item_drugs;"`
 }

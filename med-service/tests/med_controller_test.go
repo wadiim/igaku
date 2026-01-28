@@ -4226,14 +4226,26 @@ func TestMedController_GetMedicalHistoryItemByPatientID_Success(t *testing.T) {
 	createdAt, err := time.Parse(layout, "2025-10-15 14:30:00")
 	require.NoError(t, err)
 
-	item := &models.MedicalHistoryItem{
-		ID: itemID,
-		PatientID: patientID,
-		DoctorID: doctorID,
-		CreatedAt: createdAt,
+	drugs := []models.Drug{
+		{
+			ID: uuid.New(),
+			RXCUI: "D007251",
+			Name: "Tamiflu",
+			Substance: "hydrocodone",
+		},
+	}
+
+	items := []*models.MedicalHistoryItem{
+		{
+			ID: itemID,
+			PatientID: patientID,
+			DoctorID: doctorID,
+			CreatedAt: createdAt,
+			Drugs: drugs,
+		},
 	}
 	mockRepo.On("GetMedicalHistoryItemByPatientID", patientID).Return(
-		item, nil,
+		items, nil,
 	).Once()
 
 	req, err := http.NewRequest(
@@ -4253,14 +4265,14 @@ func TestMedController_GetMedicalHistoryItemByPatientID_Success(t *testing.T) {
 		"Expected HTTP status 200 OK",
 	)
 
-	var response models.MedicalHistoryItem
+	var response []models.MedicalHistoryItem
 	err = json.Unmarshal(rec.Body.Bytes(), &response)
 	require.NoError(t, err, "Failed to unmarshal response body")
 
-	assert.Equal(t, itemID, response.ID)
-	assert.Equal(t, patientID, response.PatientID)
-	assert.Equal(t, doctorID, response.DoctorID)
-	assert.Equal(t, createdAt, response.CreatedAt)
+	assert.Equal(t, itemID, response[0].ID)
+	assert.Equal(t, patientID, response[0].PatientID)
+	assert.Equal(t, doctorID, response[0].DoctorID)
+	assert.Equal(t, createdAt, response[0].CreatedAt)
 
 	mockRepo.AssertExpectations(t)
 }
@@ -4300,7 +4312,7 @@ func TestMedController_CreatePrescription_MedicalHistoryItemInsertError(t *testi
 		Name: "Cryptogenic Organizing Pneumonia",
 	}
 
-	drugs := []dtos.DrugDetails{
+	drugDetails := []dtos.DrugDetails{
 		{
 			ID: "D007251",
 			Name: "Tamiflu",
@@ -4310,12 +4322,19 @@ func TestMedController_CreatePrescription_MedicalHistoryItemInsertError(t *testi
 	prescription := &dtos.PrescriptionDetails{
 		Patient: patient,
 		Disease: disease,
-		Drugs: drugs,
+		Drugs: drugDetails,
 	}
 	body, err := json.Marshal(prescription)
 	require.NoError(t, err)
+	drugs := []models.Drug{
+		{
+			RXCUI: "D007251",
+			Name: "Tamiflu",
+			Substance: "hydrocodone",
+		},
+	}
 
-	mockRepo.On("AddMedicalHistoryItem", patientID, id).Return(
+	mockRepo.On("AddMedicalHistoryItem", patientID, id, drugs).Return(
 		nil, &errors.MedicalHistoryItemInsertError{},
 	).Once()
 
@@ -4382,7 +4401,7 @@ func TestMedController_CreatePrescription_Success(t *testing.T) {
 		Name: "Cryptogenic Organizing Pneumonia",
 	}
 
-	drugs := []dtos.DrugDetails{
+	drugDetails := []dtos.DrugDetails{
 		{
 			ID: "D007251",
 			Name: "Tamiflu",
@@ -4392,7 +4411,7 @@ func TestMedController_CreatePrescription_Success(t *testing.T) {
 	prescription := &dtos.PrescriptionDetails{
 		Patient: patient,
 		Disease: disease,
-		Drugs: drugs,
+		Drugs: drugDetails,
 	}
 	body, err := json.Marshal(prescription)
 	require.NoError(t, err)
@@ -4402,14 +4421,22 @@ func TestMedController_CreatePrescription_Success(t *testing.T) {
 	layout := "2006-01-02 15:04:05"
 	createdAt, err := time.Parse(layout, "2025-10-15 14:30:00")
 	require.NoError(t, err)
+	drugs := []models.Drug{
+		{
+			RXCUI: "D007251",
+			Name: "Tamiflu",
+			Substance: "hydrocodone",
+		},
+	}
 	item := &models.MedicalHistoryItem{
 		ID: itemID,
 		PatientID: patient.ID,
 		DoctorID: id,
 		CreatedAt: createdAt,
+		Drugs: drugs,
 	}
 
-	mockRepo.On("AddMedicalHistoryItem", patientID, id).Return(
+	mockRepo.On("AddMedicalHistoryItem", patientID, id, drugs).Return(
 		item, nil,
 	).Once()
 

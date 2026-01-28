@@ -94,3 +94,10 @@ VALUES
     '880e8400-e29b-41d4-a716-446655440001', 
     '2025-10-15 14:30:00'
 );
+
+INSERT INTO medical_history_item_drugs (medical_history_item_id, drug_id) 
+VALUES 
+(
+    'aa0e8400-e29b-41d4-a716-446655440001', 
+    'ee5fd388-c675-477b-9bc5-3f16cc359abe'
+);

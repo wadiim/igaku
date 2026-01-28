@@ -10,6 +10,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"testing"
 
@@ -800,10 +801,20 @@ func TestGormMedRepository(t *testing.T) {
 		require.NoError(t, err, "Failed to parse target UUID")
 		expectedDoctorID, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
 		require.NoError(t, err, "Failed to parse target UUID")
+		expectedDrugID, err := uuid.Parse("ee5fd388-c675-477b-9bc5-3f16cc359abe")
+		require.NoError(t, err, "Failed to parse target UUID")
 
-		assert.Equal(t, expectedID, item.ID)
-		assert.Equal(t, expectedPatientID, item.PatientID)
-		assert.Equal(t, expectedDoctorID, item.DoctorID)
+		expectedRXCUI := "261315"
+		expectedName := "Tamiflu"
+		expectedSubstance := "hydrocodone"
+
+		assert.Equal(t, expectedID, item[0].ID)
+		assert.Equal(t, expectedPatientID, item[0].PatientID)
+		assert.Equal(t, expectedDoctorID, item[0].DoctorID)
+		assert.Equal(t, expectedDrugID, item[0].Drugs[0].ID)
+		assert.Equal(t, expectedRXCUI, item[0].Drugs[0].RXCUI)
+		assert.Equal(t, expectedName, item[0].Drugs[0].Name)
+		assert.Equal(t, expectedSubstance, item[0].Drugs[0].Substance)
 	})
 
 	t.Run("AddMedicalHistoryItem_MedicalHistoryItemInsertError", func(t *testing.T) {
@@ -815,7 +826,15 @@ func TestGormMedRepository(t *testing.T) {
 		doctorID, err := uuid.Parse("4f070b72-1b62-43d7-b085-b9af88d1eefb")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		item, err := repo.AddMedicalHistoryItem(patientID, doctorID)
+		drugs := []models.Drug{
+			models.Drug{
+				RXCUI:     "111111",
+				Name:      "New drug",
+				Substance: "Substance",
+			},
+		}
+
+		item, err := repo.AddMedicalHistoryItem(patientID, doctorID, drugs)
 
 		errMsg := "Medical history item could not be inserted"
 		assert.Nil(t, item, "Expected medical history item to be nil")
@@ -831,21 +850,37 @@ func TestGormMedRepository(t *testing.T) {
 		require.NoError(t, err, "Failed to parse target UUID")
 		doctorID, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
 		require.NoError(t, err, "Failed to parse target UUID")
+		drugs := []models.Drug{
+			models.Drug{
+				RXCUI:     "111111",
+				Name:      "New drug",
+				Substance: "Substance",
+			},
+		}
 
-		item, err := repo.AddMedicalHistoryItem(patientID, doctorID)
+		item, err := repo.AddMedicalHistoryItem(patientID, doctorID, drugs)
+		log.Printf("%v", item.Drugs)
 
 		assert.NoError(t, err, "Expected no error adding medical history item")
 
-		item, err = repo.GetMedicalHistoryItemByPatientID(patientID)
-		assert.NoError(t, err, "Expected no error finding medical history item")
+		items, err := repo.GetMedicalHistoryItemByPatientID(patientID)
+		assert.NoError(t, err, "Expected no error finding medical history items")
 
 		expectedPatientID, err := uuid.Parse("c2aa753e-ce76-43db-b855-399d1955ad66")
 		require.NoError(t, err, "Failed to parse target UUID")
 		expectedDoctorID, err := uuid.Parse("880e8400-e29b-41d4-a716-446655440001")
 		require.NoError(t, err, "Failed to parse target UUID")
 
-		assert.Equal(t, expectedPatientID, item.PatientID)
-		assert.Equal(t, expectedDoctorID, item.DoctorID)
+		expectedRXCUI := "111111"
+		expectedName := "New drug"
+		expectedSubstance := "Substance"
+
+		assert.Equal(t, expectedPatientID, items[0].PatientID)
+		assert.Equal(t, expectedDoctorID, items[0].DoctorID)
+		log.Printf("%v", items[0])
+		assert.Equal(t, expectedRXCUI, items[0].Drugs[0].RXCUI)
+		assert.Equal(t, expectedName, items[0].Drugs[0].Name)
+		assert.Equal(t, expectedSubstance, items[0].Drugs[0].Substance)
 	})
 
 }

@@ -34,8 +34,12 @@ type MedService interface {
 	ValidateUniquePatient(record *commonsModels.PatientRecord) error
 	CreatePatient(data *commonsModels.PatientRecord) error
 	GetPatientByNationalID(nationalID string) (*dtos.PatientDetails, error)
-	AddMedicalHistoryItem(patientID uuid.UUID, doctorID uuid.UUID) error
-	GetMedicalHistoryItemByPatientID(patientID uuid.UUID) (*models.MedicalHistoryItem, error)
+	AddMedicalHistoryItem(
+		patientID uuid.UUID,
+		doctorID uuid.UUID,
+		drugs []dtos.DrugDetails,
+	) error
+	GetMedicalHistoryItemByPatientID(patientID uuid.UUID) ([]*models.MedicalHistoryItem, error)
 }
 
 type medService struct {
@@ -261,16 +265,29 @@ func (s *medService) CreatePatient(data *commonsModels.PatientRecord) error {
 	return err
 }
 
-func (s *medService) AddMedicalHistoryItem(patientID uuid.UUID, doctorID uuid.UUID) error {
-	_, err := s.repo.AddMedicalHistoryItem(patientID, doctorID)
+func (s *medService) AddMedicalHistoryItem(
+	patientID uuid.UUID,
+	doctorID uuid.UUID,
+	drugsDetails []dtos.DrugDetails,
+) error {
+	drugs := make([]models.Drug, 0, len(drugsDetails))
+	for _, d := range drugsDetails{
+		drugs = append(drugs, models.Drug{
+			RXCUI:     d.ID,
+			Name:      d.Name,
+			Substance: d.Substance,
+		})
+	}
+
+	_, err := s.repo.AddMedicalHistoryItem(patientID, doctorID, drugs)
 
 	return err
 }
 
 func (s *medService) GetMedicalHistoryItemByPatientID(
 	patientID uuid.UUID,
-) (*models.MedicalHistoryItem, error) {
-	item, err := s.repo.GetMedicalHistoryItemByPatientID(patientID)
+) ([]*models.MedicalHistoryItem, error) {
+	items, err := s.repo.GetMedicalHistoryItemByPatientID(patientID)
 
-	return item, err
+	return items, err
 }
