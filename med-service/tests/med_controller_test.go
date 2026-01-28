@@ -51,11 +51,8 @@ func TestMedController_GetRecommendedDrugs_NoToken(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	diseaseID := "D007251"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	rec := httptest.NewRecorder()
@@ -88,11 +85,8 @@ func TestMedController_GetRecommendedDrugs_InvalidTokenFormat(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	diseaseID := "D007251"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", "INVALID.TOKEN")
@@ -127,11 +121,8 @@ func TestMedController_GetRecommendedDrugs_ExpiredToken(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	diseaseID := "D007251"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -186,11 +177,8 @@ func TestMedController_GetRecommendedDrugs_UnauthorizedPatient(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	diseaseID := "D007251"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -241,11 +229,8 @@ func TestMedController_GetRecommendedDrugs_UnauthorizedAdmin(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	diseaseID := "D007251"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -300,11 +285,8 @@ func TestMedController_GetRecommendedDrugs_InvalidPage(t *testing.T) {
 	// Zero page
 	diseaseID := "D007251"
 	page := 0
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s?page=%d", diseaseID, page),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s?page=%d", diseaseID, page)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -333,9 +315,10 @@ func TestMedController_GetRecommendedDrugs_InvalidPage(t *testing.T) {
 	// Negative page
 	diseaseID = "D007251"
 	page = -1
+	endpoint = fmt.Sprintf("/med/drug/recommend/%s?page=%d", diseaseID, page)
 	req, err = http.NewRequest(
 		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s?page=%d", diseaseID, page),
+		endpoint,
 		nil,
 	)
 	require.NoError(t, err)
@@ -374,11 +357,8 @@ func TestMedController_GetRecommendedDrugs_InvalidPageSize(t *testing.T) {
 	// Zero page
 	diseaseID := "D007251"
 	pageSize := 0
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s?pageSize=%d", diseaseID, pageSize),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s?pageSize=%d", diseaseID, pageSize)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -407,11 +387,8 @@ func TestMedController_GetRecommendedDrugs_InvalidPageSize(t *testing.T) {
 	// Negative page
 	diseaseID = "D007251"
 	pageSize = -1
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s?pageSize=%d", diseaseID, pageSize),
-		nil,
-	)
+	endpoint = fmt.Sprintf("/med/drug/recommend/%s?pageSize=%d", diseaseID, pageSize)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -447,11 +424,8 @@ func TestMedController_GetRecommendedDrugs_InvalidOrderBy(t *testing.T) {
 
 	diseaseID := "D007251"
 	orderBy := "invalid"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s?orderBy=%s", diseaseID, orderBy),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s?orderBy=%s", diseaseID, orderBy)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -488,11 +462,8 @@ func TestMedController_GetRecommendedDrugs_InvalidOrderMethod(t *testing.T) {
 
 	diseaseID := "D007251"
 	orderMethod := "invalid"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s?orderMethod=%s", diseaseID, orderMethod),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s?orderMethod=%s", diseaseID, orderMethod)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -533,11 +504,8 @@ func TestMedController_GetRecommendedDrugs_RxClassUnavailable(t *testing.T) {
 		&errors.RxClassUnavailableError{},
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -578,11 +546,8 @@ func TestMedController_GetRecommendedDrugs_SubstanceNotFound(t *testing.T) {
 		&errors.SubstanceNotFoundError{},
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -657,11 +622,8 @@ func TestMedController_GetRecommendedDrugs_DrugsBySubstanceError(t *testing.T) {
 		nil,
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -723,11 +685,8 @@ func TestMedController_GetRecommendedDrugs_DrugNotFoundError(t *testing.T) {
 		nil,
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/recommend/%s", diseaseID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/recommend/%s", diseaseID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -809,13 +768,10 @@ func TestMedController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 
 	orderMethod := "asc" 
 	orderBy := "id"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
-		),
-		nil,
+	endpoint := fmt.Sprintf(
+		"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
 	)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -857,13 +813,10 @@ func TestMedController_GetRecommendedDrugs_OrderByID(t *testing.T) {
 
 	orderMethod = "desc" 
 	orderBy = "id"
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
-		),
-		nil,
+	endpoint = fmt.Sprintf(
+		"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
 	)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -947,13 +900,10 @@ func TestMedController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 
 	orderMethod := "asc" 
 	orderBy := "name"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
-		),
-		nil,
+	endpoint := fmt.Sprintf(
+		"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
 	)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -995,13 +945,10 @@ func TestMedController_GetRecommendedDrugs_OrderByName(t *testing.T) {
 
 	orderMethod = "desc" 
 	orderBy = "name"
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
-		),
-		nil,
+	endpoint = fmt.Sprintf(
+		"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
 	)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1085,13 +1032,10 @@ func TestMedController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
 
 	orderMethod := "asc" 
 	orderBy := "name"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
-		),
-		nil,
+	endpoint := fmt.Sprintf(
+		"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
 	)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1133,13 +1077,10 @@ func TestMedController_GetRecommendedDrugs_OrderBySubstance(t *testing.T) {
 
 	orderMethod = "desc" 
 	orderBy = "name"
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
-		),
-		nil,
+	endpoint = fmt.Sprintf(
+		"/med/drug/recommend/%s?orderBy=%s&orderMethod=%s", diseaseID, orderBy, orderMethod,
 	)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1212,13 +1153,8 @@ func TestMedController_GetRecommendedDrugs_SinglePage(t *testing.T) {
 		nil,
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?pageSize=%d", diseaseID, pageSize,
-		),
-		nil,
-	)
+	endpoint := fmt.Sprintf( "/med/drug/recommend/%s?pageSize=%d", diseaseID, pageSize,)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1297,13 +1233,10 @@ func TestMedController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 		nil,
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?page=%d&pageSize=%d", diseaseID, page, pageSize,
-		),
-		nil,
+	endpoint := fmt.Sprintf(
+		"/med/drug/recommend/%s?page=%d&pageSize=%d", diseaseID, page, pageSize,
 	)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1354,13 +1287,10 @@ func TestMedController_GetRecommendedDrugs_MultiplePages(t *testing.T) {
 		nil,
 	).Once()
 
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s?page=%d&pageSize=%d", diseaseID, page, pageSize,
-		),
-		nil,
+	endpoint = fmt.Sprintf(
+		"/med/drug/recommend/%s?page=%d&pageSize=%d", diseaseID, page, pageSize,
 	)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1434,13 +1364,8 @@ func TestMedController_GetRecommendedDrugs_DefaultParams(t *testing.T) {
 		nil,
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/recommend/%s", diseaseID,
-		),
-		nil,
-	)
+	endpoint := fmt.Sprintf( "/med/drug/recommend/%s", diseaseID,)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1491,11 +1416,8 @@ func TestMedController_GetDrugsByName_NoToken(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	drugName := "morphine"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint :=  fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	rec := httptest.NewRecorder()
@@ -1528,11 +1450,8 @@ func TestMedController_GetDrugsByName_InvalidTokenFormat(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	drugName := "morphine"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", "INVALID.TOKEN")
@@ -1567,11 +1486,8 @@ func TestMedController_GetDrugsByName_ExpiredToken(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	drugName := "morphine"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -1626,11 +1542,8 @@ func TestMedController_GetDrugsByName_UnauthorizedPatient(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	drugName := "morphine"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -1681,11 +1594,8 @@ func TestMedController_GetDrugsByName_UnauthorizedAdmin(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	drugName := "morphine"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -1739,11 +1649,8 @@ func TestMedController_GetDrugsByName_InvalidPage(t *testing.T) {
 	// Zero page
 	drugName := "morphine"
 	page := 0
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s?page=%d", drugName, page)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1771,11 +1678,8 @@ func TestMedController_GetDrugsByName_InvalidPage(t *testing.T) {
 
 	// Negative page
 	page = -1
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
-		nil,
-	)
+	endpoint = fmt.Sprintf("/med/drug/%s?page=%d", drugName, page)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1812,11 +1716,8 @@ func TestMedController_GetDrugsByName_InvalidPageSize(t *testing.T) {
 	// Zero page
 	drugName := "morphine"
 	pageSize := 0
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?pageSize=%d", drugName, pageSize),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s?pageSize=%d", drugName, pageSize)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1844,11 +1745,8 @@ func TestMedController_GetDrugsByName_InvalidPageSize(t *testing.T) {
 
 	// Negative page
 	pageSize = -1
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?pageSize=%d", drugName, pageSize),
-		nil,
-	)
+	endpoint = fmt.Sprintf("/med/drug/%s?pageSize=%d", drugName, pageSize)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1884,11 +1782,8 @@ func TestMedController_GetDrugsByName_InvalidOrderBy(t *testing.T) {
 
 	drugName := "morphine"
 	orderBy := "invalid"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?orderBy=%s", drugName, orderBy),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s?orderBy=%s", drugName, orderBy)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1925,11 +1820,8 @@ func TestMedController_GetDrugsByName_InvalidOrderMethod(t *testing.T) {
 
 	drugName := "morphine"
 	orderMethod := "invalid"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?orderMethod=%s", drugName, orderMethod),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s?orderMethod=%s", drugName, orderMethod)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -1967,11 +1859,8 @@ func TestMedController_GetDrugsByName_RxClassUnavailable(t *testing.T) {
 	drugName := "morphine"
 	mockAPI.On("GetDrugsByName", drugName).Return(nil, &errors.RxClassUnavailableError{}).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2009,11 +1898,8 @@ func TestMedController_GetDrugsByName_DrugNotFound(t *testing.T) {
 	drugName := "morphine"
 	mockAPI.On("GetDrugsByName", drugName).Return(nil, &errors.DrugNotFoundError{}).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2078,13 +1964,10 @@ func TestMedController_GetDrugsByName_OrderByID(t *testing.T) {
 
 	orderMethod := "asc" 
 	orderBy := "id"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
-		),
-		nil,
+	endpoint := fmt.Sprintf(
+		"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
 	)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2119,13 +2002,10 @@ func TestMedController_GetDrugsByName_OrderByID(t *testing.T) {
 
 	orderMethod = "desc" 
 	orderBy = "id"
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
-		),
-		nil,
+	endpoint = fmt.Sprintf(
+		"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
 	)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2192,13 +2072,10 @@ func TestMedController_GetDrugsByName_OrderByName(t *testing.T) {
 
 	orderMethod := "asc" 
 	orderBy := "name"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
-		),
-		nil,
+	endpoint := fmt.Sprintf(
+		"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
 	)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2233,13 +2110,10 @@ func TestMedController_GetDrugsByName_OrderByName(t *testing.T) {
 
 	orderMethod = "desc" 
 	orderBy = "name"
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
-		),
-		nil,
+	endpoint = fmt.Sprintf(
+		"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
 	)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2306,13 +2180,10 @@ func TestMedController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 
 	orderMethod := "asc" 
 	orderBy := "name"
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
-		),
-		nil,
+	endpoint := fmt.Sprintf(
+		"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
 	)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2347,13 +2218,10 @@ func TestMedController_GetDrugsByName_OrderBySubstance(t *testing.T) {
 
 	orderMethod = "desc" 
 	orderBy = "name"
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf(
-			"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
-		),
-		nil,
+	endpoint = fmt.Sprintf(
+		"/med/drug/%s?orderBy=%s&orderMethod=%s", drugName, orderBy, orderMethod,
 	)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2407,11 +2275,8 @@ func TestMedController_GetDrugsByName_SinglePage(t *testing.T) {
 	drugName := "morphine"
 	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2481,11 +2346,8 @@ func TestMedController_GetDrugsByName_MultiplePages(t *testing.T) {
 	page := 1
 	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/drug/%s?page=%d", drugName, page)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2530,11 +2392,8 @@ func TestMedController_GetDrugsByName_MultiplePages(t *testing.T) {
 	page = 2
 	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s?page=%d", drugName, page),
-		nil,
-	)
+	endpoint = fmt.Sprintf("/med/drug/%s?page=%d", drugName, page)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2591,11 +2450,8 @@ func TestMedController_GetDrugsByName_DefaultParams(t *testing.T) {
 
 	mockAPI.On("GetDrugsByName", drugName).Return(drugs, nil).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/drug/%s", drugName),
-		nil,
-	)
+	endpoint :=  fmt.Sprintf("/med/drug/%s", drugName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -2670,6 +2526,7 @@ func TestMedController_GetBySubstring_NoToken(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 }
+
 func TestMedController_GetBySubstring_InvalidTokenFormat(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
@@ -2878,11 +2735,8 @@ func TestMedController_GetBySubstring_DefaultParam(t *testing.T) {
 	mockRepo.On("FindBySubstring", testName, 0, 5).Return(expectedDiseases, nil).Once()
 	mockRepo.On("CountBySubstring", testName).Return(int64(count), nil).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s", testName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s", testName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", testUtils.GenDoctorToken(t))
 
@@ -2930,11 +2784,8 @@ func TestMedController_GetBySubstring_WithParam(t *testing.T) {
 
 	page := 1
 	pageSize := 5
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", testUtils.GenDoctorToken(t))
 
@@ -2984,11 +2835,8 @@ func TestMedController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 	mockRepo.On("CountBySubstring", testName).Return(int64(count), nil).Once()
 
 	token := testUtils.GenDoctorToken(t)
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", token)
 
@@ -3017,11 +2865,8 @@ func TestMedController_GetBySubstring_CountMoreThanPageSize(t *testing.T) {
 	mockRepo.On("FindBySubstring", testName, 5, 5).Return(expectedDiseases[pageSize:count], nil).Once()
 	mockRepo.On("CountBySubstring", testName).Return(int64(count), nil).Once()
 
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
-		nil,
-	)
+	endpoint = fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", token)
 
@@ -3064,11 +2909,8 @@ func TestMedController_GetBySubstring_CountLessThanPageSize(t *testing.T) {
 	mockRepo.On("FindBySubstring", testName, 0, pageSize).Return(expectedDiseases, nil).Once()
 	mockRepo.On("CountBySubstring", testName).Return(int64(count), nil).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", testUtils.GenDoctorToken(t))
 
@@ -3120,11 +2962,8 @@ func TestMedController_GetBySubstring_EmptyPage(t *testing.T) {
 		nil, &errors.DiseaseNotFoundError{},
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s?page=%d&pageSize=%d", testName, page, pageSize)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", testUtils.GenDoctorToken(t))
 
@@ -3150,27 +2989,21 @@ func TestMedController_GetBySubstring_InvalidPageParam(t *testing.T) {
 
 	testName := "Lupus"
 	token := testUtils.GenDoctorToken(t)
-	req1, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=-5", testName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s?page=-5", testName)
+	req1, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	req1.Header.Set("Authorization", token)
 	require.NoError(t, err)
-	req2, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=0", testName),
-		nil,
-	)
+
+	endpoint = fmt.Sprintf("/med/disease/%s?page=0", testName)
+	req2, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	req2.Header.Set("Authorization", token)
 	require.NoError(t, err)
-	req3, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?page=abc", testName),
-		nil,
-	)
+
+	endpoint = fmt.Sprintf("/med/disease/%s?page=abc", testName)
+	req3, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	req3.Header.Set("Authorization", token)
 	require.NoError(t, err)
+
 	for i, req := range []*http.Request{req1, req2, req3} {
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
@@ -3207,27 +3040,21 @@ func TestMedController_GetBySubstring_InvalidPageSizeParam(t *testing.T) {
 
 	testName := "Lupus"
 	token := testUtils.GenDoctorToken(t)
-	req1, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?pageSize=-5", testName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s?pageSize=-5", testName)
+	req1, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	req1.Header.Set("Authorization", token)
 	require.NoError(t, err)
-	req2, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?pageSize=0", testName),
-		nil,
-	)
+
+	endpoint = fmt.Sprintf("/med/disease/%s?pageSize=0", testName)
+	req2, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	req2.Header.Set("Authorization", token)
 	require.NoError(t, err)
-	req3, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s?pageSize=abc", testName),
-		nil,
-	)
+
+	endpoint = fmt.Sprintf("/med/disease/%s?pageSize=abc", testName)
+	req3, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	req3.Header.Set("Authorization", token)
 	require.NoError(t, err)
+
 	for i, req := range []*http.Request{req1, req2, req3} {
 		rec := httptest.NewRecorder()
 		router.ServeHTTP(rec, req)
@@ -3271,11 +3098,8 @@ func TestMedController_GetBySubstring_DiseaseNotFound(t *testing.T) {
 		nil, &errors.DiseaseNotFoundError{},
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s", testName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s", testName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", testUtils.GenDoctorToken(t))
 
@@ -3308,11 +3132,8 @@ func TestMedController_GetBySubstring_RepoError(t *testing.T) {
 		nil, &commonsErrors.DatabaseError{},
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/disease/%s", testName),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/disease/%s", testName)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 	req.Header.Set("Authorization", testUtils.GenDoctorToken(t))
 
@@ -3566,20 +3387,7 @@ func TestMedController_GetByNationalID_InvalidNationalID(t *testing.T) {
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
-	require.NoError(t, err)
-	user := commonsModels.User{
-		ID: id,
-		Username: "ghouse",
-		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: commonsModels.Doctor,
-	}
-	token, err := commonsUtils.GenerateJWTToken(
-		&user,
-		time.Now(),
-		time.Now().Add(time.Hour),
-	)
-	require.NoError(t, err)
+	token := testUtils.GenDoctorToken(t)
 
 	// Letters
 	req, err := http.NewRequest(http.MethodGet, "/med/patient/test", nil)
@@ -3667,20 +3475,7 @@ func TestMedController_GetByNationalID_NotFound(t *testing.T) {
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
-	require.NoError(t, err)
-	user := commonsModels.User{
-		ID: id,
-		Username: "ghouse",
-		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: commonsModels.Doctor,
-	}
-	token, err := commonsUtils.GenerateJWTToken(
-		&user,
-		time.Now(),
-		time.Now().Add(time.Hour),
-	)
-	require.NoError(t, err)
+	token := testUtils.GenDoctorToken(t)
 
 	nationalID := "44051401458"
 
@@ -3690,11 +3485,8 @@ func TestMedController_GetByNationalID_NotFound(t *testing.T) {
 	).Once()
 	mockUserClient.AssertNotCalled(t, "FindByID", mock.Anything)
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/patient/%s", nationalID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/patient/%s", nationalID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -3721,7 +3513,7 @@ func TestMedController_GetByNationalID_NotFound(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 
 	// User not found
-	id, err = uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
 	patient := &commonsModels.PatientRecord{
 		ID: id,
@@ -3734,11 +3526,8 @@ func TestMedController_GetByNationalID_NotFound(t *testing.T) {
 		nil, &commonsErrors.UserNotFoundError{},
 	)
 
-	req, err = http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/patient/%s", nationalID),
-		nil,
-	)
+	endpoint = fmt.Sprintf("/med/patient/%s", nationalID)
+	req, err = http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -3770,24 +3559,11 @@ func TestMedController_GetByNationalID_Success(t *testing.T) {
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	id, err := uuid.Parse("0c0f5212-e90b-4d65-b4aa-60fa72c6565a")
-	require.NoError(t, err)
-	doctor := commonsModels.User{
-		ID: id,
-		Username: "ghouse",
-		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: commonsModels.Doctor,
-	}
-	token, err := commonsUtils.GenerateJWTToken(
-		&doctor,
-		time.Now(),
-		time.Now().Add(time.Hour),
-	)
-	require.NoError(t, err)
+	token := testUtils.GenDoctorToken(t)
 
 	nationalID := "44051401458"
 
-	id, err = uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
+	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
 	patient := &commonsModels.PatientRecord{
 		ID: id,
@@ -3806,11 +3582,8 @@ func TestMedController_GetByNationalID_Success(t *testing.T) {
 		user, nil,
 	)
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/patient/%s", nationalID),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/patient/%s", nationalID)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -3842,11 +3615,8 @@ func TestMedController_GetMedicalHistoryItemByPatientID_NoToken(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
-	req, err := http.NewRequest(
-		http.MethodGet, 
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	rec := httptest.NewRecorder()
@@ -3879,11 +3649,8 @@ func TestMedController_GetByNationalID_InvalidTokenFormat(t *testing.T) {
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
-	req, err := http.NewRequest(
-		http.MethodGet, 
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", "INVALID.TOKEN")
@@ -3918,11 +3685,8 @@ func TestMedController_GetMedicalHistoryItemByPatientID_UnauthorizedPatient(t *t
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
-	req, err := http.NewRequest(
-		http.MethodGet, 
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -3973,11 +3737,8 @@ func TestMedController_GetMedicalHistoryItemByPatientID_UnauthorizedAdmin(t *tes
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
-	req, err := http.NewRequest(
-		http.MethodGet, 
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -4028,11 +3789,8 @@ func TestMedController_GetMedicalHistoryItemByPatientID_ExpiredToken(t *testing.
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
-	req, err := http.NewRequest(
-		http.MethodGet, 
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
@@ -4086,20 +3844,7 @@ func TestMedController_GetMedicalHistoryItemByPatientID_NotFound(t *testing.T) {
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
-	require.NoError(t, err)
-	user := commonsModels.User{
-		ID: id,
-		Username: "ghouse",
-		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: commonsModels.Doctor,
-	}
-	token, err := commonsUtils.GenerateJWTToken(
-		&user,
-		time.Now(),
-		time.Now().Add(time.Hour),
-	)
-	require.NoError(t, err)
+	token := testUtils.GenDoctorToken(t)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
 	patientID, err := uuid.Parse(patientIDStr)
@@ -4109,11 +3854,8 @@ func TestMedController_GetMedicalHistoryItemByPatientID_NotFound(t *testing.T) {
 		nil, &errors.MedicalHistoryItemNotFoundError{},
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet, 
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -4145,28 +3887,12 @@ func TestMedController_GetMedicalHistoryItemByPatientID_InvalidPatientID(t *test
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
-	require.NoError(t, err)
-	user := commonsModels.User{
-		ID: id,
-		Username: "ghouse",
-		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: commonsModels.Doctor,
-	}
-	token, err := commonsUtils.GenerateJWTToken(
-		&user,
-		time.Now(),
-		time.Now().Add(time.Hour),
-	)
-	require.NoError(t, err)
+	token := testUtils.GenDoctorToken(t)
 
 	patientIDStr := "invalid uuid"
 
-	req, err := http.NewRequest(
-		http.MethodGet, 
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -4198,20 +3924,7 @@ func TestMedController_GetMedicalHistoryItemByPatientID_Success(t *testing.T) {
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	id, err := uuid.Parse("0c0f5212-e90b-4d65-b4aa-60fa72c6565a")
-	require.NoError(t, err)
-	doctor := commonsModels.User{
-		ID: id,
-		Username: "ghouse",
-		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: commonsModels.Doctor,
-	}
-	token, err := commonsUtils.GenerateJWTToken(
-		&doctor,
-		time.Now(),
-		time.Now().Add(time.Hour),
-	)
-	require.NoError(t, err)
+	token := testUtils.GenDoctorToken(t)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
 	patientID, err := uuid.Parse(patientIDStr)
@@ -4248,11 +3961,8 @@ func TestMedController_GetMedicalHistoryItemByPatientID_Success(t *testing.T) {
 		items, nil,
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodGet,
-		fmt.Sprintf("/med/history/%s", patientIDStr),
-		nil,
-	)
+	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -4338,11 +4048,7 @@ func TestMedController_CreatePrescription_MedicalHistoryItemInsertError(t *testi
 		nil, &errors.MedicalHistoryItemInsertError{},
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodPost,
-		"/med/prescribe",
-		bytes.NewReader(body),
-	)
+	req, err := http.NewRequest(http.MethodPost, "/med/prescribe", bytes.NewReader(body))
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)
@@ -4440,11 +4146,7 @@ func TestMedController_CreatePrescription_Success(t *testing.T) {
 		item, nil,
 	).Once()
 
-	req, err := http.NewRequest(
-		http.MethodPost,
-		"/med/prescribe",
-		bytes.NewReader(body),
-	)
+	req, err := http.NewRequest(http.MethodPost, "/med/prescribe", bytes.NewReader(body))
 	require.NoError(t, err)
 
 	req.Header.Set("Authorization", token)

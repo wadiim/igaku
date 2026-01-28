@@ -88,7 +88,7 @@ func SetupRouter(
 }
 
 func GenDoctorToken(t *testing.T) string {
-	admin := &models.User{
+	doctor := &models.User{
 		ID: uuid.New(),
 		Username: "ghouse",
 		Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
@@ -96,7 +96,7 @@ func GenDoctorToken(t *testing.T) string {
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
-		admin,
+		doctor,
 		time.Now(),
 		time.Now().Add(time.Hour),
 	)
