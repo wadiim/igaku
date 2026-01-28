@@ -1,3 +1,4 @@
+import { jwtDecode } from 'jwt-decode'
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useMatch, useResolvedPath } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -5,8 +6,22 @@ import { faBars } from '@fortawesome/free-solid-svg-icons'
 
 function Navbar() {
   const [mobileMenuHidden, setMobileMenuHidden] = useState(true);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   let navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("jwt");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserRole(decoded.role);
+      } catch (error) {
+        console.error("Invalid token", error);
+        setUserRole(null);
+      }
+    }
+  }, []);
 
   const handleSignOut = () => {
     localStorage.removeItem("jwt");
@@ -76,9 +91,11 @@ function Navbar() {
             gap-8 px-4 items-center justify-end
           `}
         >
-          <li>
+          {userRole === "doctor" && (
+            <li>
             <NavLink to="/prescribe">Prescribe</NavLink>
-          </li>
+            </li>
+          )}
           <li>
             <NavLink to="/profile">Profile</NavLink>
           </li>
