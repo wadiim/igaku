@@ -3678,28 +3678,28 @@ func TestMedController_GetByNationalID_InvalidTokenFormat(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestMedController_GetMedicalHistoryItemByPatientID_UnauthorizedPatient(t *testing.T) {
+func TestMedController_GetMedicalHistoryItemByPatientID_UnauthorizedDoctor(t *testing.T) {
 	mockAPI := new(mocks.MockRxClassAPI)
 	mockUserClient := new(mocks.UserClient)
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
-	endpoint := fmt.Sprintf("/med/history/%s", patientIDStr)
+	doctorIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
+	endpoint := fmt.Sprintf("/med/history/%s", doctorIDStr)
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	require.NoError(t, err)
 
 	id, err := uuid.Parse("0b6f13da-efb9-4221-9e89-e2729ae90030")
 	require.NoError(t, err)
-	user := commonsModels.User{
+	doctor := commonsModels.User{
 		ID: id,
 		Username: "jdoe",
 		Password: "$2a$12$OfvOLLULECgOzcUCzdCCCet8.9Ik7gwFipzQDDqU11rQngld5s8Nq",
-		Role: commonsModels.Patient,
+		Role: commonsModels.Doctor,
 	}
 
 	token, err := commonsUtils.GenerateJWTToken(
-		&user,
+		&doctor,
 		time.Now(),
 		time.Now().Add(time.Hour),
 	)
@@ -3844,7 +3844,19 @@ func TestMedController_GetMedicalHistoryItemByPatientID_NotFound(t *testing.T) {
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	token := testUtils.GenDoctorToken(t)
+	patient := &commonsModels.User{
+		ID: uuid.New(),
+		Username: "ghouse",
+		Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+		Role: commonsModels.Patient,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		patient,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
 	patientID, err := uuid.Parse(patientIDStr)
@@ -3887,7 +3899,19 @@ func TestMedController_GetMedicalHistoryItemByPatientID_InvalidPatientID(t *test
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	token := testUtils.GenDoctorToken(t)
+	patient := &commonsModels.User{
+		ID: uuid.New(),
+		Username: "ghouse",
+		Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+		Role: commonsModels.Patient,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		patient,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
 
 	patientIDStr := "invalid uuid"
 
@@ -3924,7 +3948,19 @@ func TestMedController_GetMedicalHistoryItemByPatientID_Success(t *testing.T) {
 	mockRepo := new(mocks.MockMedRepository)
 	router := testUtils.SetupRouter(mockAPI, mockUserClient, mockRepo)
 
-	token := testUtils.GenDoctorToken(t)
+	patient := &commonsModels.User{
+		ID: uuid.New(),
+		Username: "ghouse",
+		Password: "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6",
+		Role: commonsModels.Patient,
+	}
+
+	token, err := commonsUtils.GenerateJWTToken(
+		patient,
+		time.Now(),
+		time.Now().Add(time.Hour),
+	)
+	require.NoError(t, err)
 
 	patientIDStr := "0b6f13da-efb9-4221-9e89-e2729ae90030"
 	patientID, err := uuid.Parse(patientIDStr)

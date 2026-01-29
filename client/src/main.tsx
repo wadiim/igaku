@@ -7,6 +7,7 @@ import Root from './root.tsx'
 import NotFoundPage from './not-found-page.tsx'
 import Register from './register.tsx'
 import Prescribe from './prescribe.tsx'
+import PrescriptionsView from './prescription.tsx'
 
 import { BrowserRouter, Routes, Route } from 'react-router'
 import { StrictMode, useEffect } from 'react'
@@ -26,6 +27,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/prescribe" element={<Prescribe />} />
+          <Route path="/history" element={<PrescriptionsView />} />
         </Route>
         <Route path="auth" element={<Auth />}>
           <Route path="login" element={<Login />} />

@@ -427,7 +427,7 @@ func (ctrl *MedController) RegisterRoutes(router *gin.Engine) {
 		)
 		routes.GET(
 			"/history/:patient_id",
-			middleware.Authorize(commonsModels.Doctor),
+			middleware.Authorize(commonsModels.Patient),
 			ctrl.GetMedicalHistoryItemByPatientID,
 		)
 	}

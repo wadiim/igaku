@@ -96,6 +96,11 @@ function Navbar() {
             <NavLink to="/prescribe">Prescribe</NavLink>
             </li>
           )}
+          {userRole === "patient" && (
+            <li>
+            <NavLink to="/history">History</NavLink>
+            </li>
+          )}
           <li>
             <NavLink to="/profile">Profile</NavLink>
           </li>
