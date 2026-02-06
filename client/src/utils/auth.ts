@@ -1,4 +1,9 @@
 import { jwtDecode } from 'jwt-decode'
+import type { JwtPayload } from 'jwt-decode'
+
+interface CustomJwtPayload extends JwtPayload {
+  role: string;
+}
 
 export function isTokenExpired(token: string | null): boolean {
   if (!token) return true;
@@ -14,4 +19,9 @@ export function isTokenExpired(token: string | null): boolean {
     console.log("Error decoding token: ", err);
     return true;
   }
+}
+
+export function getRole(token: string): string {
+    const decoded = jwtDecode<CustomJwtPayload>(token);
+    return decoded.role;
 }

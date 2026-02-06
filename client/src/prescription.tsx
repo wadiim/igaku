@@ -42,16 +42,18 @@ function PrescriptionsView() {
       let patientID = jwtDecode(jwt).sub
       fetch(`http://localhost:4000/med/history/${patientID}`, {
         method: "GET",
-        headers: {
-          "accept": "application/json",
-          "Authorization": jwt,
-        }
+      headers: {
+        "accept": "application/json",
+        "Authorization": jwt,
+      }
       })
       .then((res) => {
         if (res.status === 400) {
           throw new Error("Invalid National ID"); 
         } else if (res.status === 401 || res.status === 403) {
           throw new Error("You do not have permission to perform this action"); 
+        } else if (res.status === 404) {
+          throw new Error("Patient data not found"); 
         } else if (res.status === 500) {
           throw new Error("Something went wrong"); 
         }
@@ -59,14 +61,28 @@ function PrescriptionsView() {
       })
       .then((data) => {
         setPrescriptions(data);
+        localStorage.setItem("prescriptionData", JSON.stringify(data));
         setLoading(false);
       })
       .catch((err) => {
         console.log(err) 
-      })
-
+        if (err instanceof TypeError && err.message === "Failed to fetch") {
+          // No network connection.
+          // NOTE: This detection mechanism does not work in Firefox.
+          const catchedPrescriptionData = localStorage.getItem("prescriptionData");
+          if (catchedPrescriptionData) {
+            setPrescriptions(JSON.parse(catchedPrescriptionData));
+            // setError(null);
+          } else {
+            // setError("Failed to load user data");
+          }
+          setLoading(false);
+        } else {
+          setError(err.message);
+          setLoading(false);
+        }
+      });
     }
-
   }
 
   if (loading) return <div className="text-tn-d-fg p-8">Loading history...</div>;

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { isTokenExpired } from './utils/auth'
+import { sendNotification } from './utils/notify'
 import SearchBar from './search-bar.tsx'
 import DiseaseTable from './disease.tsx'
 import DrugTable from './drug.tsx'
@@ -341,7 +342,18 @@ function Prescribe() {
         },
         body: JSON.stringify(payload),
       })
-      .then((res) => {console.log(res);})
+      .then((res) => {
+          sendNotification("Prescription submitted successfully");
+          setSelectedDisease(null);
+          setSelectedDrugIds(new Set());
+          setRecDrugData([]);
+          setManualDrugData([]);
+          setErrorMessage(null);
+      })
+      .catch((err) => {
+        console.log(err);
+        setErrorMessage(err.message);
+      })
       // TODO: Finish this endpoint
 
     //   const data = await res.json();

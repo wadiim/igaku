@@ -96,6 +96,26 @@ definitions:
     required:
     - id
     type: object
+  models.Drug:
+    properties:
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      name:
+        example: Lupus Vulgaris
+        type: string
+      rxcui:
+        example: "1115700"
+        type: string
+      substance:
+        example: hydrocodone
+        type: string
+    required:
+    - id
+    - name
+    - rxcui
+    - substance
+    type: object
   models.MedicalHistoryItem:
     properties:
       createdAt:
@@ -104,6 +124,10 @@ definitions:
         $ref: '#/definitions/models.Doctor'
       doctorID:
         type: string
+      drugs:
+        items:
+          $ref: '#/definitions/models.Drug'
+        type: array
       id:
         example: 0b6f13da-efb9-4221-9e89-e2729ae90030
         type: string
@@ -351,8 +375,8 @@ paths:
       - Health
   /med/history/{patient_id}:
     get:
-      description: Retrieves the most recent medical‑history entry for the specified
-        patient UUID.
+      description: Retrieves a list of medical history entries for the specified patient
+        UUID.
       parameters:
       - description: Patient UUID
         in: path
@@ -365,7 +389,9 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/models.MedicalHistoryItem'
+            items:
+              $ref: '#/definitions/models.MedicalHistoryItem'
+            type: array
         "400":
           description: Bad Request - Invalid patient ID
           schema:
@@ -388,7 +414,7 @@ paths:
             $ref: '#/definitions/dtos.ErrorResponse'
       security:
       - BearerAuth: []
-      summary: Get medical‑history item by patient ID (Doctor)
+      summary: Get medical history items by patient ID (Doctor)
       tags:
       - MedicalHistory
   /med/patient/{national_id}:

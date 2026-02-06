@@ -4,7 +4,10 @@ import { Link, useNavigate, useMatch, useResolvedPath } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
 
+import { getRole, isTokenExpired } from './utils/auth'
+
 function Navbar() {
+  const [role, setRole] = useState("");
   const [mobileMenuHidden, setMobileMenuHidden] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
 
@@ -22,6 +25,16 @@ function Navbar() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    let jwt = localStorage.getItem("jwt");
+    if (isTokenExpired(jwt)) {
+      navigate("/auth/login");
+    }
+    if (jwt !== null) {
+      setRole(getRole(jwt));
+    }
+  });
 
   const handleSignOut = () => {
     localStorage.removeItem("jwt");
@@ -88,7 +101,7 @@ function Navbar() {
           className={`
             flex-1 hidden md:flex
             font-bold text-tn-d-fg text-2xl
-            gap-8 px-4 items-center justify-end
+            gap-8 items-center justify-end
           `}
         >
           {userRole === "doctor" && (
@@ -102,6 +115,7 @@ function Navbar() {
             </li>
           )}
           <li>
+            { role === "admin" && <NavLink to="/users">Users</NavLink> }
             <NavLink to="/profile">Profile</NavLink>
           </li>
         </ul>
@@ -143,6 +157,11 @@ function Navbar() {
           <li>
             <NavLink to="/profile" toggle={toggleMobileMenu}>Profile</NavLink>
           </li>
+          <li>
+            { role === "admin"
+              && <NavLink to="/users" toggle={toggleMobileMenu}>Users</NavLink>
+            }
+          </li>
         </ul>
       </div>
     </>
@@ -166,6 +185,7 @@ function NavLink({ to, toggle, children }: NavLinkProps) {
       className={`
         cursor-pointer
         hover:text-tn-d-blue
+        me-4
         ${isActive ? "text-tn-d-dblue" : "text-tn-d-fg"}
       `}
     >

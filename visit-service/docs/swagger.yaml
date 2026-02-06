@@ -5,14 +5,34 @@ definitions:
         example: Specific error message
         type: string
     type: object
+  dtos.Location:
+    properties:
+      display_name:
+        example: 135, Pilkington Avenue, Maney, Sutton Coldfield, Birmingham, West
+          Midlands, England, B72 1LH, United Kingdom
+        type: string
+      lat:
+        example: "52.5487921"
+        type: string
+      lon:
+        example: "-1.8164308"
+        type: string
+      osm_id:
+        example: 90394480
+        type: integer
+    required:
+    - display_name
+    - lat
+    - lon
+    - osm_id
+    type: object
   models.Organization:
     properties:
-      address:
-        example: 295 Varnum Ave
-        type: string
       id:
         example: 86e6a1f3-d7aa-4e74-a20a-ea78bc13340b
         type: string
+      location:
+        $ref: '#/definitions/dtos.Location'
       name:
         example: The Lowell General Hospital
         type: string

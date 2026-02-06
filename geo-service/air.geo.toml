@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -C geo-service -buildvcs=false -o tmp/main igaku/geo-service"
+bin = "geo-service/tmp/main"
+include_ext = ["go"]
+exclude_dir = ["geo-service/tmp", "geo-service/bin"]
+log = "air_geo.log"
+delay = 1000
+stop_on_error = true
+
+[misc]
+clean_on_exit = true

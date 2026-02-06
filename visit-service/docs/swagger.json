@@ -85,16 +85,42 @@
                 }
             }
         },
+        "dtos.Location": {
+            "type": "object",
+            "required": [
+                "display_name",
+                "lat",
+                "lon",
+                "osm_id"
+            ],
+            "properties": {
+                "display_name": {
+                    "type": "string",
+                    "example": "135, Pilkington Avenue, Maney, Sutton Coldfield, Birmingham, West Midlands, England, B72 1LH, United Kingdom"
+                },
+                "lat": {
+                    "type": "string",
+                    "example": "52.5487921"
+                },
+                "lon": {
+                    "type": "string",
+                    "example": "-1.8164308"
+                },
+                "osm_id": {
+                    "type": "integer",
+                    "example": 90394480
+                }
+            }
+        },
         "models.Organization": {
             "type": "object",
             "properties": {
-                "address": {
-                    "type": "string",
-                    "example": "295 Varnum Ave"
-                },
                 "id": {
                     "type": "string",
                     "example": "86e6a1f3-d7aa-4e74-a20a-ea78bc13340b"
+                },
+                "location": {
+                    "$ref": "#/definitions/dtos.Location"
                 },
                 "name": {
                     "type": "string",

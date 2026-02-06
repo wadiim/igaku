@@ -5,10 +5,11 @@ set -xe
 common_dirs="commons/dtos,commons/errors,commons/models,commons/utils"
 services=(
     "auth-service"
-    "visit-service"
+    "geo-service"
     "mail-service"
     "med-service"
     "user-service"
+    "visit-service"
 )
 
 for service in "${services[@]}"; do

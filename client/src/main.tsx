@@ -1,13 +1,15 @@
 import './index.css'
 import Auth from './auth.tsx'
-import Profile from './profile.tsx'
 import Home from './home.tsx'
 import Login from './login.tsx'
-import Root from './root.tsx'
 import NotFoundPage from './not-found-page.tsx'
+import Profile from './profile.tsx'
 import Register from './register.tsx'
 import Prescribe from './prescribe.tsx'
 import PrescriptionsView from './prescription.tsx'
+import Root from './root.tsx'
+import UnauthorizedPage from './unauthorized-page.tsx'
+import Users from './users.tsx'
 
 import { BrowserRouter, Routes, Route } from 'react-router'
 import { StrictMode, useEffect } from 'react'
@@ -28,11 +30,13 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/prescribe" element={<Prescribe />} />
           <Route path="/history" element={<PrescriptionsView />} />
+          <Route path="/users" element={<Users />} />
         </Route>
         <Route path="auth" element={<Auth />}>
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
         </Route>
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

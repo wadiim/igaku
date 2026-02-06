@@ -359,14 +359,14 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Retrieves the most recent medical‑history entry for the specified patient UUID.",
+                "description": "Retrieves a list of medical history entries for the specified patient UUID.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "MedicalHistory"
                 ],
-                "summary": "Get medical‑history item by patient ID (Doctor)",
+                "summary": "Get medical history items by patient ID (Doctor)",
                 "parameters": [
                     {
                         "type": "string",
@@ -380,7 +380,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.MedicalHistoryItem"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.MedicalHistoryItem"
+                            }
                         }
                     },
                     "400": {
@@ -674,6 +677,33 @@ const docTemplate = `{
                 }
             }
         },
+        "models.Drug": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "rxcui",
+                "substance"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "0b6f13da-efb9-4221-9e89-e2729ae90030"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Lupus Vulgaris"
+                },
+                "rxcui": {
+                    "type": "string",
+                    "example": "1115700"
+                },
+                "substance": {
+                    "type": "string",
+                    "example": "hydrocodone"
+                }
+            }
+        },
         "models.MedicalHistoryItem": {
             "type": "object",
             "required": [
@@ -688,6 +718,12 @@ const docTemplate = `{
                 },
                 "doctorID": {
                     "type": "string"
+                },
+                "drugs": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Drug"
+                    }
                 },
                 "id": {
                     "type": "string",

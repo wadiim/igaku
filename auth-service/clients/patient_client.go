@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"igaku/auth-service/errors"
+	// "igaku/auth-service/errors"
 	"igaku/commons/dtos"
 	commonsErrors "igaku/commons/errors"
 	"igaku/commons/models"
@@ -143,7 +143,7 @@ func (c *patientClient) AddPatientRecord(record *models.PatientRecord) error {
 			err,
 		)
 		log.Println(errmsg)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 
 	var rpcResp dtos.RPCResponse
@@ -152,7 +152,7 @@ func (c *patientClient) AddPatientRecord(record *models.PatientRecord) error {
 			"[RabbitMQ] Failed to unmarshal RPC response: %v\n", err,
 		)
 		log.Println(errmsg)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 
 	if rpcResp.Error != nil {
@@ -174,7 +174,7 @@ func (c *patientClient) AddPatientRecord(record *models.PatientRecord) error {
 			}
 		default:
 			log.Printf("Failed to add patient: %v\n", rpcResp.Error.Message)
-			return &errors.InternalError{}
+			return &commonsErrors.InternalError{}
 		}
 	}
 
@@ -185,7 +185,7 @@ func (c *patientClient) ValidateUniquePatient(record *models.PatientRecord) erro
 	body, err := json.Marshal(record)
 	if err != nil {
 		log.Printf("Failed to marshal a user: %v", err)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 
 	reply, err := c.call("validate_unique_patient", []byte(body))
@@ -195,7 +195,7 @@ func (c *patientClient) ValidateUniquePatient(record *models.PatientRecord) erro
 			err,
 		)
 		log.Println(errmsg)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 
 	var rpcResp dtos.RPCResponse
@@ -204,7 +204,7 @@ func (c *patientClient) ValidateUniquePatient(record *models.PatientRecord) erro
 			"[RabbitMQ] Failed to unmarshal RPC response: %v\n", err,
 		)
 		log.Println(errmsg)
-		return &errors.InternalError{}
+		return &commonsErrors.InternalError{}
 	}
 	
 	if rpcResp.Error != nil {
@@ -221,7 +221,7 @@ func (c *patientClient) ValidateUniquePatient(record *models.PatientRecord) erro
 			}
 		default:
 			log.Printf("Failed to validate patient: %v\n", rpcResp.Error.Message)
-			return &errors.InternalError{}
+			return &commonsErrors.InternalError{}
 		}
 	}
 
