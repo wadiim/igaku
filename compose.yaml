@@ -361,6 +361,8 @@ services:
     networks:
       - igaku-network
     depends_on:
+      rabbitmq:
+        condition: service_healthy
       med-db:
         condition: service_healthy
       logstash:
@@ -411,6 +413,8 @@ services:
         condition: service_started
         required: false
       user:
+        condition: service_started
+      med:
         condition: service_started
     networks:
       - igaku-network
