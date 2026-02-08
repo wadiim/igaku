@@ -13,18 +13,18 @@ import (
 	"strings"
 	"testing"
 
-	"igaku/user-service/repositories"
-	"igaku/user-service/utils"
 	"igaku/commons/models"
 	igakuErrors "igaku/commons/errors"
-	testUtils "igaku/commons/utils"
+	commonsUtils "igaku/commons/utils"
+	"igaku/user-service/repositories"
+	"igaku/user-service/utils"
 )
 
 func TestGormUserRepository(t *testing.T) {
 	t.Run("FindByID_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()
@@ -62,7 +62,7 @@ func TestGormUserRepository(t *testing.T) {
 	t.Run("FindByID_NotFound", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()
@@ -90,7 +90,7 @@ func TestGormUserRepository(t *testing.T) {
 	t.Run("FindByUsername_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()
@@ -130,7 +130,7 @@ func TestGormUserRepository(t *testing.T) {
 	t.Run("FindByID_NotFound", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()
@@ -158,7 +158,7 @@ func TestGormUserRepository(t *testing.T) {
 	t.Run("FindAll_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()
@@ -167,7 +167,7 @@ func TestGormUserRepository(t *testing.T) {
 
 		userCount := 5
 		list, err := repo.FindAll(
-			0, userCount, models.Username, utils.Asc,
+			0, userCount, models.Username, commonsUtils.Asc,
 		)
 
 		assert.NoError(
@@ -205,7 +205,7 @@ func TestGormUserRepository(t *testing.T) {
 	t.Run("CountAll_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()
@@ -247,7 +247,7 @@ func TestGormUserRepository(t *testing.T) {
 	t.Run("Persist_InvalidUser", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()
@@ -292,7 +292,7 @@ func TestGormUserRepository(t *testing.T) {
 	t.Run("Persist_Success", func(t *testing.T) {
 		t.Parallel()
 		ctx := context.Background()
-		db, cleanup := testUtils.SetupTestDatabase(
+		db, cleanup := commonsUtils.SetupTestDatabase(
 			ctx, t, utils.MigrateSchema,
 		)
 		defer cleanup()

@@ -11,4 +11,3 @@ type UsernameAlreadyTakenError struct {
 func (m *UsernameAlreadyTakenError) Error() string {
 	return fmt.Sprintf("Username '%s' already taken", m.Username)
 }
-

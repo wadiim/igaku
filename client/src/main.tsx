@@ -5,6 +5,8 @@ import Login from './login.tsx'
 import NotFoundPage from './not-found-page.tsx'
 import Profile from './profile.tsx'
 import Register from './register.tsx'
+import Prescribe from './prescribe.tsx'
+import PrescriptionsView from './prescription.tsx'
 import Root from './root.tsx'
 import UnauthorizedPage from './unauthorized-page.tsx'
 import Users from './users.tsx'
@@ -19,12 +21,15 @@ function App() {
     hideSplashScreen();
   });
 
+  // TODO: Find better name than *Prescribe*
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Root />}>
           <Route index element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/prescribe" element={<Prescribe />} />
+          <Route path="/history" element={<PrescriptionsView />} />
           <Route path="/users" element={<Users />} />
         </Route>
         <Route path="auth" element={<Auth />}>

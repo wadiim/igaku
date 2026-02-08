@@ -11,9 +11,9 @@ import (
 
 	"igaku/user-service/middleware"
 	"igaku/user-service/services"
-	"igaku/user-service/utils"
 	"igaku/commons/models"
 	commonsDtos "igaku/commons/dtos"
+	commonsUtils "igaku/commons/utils"
 	igakuErrors "igaku/commons/errors"
 )
 
@@ -79,7 +79,7 @@ func (ctrl *AccountController) GetSelf(c *gin.Context) {
 // @Param	pageSize query int false "Number of items per page (default: 10)" minimum(1) maximum(100)
 // @Param	orderBy query string false "Field name to be ordered by: id (default) or username"
 // @Param	orderMethod query string false "Ordering method: asc (default) or desc"
-// @Success	200  {object}  dtos.PaginatedResponse{data=[]dtos.AccountDetailsWithID} "Successfully retrieved list of accounts"
+// @Success	200  {object}  commonsDtos.PaginatedResponse{data=[]dtos.AccountDetailsWithID} "Successfully retrieved list of accounts"
 // @Failure	400  {object}  dtos.ErrorResponse  "Bad Request - Invalid query parameters (page, pageSize, orderBy, orderMethod)"
 // @Failure	401  {object}  dtos.ErrorResponse  "Unauthorized - Invalid or missing token"
 // @Failure	403  {object}  dtos.ErrorResponse  "Forbidden - User does not have Admin role"
@@ -116,7 +116,7 @@ func (ctrl *AccountController) ListAccounts(c *gin.Context) {
 		return
 	}
 
-	orderMethod, ok := utils.OrderingsMap[strings.ToLower(orderMethodStr)]
+	orderMethod, ok := commonsUtils.OrderingsMap[strings.ToLower(orderMethodStr)]
 	if !ok {
 		c.JSON(http.StatusBadRequest, commonsDtos.ErrorResponse{
 			Message: "Invalid orderMethod parameter. Must be `asc` or `desc`",

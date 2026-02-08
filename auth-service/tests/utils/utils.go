@@ -26,6 +26,9 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		"USER_DB_NAME":			"userdb",
 		"USER_DB_USER":			"user",
 		"USER_DB_PASSWORD":		"P@ssw0rd!",
+		"MED_DB_NAME":		"meddb",
+		"MED_DB_USER":		"med",
+		"MED_DB_PASSWORD":		"P@ssw0rd!",
 		"VISIT_DB_NAME":		"visitdb",
 		"VISIT_DB_USER":		"visit",
 		"VISIT_DB_PASSWORD":		"P@ssw0rd!",
@@ -36,18 +39,25 @@ func SetupTestServices(ctx context.Context) (func(), error) {
 		"GRAFANA_URL":			"",
 		"NOMINATIM_URL":		"",
 		"NOMINATIM_TIMEOUT":		"",
-
 	}
 
 	err = stack.
 		WithEnv(env).
 		WaitForService("user-db", wait.ForHealthCheck()).
+		WaitForService("med-db", wait.ForHealthCheck()).
 		WaitForService("rabbitmq", wait.ForHealthCheck()).
 		WaitForService(
 			"nginx",
 			wait.NewHTTPStrategy("/user/health").
 				WithPort("4000/tcp").
 				WithStartupTimeout(300*time.Second).
+				WithPollInterval(4*time.Second),
+		).
+		WaitForService(
+			"nginx",
+			wait.NewHTTPStrategy("/med/health").
+				WithPort("4000/tcp").
+				WithStartupTimeout(200*time.Second).
 				WithPollInterval(4*time.Second),
 		).
 		Up(ctx, compose.Wait(true))

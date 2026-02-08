@@ -165,6 +165,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "national_id",
                 "password",
                 "username"
             ],
@@ -172,6 +173,10 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "example": "jdoe@mail.com"
+                },
+                "national_id": {
+                    "type": "string",
+                    "example": "51011664198"
                 },
                 "password": {
                     "type": "string",

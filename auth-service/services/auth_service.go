@@ -25,6 +25,7 @@ type AuthService interface {
 type authService struct {
 	userClient clients.UserClient
 	mailClient clients.MailClient
+	patientClient clients.PatientClient
 	tokenDuration time.Duration
 	from string
 }
@@ -32,6 +33,7 @@ type authService struct {
 func NewAuthService(
 	userClient clients.UserClient,
 	mailClient clients.MailClient,
+	patientClient clients.PatientClient,
 	tokenDurationInHours int,
 	from string,
 ) (AuthService, error) {
@@ -47,6 +49,7 @@ func NewAuthService(
 	return &authService{
 		userClient: userClient,
 		mailClient: mailClient,
+		patientClient: patientClient,
 		tokenDuration: tokenDuration,
 		from: from,
 	}, nil
@@ -91,15 +94,31 @@ func (s *authService) Register(fields dtos.RegistrationFields) (string, error) {
 		}
 	}
 
+	id := uuid.New()
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(fields.Password), 2)
+	patientRecord := &models.PatientRecord{
+		ID: id,
+		NationalID: fields.NationalID,
+	}
+
+	err = s.patientClient.ValidateUniquePatient(patientRecord)
+	if err != nil {
+		return "", err
+	}
+
 	usr := models.User {
-		ID: uuid.New(),
+		ID: id,
 		Username: fields.Username,
 		Email: fields.Email,
 		Password: string(hashedPassword),
 		Role: models.Patient,
 	}
 	err = s.userClient.Persist(&usr)
+	if err != nil {
+		return "", err
+	}
+
+	err = s.patientClient.AddPatientRecord(patientRecord)
 	if err != nil {
 		return "", err
 	}

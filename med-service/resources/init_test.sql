@@ -1,0 +1,103 @@
+INSERT INTO diseases (id, rx_norm_id, name)
+VALUES
+(
+    '6288b3bd-959f-4b57-a26e-11688e26ce5c',
+    'D031249',
+    'Erdheim-Chester Disease'
+),
+(
+    '32f5c8d5-9cb0-4b1a-b900-ad2aa78f3a19',
+    'D008177',
+    'Lupus Vulgaris'
+),
+(
+    '4140b999-d05b-46eb-a83b-6ff1f06a9eda',
+    'D008179',
+    'Panniculitis, Lupus Erythematosus'
+),
+(
+    'e5508a21-08e0-47dc-b596-5eab48d085c2',
+    'D012507',
+    'Sarcoidosis'
+),
+(
+    '7f798e6d-7ebd-412d-91d5-47b3404c34c9',
+    'D012859',
+    'Sjogren''s Syndrome'
+),
+(
+    '542badca-4acf-42cf-a0bc-b5a6ca231f52',
+    'D001528',
+    'Behcet Syndrome'
+),
+(
+    'ebb58b3c-4356-4564-bd01-ddd495927025',
+    'D011014',
+    'Pneumonia'
+),
+(
+    'ff99edf6-b4c3-4134-9805-61defafa0b62',
+    'D011002',
+    'Pleuropneumonia'
+),
+(
+    '0d8209f8-a04d-493d-a162-50878a8ee5c0',
+    'D018549',
+    'Cryptogenic Organizing Pneumonia'
+),
+(
+    '8307b49d-5856-4a04-a2aa-f089b8076420',
+    'D011017',
+    'Pneumonia, Lipid'
+);
+
+INSERT INTO substances (id, rxcui, name, tty)
+VALUES
+(
+    'a5504c0c-1eb4-4967-8185-2fd82b3295b4',
+    '1234567',
+    'hydrocodone',
+    'IN'
+);
+
+INSERT INTO drugs (id, rxcui, name, substance)
+VALUES
+(
+    'ee5fd388-c675-477b-9bc5-3f16cc359abe',
+    '261315',
+    'Tamiflu',
+    'hydrocodone'
+);
+
+INSERT INTO patient_records (id, national_id)
+VALUES
+(
+    '0b6f13da-efb9-4221-9e89-e2729ae90030',
+    '12345123451'
+),
+(
+    'c2aa753e-ce76-43db-b855-399d1955ad66',
+    '12345654321'
+);
+
+INSERT INTO doctors (id) 
+VALUES 
+(
+    '880e8400-e29b-41d4-a716-446655440001'
+);
+
+INSERT INTO medical_history_items (id, patient_id, doctor_id, created_at) 
+VALUES 
+(
+    'aa0e8400-e29b-41d4-a716-446655440001', 
+    '0b6f13da-efb9-4221-9e89-e2729ae90030', 
+    '880e8400-e29b-41d4-a716-446655440001', 
+    '2025-10-15 14:30:00'
+);
+
+INSERT INTO medical_history_item_drugs (medical_history_item_id, drug_id) 
+VALUES 
+(
+    'aa0e8400-e29b-41d4-a716-446655440001', 
+    'ee5fd388-c675-477b-9bc5-3f16cc359abe'
+);

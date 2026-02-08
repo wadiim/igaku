@@ -22,6 +22,9 @@ definitions:
       email:
         example: jdoe@mail.com
         type: string
+      national_id:
+        example: "51011664198"
+        type: string
       password:
         example: P@ssw0rd!
         type: string
@@ -30,6 +33,7 @@ definitions:
         type: string
     required:
     - email
+    - national_id
     - password
     - username
     type: object

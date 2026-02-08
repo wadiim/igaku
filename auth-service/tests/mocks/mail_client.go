@@ -15,4 +15,3 @@ func (m *MailClient) SendMail(to []string, msg []byte) error {
 }
 
 func (m *MailClient) Shutdown() {}
-

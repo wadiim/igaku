@@ -82,13 +82,28 @@ func (ctrl *AuthController) Register(c *gin.Context) {
 	token, err := ctrl.service.Register(fields)
 	if err != nil {
 		var dupUsrNameErr *commonsErrors.UsernameAlreadyTakenError
-                var dupEmailErr *commonsErrors.EmailAlreadyTakenError
+		var dupEmailErr *commonsErrors.EmailAlreadyTakenError
+		var dupPatientIDErr *commonsErrors.DuplicatedIDError
+		var dupPatientNationalIDErr *commonsErrors.DuplicatedNationalIDError
+		var invPatientNationalIDErr *commonsErrors.InvalidNationalIDError
 
 		if errors.As(err, &dupUsrNameErr) {
 			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
 				Message: err.Error(),
 			})
 		} else if errors.As(err, &dupEmailErr) {
+			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+		} else if errors.As(err, &dupPatientIDErr) {
+			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+		} else if errors.As(err, &dupPatientNationalIDErr) {
+			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
+				Message: err.Error(),
+			})
+		} else if errors.As(err, &invPatientNationalIDErr) {
 			c.JSON(http.StatusConflict, commonsDtos.ErrorResponse{
 				Message: err.Error(),
 			})

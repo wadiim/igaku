@@ -1,0 +1,502 @@
+definitions:
+  dtos.DiseaseDetails:
+    properties:
+      id:
+        example: 6288b3bd-959f-4b57-a26e-11688e26ce5c
+        type: string
+      name:
+        example: Pneumonia
+        type: string
+      rx_norm_id:
+        example: D000111
+        type: string
+    required:
+    - id
+    - name
+    - rx_norm_id
+    type: object
+  dtos.DrugDetails:
+    properties:
+      id:
+        example: D007251
+        type: string
+      name:
+        example: Tamiflu 30 MG Oral Capsule
+        type: string
+      substance:
+        example: oseltamivir
+        type: string
+    required:
+    - id
+    - name
+    - substance
+    type: object
+  dtos.ErrorResponse:
+    properties:
+      error:
+        example: Specific error message
+        type: string
+    type: object
+  dtos.PaginatedResponse:
+    properties:
+      data: {}
+      page:
+        type: integer
+      page_size:
+        type: integer
+      total_count:
+        type: integer
+      total_pages:
+        type: integer
+    type: object
+  dtos.PatientDetails:
+    properties:
+      email:
+        example: jdoe@mail.com
+        type: string
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      national_id:
+        example: "44051401458"
+        type: string
+      username:
+        example: jdoe
+        type: string
+    required:
+    - email
+    - id
+    - national_id
+    - username
+    type: object
+  dtos.PrescriptionDetails:
+    properties:
+      disease:
+        $ref: '#/definitions/dtos.DiseaseDetails'
+      drugs:
+        items:
+          $ref: '#/definitions/dtos.DrugDetails'
+        type: array
+      patient:
+        $ref: '#/definitions/dtos.PatientDetails'
+    required:
+    - disease
+    - drugs
+    - patient
+    type: object
+  models.Doctor:
+    properties:
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      medicalHistoryItems:
+        items:
+          $ref: '#/definitions/models.MedicalHistoryItem'
+        type: array
+    required:
+    - id
+    type: object
+  models.Drug:
+    properties:
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      name:
+        example: Lupus Vulgaris
+        type: string
+      rxcui:
+        example: "1115700"
+        type: string
+      substance:
+        example: hydrocodone
+        type: string
+    required:
+    - id
+    - name
+    - rxcui
+    - substance
+    type: object
+  models.MedicalHistoryItem:
+    properties:
+      createdAt:
+        type: string
+      doctor:
+        $ref: '#/definitions/models.Doctor'
+      doctorID:
+        type: string
+      drugs:
+        items:
+          $ref: '#/definitions/models.Drug'
+        type: array
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      patient:
+        $ref: '#/definitions/models.PatientRecord'
+      patientID:
+        type: string
+    required:
+    - id
+    type: object
+  models.PatientRecord:
+    properties:
+      id:
+        example: 0b6f13da-efb9-4221-9e89-e2729ae90030
+        type: string
+      national_id:
+        example: "44051401458"
+        type: string
+    required:
+    - id
+    type: object
+host: localhost:4000
+info:
+  contact: {}
+  title: Igaku Med API
+  version: 0.0.1
+paths:
+  /med/disease/{name}:
+    get:
+      description: Retrieves a paginated list of diseases that match provided substring.
+        Requires Doctor privileges.
+      parameters:
+      - description: Partial disease name to search for (case‑insensitive)
+        in: path
+        name: name
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: 'Number of items per page (default: 10)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of diseases
+          schema:
+            allOf:
+            - $ref: '#/definitions/dtos.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.DiseaseDetails'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request - Invalid query parameters (name, page, pageSize)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to retrieve diseases
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List diseases that match provided substring (Doctor)
+      tags:
+      - Diseases
+  /med/drug/{name}:
+    get:
+      description: Retrieves drugs whose names contain the supplied substring. Supports
+        pagination and sorting. Requires Doctor privileges.
+      parameters:
+      - description: Partial drug name to search for (case‑insensitive)
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: 'Number of items per page (default: 5)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: pageSize
+        type: integer
+      - description: 'Field to sort by: `id`, `name` or `substance` (default: `id`)'
+        enum:
+        - id
+        - name
+        - substance
+        in: query
+        name: orderBy
+        type: string
+      - description: 'Sort direction: `asc` or `desc` (default: `asc`)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: orderMethod
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of drugs
+          schema:
+            allOf:
+            - $ref: '#/definitions/dtos.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.DrugDetails'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request – Invalid query parameters
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized – Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden – User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found – No matching drugs
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error – Failed to retrieve drugs
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List drugs by name substring (Doctor)
+      tags:
+      - Drugs
+  /med/drug/recommend/{disease}:
+    get:
+      description: Retrieves drugs that are indicated for the specified disease. Supports
+        pagination and sorting. Requires Doctor privileges.
+      parameters:
+      - description: Disease RxNormID
+        in: path
+        name: disease
+        required: true
+        type: string
+      - description: 'Page number (default: 1)'
+        in: query
+        minimum: 1
+        name: page
+        type: integer
+      - description: 'Number of items per page (default: 5)'
+        in: query
+        maximum: 100
+        minimum: 1
+        name: pageSize
+        type: integer
+      - description: 'Field to sort by: `id`, `name` or `substance` (default: `id`)'
+        enum:
+        - id
+        - name
+        - substance
+        in: query
+        name: orderBy
+        type: string
+      - description: 'Sort direction: `asc` or `desc` (default: `asc`)'
+        enum:
+        - asc
+        - desc
+        in: query
+        name: orderMethod
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved list of recommended drugs
+          schema:
+            allOf:
+            - $ref: '#/definitions/dtos.PaginatedResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dtos.DrugDetails'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request – Invalid query parameters
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized – Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden – User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found – Drug not found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error – Failed to retrieve drugs
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List recommended drugs for a disease (Doctor)
+      tags:
+      - Drugs
+  /med/health:
+    get:
+      description: Returns an OK message
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: Check health
+      tags:
+      - Health
+  /med/history/{patient_id}:
+    get:
+      description: Retrieves a list of medical history entries for the specified patient
+        UUID.
+      parameters:
+      - description: Patient UUID
+        in: path
+        name: patient_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.MedicalHistoryItem'
+            type: array
+        "400":
+          description: Bad Request - Invalid patient ID
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "404":
+          description: Not Found - Medical history item not found
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error – Failed to retrieve item
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get medical history items by patient ID (Doctor)
+      tags:
+      - MedicalHistory
+  /med/patient/{national_id}:
+    get:
+      description: Retrieves username, email and national ID of patient. Requires
+        Doctor privileges.
+      parameters:
+      - description: 11‑digit national identification number of the patient
+        in: path
+        name: national_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved patient data
+          schema:
+            $ref: '#/definitions/dtos.PatientDetails'
+        "400":
+          description: Bad Request - Invalid path parameter (national_id)
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Internal Server Error - Failed to retrieve patient data
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Retrieve data of patient with given national ID (Doctor)
+      tags:
+      - Patient
+  /med/prescribe:
+    post:
+      consumes:
+      - application/json
+      description: Stores a prescription (patient, disease, drugs) and creates a medical‑history
+        record linking the patient with the prescribing doctor.
+      parameters:
+      - description: Prescription payload
+        in: body
+        name: prescription
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.PrescriptionDetails'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Prescription created successfully
+        "400":
+          description: Invalid doctor ID
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "403":
+          description: Forbidden - User does not have Doctor role
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/dtos.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a prescription (Doctor)
+      tags:
+      - Prescription
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -7,6 +7,7 @@ import { sendNotification } from './utils/notify'
 function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [nationalID, setNationalID] = useState("");
   const [email, setEmail] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -27,11 +28,12 @@ function Register() {
       body: JSON.stringify({
         username: username,
         email: email,
+        national_id: nationalID,
         password: password,
       }),
     }).then(res => {
       if (res.status === 409) {
-        throw new Error("Username or Email already taken");
+        throw new Error("Username, Email or NationalID already taken");
       } else if (res.status !== 200) {
         throw new Error("Something went wrong");
       }
@@ -95,6 +97,37 @@ function Register() {
               value={email}
               onChange={e => {
                 setEmail(e.target.value);
+                setErrorMessage("");
+              }}
+              className={`
+                block w-full rounded-md
+                px-3 py-1.5
+                text-base
+                text-tn-d-fg
+                bg-tn-d-fg/4
+                outline-1 -outline-offset-1 outline-tn-d-fg/32
+                focus:outline-2 focus:-outline-offset-2 focus:outline-tn-d-blue
+                sm:text-sm/6
+              `}
+            />
+          </div>
+        </div>
+
+        <div>
+          <label
+            htmlFor="nationalID"
+            className={`block text-sm/6 font-medium text-tn-d-fg`}
+          >
+            NationalID
+          </label>
+          <div className={`mt-2`}>
+            <input
+              id="nationalID"
+              name="nationalID"
+              autoComplete="nationalID"
+              value={nationalID}
+              onChange={e => {
+                setNationalID(e.target.value);
                 setErrorMessage("");
               }}
               className={`

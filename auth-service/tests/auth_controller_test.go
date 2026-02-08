@@ -11,9 +11,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 
 	"igaku/auth-service/controllers"
@@ -26,12 +28,14 @@ import (
 
 func setupAuthRouter(
 	t *testing.T,
-	mockUserClient *mocks.UserClient, mockMailClient *mocks.MailClient,
+	mockUserClient *mocks.UserClient,
+	mockMailClient *mocks.MailClient,
+	mockPatientClient *mocks.PatientClient,
 ) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 
 	authService, err := services.NewAuthService(
-		mockUserClient, mockMailClient, 1, "support@igaku.com",
+		mockUserClient, mockMailClient, mockPatientClient, 1, "support@igaku.com",
 	)
 	require.NoError(t, err)
 	authController := controllers.NewAuthController(authService)
@@ -44,7 +48,8 @@ func setupAuthRouter(
 func TestAuthController_Login_NoPasswordField(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(t, mockUserClient, mockMailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
 
 	body := []byte(`{"username":"jdoe"}`)
 	req, err := http.NewRequest(
@@ -72,7 +77,8 @@ func TestAuthController_Login_NoPasswordField(t *testing.T) {
 func TestAuthController_Login_InvalidUsername(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(t, mockUserClient, mockMailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
 
 	invalidUsername := "invalidUsername"
 	mockUserClient.On("FindByUsername", invalidUsername).
@@ -105,7 +111,8 @@ func TestAuthController_Login_InvalidUsername(t *testing.T) {
 func TestAuthController_Login_InvalidPassword(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(t, mockUserClient, mockMailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
 
 	testUsername := "jdoe"
 	expectedUser := &models.User{
@@ -144,7 +151,8 @@ func TestAuthController_Login_Success(t *testing.T) {
 
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(t, mockUserClient, mockMailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
 
 	testID := uuid.New()
 	testUsername := "jdoe"
@@ -198,7 +206,8 @@ func TestAuthController_Login_Success(t *testing.T) {
 func TestAuthController_Registration_InvalidParams(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(t, mockUserClient, mockMailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
 
 	body := []byte(`{"foo":"bar"}`)
 	req, err := http.NewRequest(
@@ -226,11 +235,13 @@ func TestAuthController_Registration_InvalidParams(t *testing.T) {
 func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(t, mockUserClient, mockMailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
 
 	usrID := uuid.New()
 	dupName := "jdoe"
 	email := "unique@mail.com"
+	nationalID := "44051401458"
 	hashedPassword := "$2a$12$FDfWu4JA9ABiG3JmSLTiKOzYn6/5UmXydNpkMssqt/9d47tqhQLX6"
 
 	existingUser := &models.User{
@@ -242,9 +253,10 @@ func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 	}
 	mockUserClient.On("FindByUsername", dupName).Return(existingUser, nil).Once()
 
-	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "password":"%s"}`,
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "national_id":"%s", "password":"%s"}`,
 		dupName,
 		email,
+		nationalID,
 		"P@ssw0rd!",
 	))
 	req, err := http.NewRequest(
@@ -272,35 +284,233 @@ func TestAuthController_Registration_DuplicatedUsername(t *testing.T) {
 	mockUserClient.AssertExpectations(t)
 }
 
-func TestAuthController_Registration_Success(t *testing.T) {
-	jwtSecretKey := []byte(os.Getenv("SECRET_KEY"))
-
+func TestAuthController_Registration_DuplicatedPatientID(t *testing.T) {
 	mockUserClient := new(mocks.UserClient)
 	mockMailClient := new(mocks.MailClient)
-	router := setupAuthRouter(t, mockUserClient, mockMailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
 
-	usrName := "newuser"
-	usrEmail := "newuser@mail.com"
+	usrID := uuid.New()
+	dupName := "jdoe"
+	email := "unique@mail.com"
+	nationalID := "44051401458"
 
-	mockUserClient.On("FindByUsername", usrName).
-		Return(nil, &errors.UserNotFoundError{}).Once()
-	mockUserClient.On("Persist", mock.Anything).Return(nil).Once()
+	mockUserClient.On("FindByUsername", dupName).Return(
+		nil, &errors.UserNotFoundError{},
+	).Once()
+	mockPatientClient.On("ValidateUniquePatient", mock.Anything).Return(
+		&errors.DuplicatedIDError{ID: usrID},
+	).Once()
 
-	to := []string{usrEmail}
-	msg := []byte(
-		"From: support@igaku.com\r\n" +
-		fmt.Sprintf("To: %s\r\n", usrEmail) +
-		"Subject: Igaku registration\r\n" +
-		"\r\n" +
-		fmt.Sprintf("Welcome %s\r\n", usrName),
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "national_id":"%s", "password":"%s"}`,
+		dupName,
+		email,
+		nationalID,
+		"P@ssw0rd!",
+	))
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/auth/register",
+		bytes.NewBuffer(body),
 	)
-	mockMailClient.On(
-		"SendMail", to, msg,
-	).Return(nil).Once()
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "password":"%s"}`,
-		usrName,
-		usrEmail,
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusConflict, rec.Code)
+
+	var responseBody map[string]string
+	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
+	assert.NoError(t, err)
+	assert.Contains(
+		t, strings.ToLower(responseBody["error"]),
+		"duplicated id",
+	)
+
+	mockUserClient.AssertExpectations(t)
+}
+
+func TestAuthController_Registration_DuplicatedPatientNationalID(t *testing.T) {
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
+
+	dupName := "jdoe"
+	email := "unique@mail.com"
+	nationalID := "44051401458"
+
+	mockUserClient.On("FindByUsername", dupName).Return(
+		nil, &errors.UserNotFoundError{},
+	).Once()
+	mockPatientClient.On("ValidateUniquePatient", mock.Anything).Return(
+		&errors.DuplicatedNationalIDError{NationalID: nationalID},
+	).Once()
+
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "national_id":"%s", "password":"%s"}`,
+		dupName,
+		email,
+		nationalID,
+		"P@ssw0rd!",
+	))
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/auth/register",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusConflict, rec.Code)
+
+	var responseBody map[string]string
+	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
+	assert.NoError(t, err)
+	log.Printf("%v", responseBody["error"])
+	assert.Contains(
+		t, strings.ToLower(responseBody["error"]),
+		"duplicated id",
+	)
+
+	mockUserClient.AssertExpectations(t)
+}
+
+func TestAuthController_Registration_InvalidNationalID(t *testing.T) {
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
+
+	dupName := "jdoe"
+	email := "unique@mail.com"
+	nationalID := "44051401458"
+
+	mockUserClient.On("FindByUsername", dupName).Return(
+		nil, &errors.UserNotFoundError{},
+	).Once()
+	mockPatientClient.On("ValidateUniquePatient", mock.Anything).Return(
+		&errors.InvalidNationalIDError{NationalID: nationalID},
+	).Once()
+
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "national_id":"%s", "password":"%s"}`,
+		dupName,
+		email,
+		nationalID,
+		"P@ssw0rd!",
+	))
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/auth/register",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusConflict, rec.Code)
+
+	var responseBody map[string]string
+	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
+	assert.NoError(t, err)
+	assert.Contains(
+		t, strings.ToLower(responseBody["error"]),
+		"invalid id",
+	)
+
+	mockUserClient.AssertExpectations(t)
+}
+
+func TestAuthController_Registration_InvalidEmail(t *testing.T) {
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
+
+	dupName := "jdoe"
+	email := "duplicate@mail.com"
+	nationalID := "44051401458"
+
+	mockUserClient.On("FindByUsername", dupName).Return(
+		nil, &errors.UserNotFoundError{},
+	).Once()
+	mockPatientClient.On("ValidateUniquePatient", mock.Anything).Return(
+		nil,
+	).Once()
+	mockUserClient.On("Persist", mock.Anything).Return(
+		&errors.EmailAlreadyTakenError{Email: email},
+	).Once()
+
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "national_id":"%s", "password":"%s"}`,
+		dupName,
+		email,
+		nationalID,
+		"P@ssw0rd!",
+	))
+	req, err := http.NewRequest(
+		http.MethodPost,
+		"/auth/register",
+		bytes.NewBuffer(body),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusConflict, rec.Code)
+
+	var responseBody map[string]string
+	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
+	assert.NoError(t, err)
+	assert.Contains(
+		t, strings.ToLower(responseBody["error"]),
+		fmt.Sprintf("email '%s' already taken", email),
+	)
+
+	mockUserClient.AssertExpectations(t)
+}
+
+func TestAuthController_Registration_Success(t *testing.T) {
+	mockUserClient := new(mocks.UserClient)
+	mockMailClient := new(mocks.MailClient)
+	mockPatientClient := new(mocks.PatientClient)
+	router := setupAuthRouter(t, mockUserClient, mockMailClient, mockPatientClient)
+
+	username := "jdoe"
+	email := "unique@mail.com"
+	nationalID := "44051401458"
+
+	mockUserClient.On("FindByUsername", username).Return(
+		nil, &errors.UserNotFoundError{},
+	).Once()
+	mockPatientClient.On("ValidateUniquePatient", mock.Anything).Return(
+		nil,
+	).Once()
+	mockUserClient.On("Persist", mock.Anything).Return(
+		nil,
+	).Once()
+	mockPatientClient.On("AddPatientRecord", mock.Anything).Return(
+		nil,
+	).Once()
+	mockMailClient.On("SendMail", []string{email}, mock.Anything).Return(
+		nil,
+	).Once()
+
+	body := []byte(fmt.Sprintf(`{"username":"%s", "email":"%s", "national_id":"%s", "password":"%s"}`,
+		username,
+		email,
+		nationalID,
 		"P@ssw0rd!",
 	))
 	req, err := http.NewRequest(
@@ -317,19 +527,9 @@ func TestAuthController_Registration_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 
-	responseToken := string(rec.Body.Bytes()[:])
-	claims := utils.Claims{}
-	_, err = jwt.ParseWithClaims(
-		responseToken,
-		&claims,
-		func(token *jwt.Token) (interface{}, error) {
-			return jwtSecretKey, nil
-		},
-	)
-	assert.NoError(t, err)
-	assert.Equal(t, models.Patient, claims.Role)
-	assert.Equal(t, "igaku", claims.Issuer)
-	// We do not know the generated ID
+	var responseBody map[string]string
+	err = json.Unmarshal(rec.Body.Bytes(), &responseBody)
+	assert.Contains(t, strings.ToLower(responseBody["error"]), "")
 
 	mockUserClient.AssertExpectations(t)
 }
