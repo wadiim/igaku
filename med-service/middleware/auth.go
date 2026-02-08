@@ -97,4 +97,3 @@ func Authorize(allowedRoles ...models.Role) gin.HandlerFunc {
 		c.Next()
 	}
 }
-

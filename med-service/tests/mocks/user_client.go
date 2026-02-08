@@ -25,4 +25,3 @@ func (m *UserClient) FindByID(id uuid.UUID) (*models.User, error) {
 }
 
 func (m *UserClient) Shutdown() {}
-

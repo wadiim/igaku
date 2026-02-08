@@ -72,9 +72,6 @@ function PrescriptionsView() {
           const catchedPrescriptionData = localStorage.getItem("prescriptionData");
           if (catchedPrescriptionData) {
             setPrescriptions(JSON.parse(catchedPrescriptionData));
-            // setError(null);
-          } else {
-            // setError("Failed to load user data");
           }
           setLoading(false);
         } else {

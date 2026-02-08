@@ -43,14 +43,12 @@ func (api *rxNormAPI) GetAllDiseases(db *gorm.DB) ([]models.Disease, error) {
 	data, err := api.fetchFromEndpoint(endpoint)
 	if err != nil {
 		return nil, err
-		// log.Printf("%v", err)
 	}
 
 	var classData RxClassData
 	err = json.Unmarshal(data, &classData)
 	if err != nil {
 		return nil, err
-		// log.Printf("%v", err)
 	}
 
 	diseases := make([]models.Disease, len(classData.ConceptList.Concepts))

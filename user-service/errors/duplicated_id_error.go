@@ -13,4 +13,3 @@ type DuplicatedIDError struct {
 func (m *DuplicatedIDError) Error() string {
 	return fmt.Sprintf("Duplicated ID:", m.ID)
 }
-

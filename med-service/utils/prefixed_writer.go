@@ -16,4 +16,3 @@ func (w *PrefixedWriter) Write(p []byte) (n int, err error) {
 	msg = w.Prefix + msg + "\n"
 	return w.Out.Write([]byte(msg))
 }
-

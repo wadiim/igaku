@@ -50,4 +50,3 @@ func (l PrefixedLogger) Trace(
 		return l.Prefix + clean(sql), rows
 	}, err)
 }
-

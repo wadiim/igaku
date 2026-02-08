@@ -355,17 +355,6 @@ function Prescribe() {
         setErrorMessage(err.message);
       })
       // TODO: Finish this endpoint
-
-    //   const data = await res.json();
-    //   console.log("Prescription saved:", data);
-    //   setSelectedDisease(null);
-    //   setSelectedDrugIds(new Set());
-    //   setRecDrugData([]);
-    //   setManualDrugData([]);
-    //   setErrorMessage(null);
-    //   alert("Prescription submitted successfully!");
-    // } catch (e: any) {
-    //   setErrorMessage(e.message ?? "An unexpected error occurred.");
     }
   };
 

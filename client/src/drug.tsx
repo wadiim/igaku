@@ -31,7 +31,6 @@ function DrugTable({
   const handleRowClick = (drug: Drug) => {
     onSelect(drug.id);          // just tell parent which id changed
   };
-  // const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
 
   const handleSelect = (drug: Drug) => {
     const newSet = new Set(selectedIds);

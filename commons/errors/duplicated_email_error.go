@@ -11,4 +11,3 @@ type EmailAlreadyTakenError struct {
 func (m *EmailAlreadyTakenError) Error() string {
 	return fmt.Sprintf("Email '%s' already taken", m.Email)
 }
-

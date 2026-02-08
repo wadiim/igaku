@@ -7,20 +7,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	// "context"
-	// "log"
-	// "os"
 	"errors"
-	// "log"
 	"strings"
 	"testing"
-	// "time"
-	// "fmt"
 
 	"igaku/auth-service/clients"
 	commonsErrors "igaku/commons/errors"
 	"igaku/commons/models"
-	// testUtils "igaku/auth-service/tests/utils"
 )
 
 func TestPatientClient(t *testing.T) {

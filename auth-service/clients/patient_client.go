@@ -11,7 +11,6 @@ import (
 	"sync"
 	"time"
 
-	// "igaku/auth-service/errors"
 	"igaku/commons/dtos"
 	commonsErrors "igaku/commons/errors"
 	"igaku/commons/models"
@@ -35,11 +34,6 @@ func (c *patientClient) Shutdown() {
 	if c.ch != nil { c.ch.Close() }
 	if c.conn != nil { c.conn.Close() }
 }
-
-// type responseChan struct {
-// 	ch	chan []byte
-// 	err	chan error
-// }
 
 func NewPatientClient(url string) (PatientClient, error) {
 	conn, err := amqp.Dial(url)

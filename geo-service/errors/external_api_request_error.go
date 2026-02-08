@@ -7,4 +7,3 @@ type ExternalApiRequestError struct {
 func (m *ExternalApiRequestError) Error() string {
 	return m.Message
 }
-
